@@ -76,6 +76,7 @@ apply fs xs =
 
 {-| Combine two arrays, combining them with the given function.
 If one array is longer, the extra elements are dropped.
+
     map2 (+) [1,2,3] [1,2,3,4] == [2,4,6]
     map2 (,) [1,2,3] ['a','b'] == [ (1,'a'), (2,'b') ]
     pairs : Array a -> Array b -> Array (a,b)
