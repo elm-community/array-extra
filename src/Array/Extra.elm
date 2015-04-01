@@ -1,6 +1,9 @@
 module Array.Extra where
 {-| Convenience functions for working with Array
 
+# Getter
+@docs getOr
+
 # Higher order helpers
 @docs filterMap, apply, map2, map3, map4, map5
 
@@ -24,6 +27,14 @@ getUnsafe n xs =
   case get n xs of
     Just x -> x
     Nothing -> Debug.crash ("Index " ++ toString n ++ " of Array with length " ++ toString (length xs) ++ " is not reachable.")
+
+{-| Return the element at the index or a default if the index is out of range.
+-}
+getOr : Int -> a -> Array a -> a
+getOr n val xs =
+  case get n xs of
+    Just x -> x
+    Nothing -> val
 
 {-| Apply a function that may succeed to all values in the array, but only keep the successes.
 
