@@ -15,7 +15,7 @@ module Array.Extra where
 
 -}
 
-import Array (..)
+import Array exposing (..)
 import List
 import Maybe
 import Debug
