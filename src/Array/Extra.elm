@@ -1,21 +1,65 @@
 module Array.Extra where
+
 {-| Convenience functions for working with Array
+
+# Transformations
+@docs update, sliceFrom, sliceUntil
 
 # Higher order helpers
 @docs filterMap, apply, map2, map3, map4, map5
+
+# Zips
+@docs zip, zip3, zip4, zip5
 
 # Slicing / resizing
 @docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt
 
 # Unsafe
 @docs getUnsafe
-
 -}
 
 import Array exposing (..)
 import List
 import Maybe
 import Debug
+
+
+{-| Update the element at the index using a function. Returns the array unchanged if the index is out of bounds.
+
+    update  1 ((+)10) (fromList [1,2,3]) == fromList [1,12,3]
+    update  4 ((+)10) (fromList [1,2,3]) == fromList [1,2,3]
+    update -1 ((+)10) (fromList [1,2,3]) == fromList [1,2,3]
+-}
+update : Int -> (a -> a) -> Array a -> Array a
+update n f a =
+  let
+    element = Array.get n a
+  in
+    case element of
+      Nothing -> a
+      Just element' -> Array.set n (f element') a
+
+
+{-| Drop *n* first elements from an array. In other words, slice an array from an index until the very end. Given negative argument, count the end of the slice from the end of the array.
+
+    sliceFrom  5 (fromList [0..9]) == fromList [5,6,7,8,9]
+    sliceFrom -3 (fromList [0..9]) == fromList [7,8,9]
+-}
+sliceFrom : Int -> Array a -> Array a
+sliceFrom n a = slice n (length a) a
+
+
+{-| Take *n* first elements from an array. In other words, slice an array from the very beginning until index not including. Given negative argument, count the beginning of the slice from the end of the array.
+
+    sliceUntil  5 (fromList [0..9]) == fromList [0,1,2,3,4]
+    sliceUntil -3 (fromList [0..9]) == fromList [0,1,2,3,4,5,6]
+-}
+sliceUntil : Int -> Array a -> Array a
+sliceUntil n a =
+  if n >= 0
+  then slice 0 n a
+  else slice 0 (length a + n) a
+
 
 {-| Unsafe version of get, don't use this unless you know what you're doing!
 -}
@@ -86,12 +130,15 @@ If one array is longer, the extra elements are dropped.
 map2 : (a -> b -> result) -> Array a -> Array b -> Array result
 map2 f ws = apply (map f ws)
 
+{-|-}
 map3 : (a -> b -> c -> result) -> Array a -> Array b -> Array c -> Array result
 map3 f ws xs = apply (map2 f ws xs)
 
+{-|-}
 map4 : (a -> b -> c -> d -> result) -> Array a -> Array b -> Array c -> Array d -> Array result
 map4 f ws xs ys = apply (map3 f ws xs ys)
 
+{-|-}
 map5 : (a -> b -> c -> d -> e -> result) -> Array a -> Array b -> Array c -> Array d -> Array e -> Array result
 map5 f ws xs ys zs = apply (map4 f ws xs ys zs)
 
@@ -100,12 +147,15 @@ map5 f ws xs ys zs = apply (map4 f ws xs ys zs)
 zip : Array a -> Array b -> Array (a,b)
 zip = map2 (,)
 
+{-|-}
 zip3 : Array a -> Array b -> Array c -> Array (a,b,c)
 zip3 = map3 (,,)
 
+{-|-}
 zip4 : Array a -> Array b -> Array c -> Array d -> Array (a,b,c,d)
 zip4 = map4 (,,,)
 
+{-|-}
 zip5 : Array a -> Array b -> Array c -> Array d -> Array e -> Array (a,b,c,d,e)
 zip5 = map5 (,,,,)
 
