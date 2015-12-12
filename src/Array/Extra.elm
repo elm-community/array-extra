@@ -6,7 +6,7 @@ module Array.Extra where
 @docs update, sliceFrom, sliceUntil
 
 # Higher order helpers
-@docs filterMap, apply, map2, map3, map4, map5
+@docs filterMap, apply, map2, map3, map4, map5, removeWhen
 
 # Zips
 @docs zip, zip3, zip4, zip5
@@ -141,6 +141,17 @@ map4 f ws xs ys = apply (map3 f ws xs ys)
 {-|-}
 map5 : (a -> b -> c -> d -> e -> result) -> Array a -> Array b -> Array c -> Array d -> Array e -> Array result
 map5 f ws xs ys zs = apply (map4 f ws xs ys zs)
+
+
+{-| Take a predicate and an array, return an array that contains elements which fails to satisfy the predicate.
+    This is equivalent to `Array.filter (not << predicate) list`
+
+    removeWhen isEven [1,2,3,4] == [1,3]
+-}
+removeWhen : (a -> Bool) -> Array a -> Array a
+removeWhen pred xs =
+  Array.filter (not << pred) xs
+
 
 {-| Zip arrays into tuples
 -}
