@@ -1,5 +1,4 @@
-module Array.Extra where
-
+module Array.Extra exposing (..)
 {-| Convenience functions for working with Array
 
 # Transformations
