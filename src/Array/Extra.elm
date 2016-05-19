@@ -19,7 +19,6 @@ module Array.Extra exposing (..)
 -}
 
 import Array exposing (..)
-import List
 import Maybe
 import Debug
 
@@ -97,35 +96,6 @@ filterMap f xs =
                     xs
     in
         foldl (maybePush f) empty xs
-
-
-
--- {-| Select the longest one of several arrays (similar to `Maybe.oneOf`).
---
--- Biased towards the left so that...
---
---     lengthiesOneOf [fromList [1,1], fromList [2,2], fromList [3]] == fromList [1,1]
--- -}
--- lengthiestOneOf : List (Array a) -> Maybe (Array a)
--- lengthiestOneOf =
---   List.foldl (\mx x -> lengthiestOf `Maybe.map` mx `Maybe.apply` x) Nothing
---
---
--- {-| Same as `lengthiestOneOf` but for an array of arrays.
--- TODO: needs some optimization
--- -}
--- lengthiestOneOf' : Array (Array a) -> Array a
--- lengthiestOneOf' =
---   Array.foldl (\mx x -> lengthiestOf `Maybe.map` mx `Maybe.apply` x) Nothing
---
--- {-| Select the longest of two arrays (similar to `Maybe.oneOf`)
---
--- Biased to the first argument so that...
---
---     lengthierOf (fromList [1,1]) (fromList [2,2]) == fromList [1,1]
--- -}
--- lengthierOf : Array a -> Array a -> Array a
--- lengthierOf x y = if Array.length y < Array.length x then y else x
 
 
 {-| Apply an array of functions to an array of values.
@@ -207,26 +177,6 @@ zip4 =
 zip5 : Array a -> Array b -> Array c -> Array d -> Array e -> Array ( a, b, c, d, e )
 zip5 =
     map5 (,,,,)
-
-
-{-| Reduce a list from the left, building up all of the intermediate results into a list.
--}
-
-
-
---scanl : (a -> b -> b) -> b -> List a -> List b
---scanl (+) 0 [1,2,3,4] == [0,1,3,6,10]
---scanl1 : (a -> a -> a) -> List a -> List a
---Same as scanl but it doesn't require a base case. List must be non-empty.
---scanl1 (+) [1,2,3,4] == [1,3,6,10]
--- {-| Resize an array by unfolding from the left (pad values onto the right-hand side)
--- -}
--- resizel : Int -> (a -> a -> a) -> a -> Array a -> Array a
--- resizel n f =
--- {-| Resize an array by unfolding from the right (pad values onto the left-hand side)
--- -}
--- resizer : Int -> (a -> a -> a) -> a -> Array a -> Array a
--- resizer n f =
 
 
 {-| Resize an array from the left, padding the right-hand side with the given value.
