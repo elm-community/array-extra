@@ -3,7 +3,7 @@ module Array.Extra exposing (..)
 {-| Convenience functions for working with Array
 
 # Transformations
-@docs update, sliceFrom, sliceUntil
+@docs update, sliceFrom, sliceUntil, transpose
 
 # Higher order helpers
 @docs filterMap, apply, map2, map3, map4, map5, removeWhen
@@ -33,14 +33,14 @@ update : Int -> (a -> a) -> Array a -> Array a
 update n f a =
     let
         element =
-            Array.get n a
+            get n a
     in
         case element of
             Nothing ->
                 a
 
             Just element' ->
-                Array.set n (f element') a
+                set n (f element') a
 
 
 {-| Drop *n* first elements from an array. In other words, slice an array from an index until the very end. Given negative argument, count the end of the slice from the end of the array.
@@ -64,6 +64,22 @@ sliceUntil n a =
         slice 0 n a
     else
         slice 0 (length a + n) a
+
+
+{-| Transpose an array of arrays.
+-}
+transpose : Array (Array a) -> Array (Array a)
+transpose xss =
+    let
+        firstRow =
+            get 0 xss
+    in
+        case firstRow of
+            Nothing ->
+                empty
+
+            Just row ->
+                foldl (map2 push) (repeat (length row) empty) xss
 
 
 {-| Unsafe version of get, don't use this unless you know what you're doing!
