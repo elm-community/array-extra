@@ -39,8 +39,8 @@ update n f a =
             Nothing ->
                 a
 
-            Just element' ->
-                Array.set n (f element') a
+            Just element_ ->
+                Array.set n (f element_) a
 
 
 {-| Drop *n* first elements from an array. In other words, slice an array from an index until the very end. Given negative argument, count the end of the slice from the end of the array.
@@ -106,10 +106,10 @@ apply fs xs =
         l =
             min (length fs) (length xs)
 
-        fs' =
+        fs_ =
             slice 0 l fs
     in
-        indexedMap (\n f -> f (getUnsafe n xs)) fs'
+        indexedMap (\n f -> f (getUnsafe n xs)) fs_
 
 
 {-| Combine two arrays, combining them with the given function.
@@ -190,7 +190,7 @@ resizelRepeat n val xs =
         if l > n then
             slice 0 n xs
         else if l < n then
-            xs `append` repeat (n - l) val
+            append xs (repeat (n - l) val)
         else
             xs
 
@@ -206,7 +206,7 @@ resizerRepeat n val xs =
         if l > n then
             slice (l - n) l xs
         else if l < n then
-            repeat (n - l) val `append` xs
+            append (repeat (n - l) val) xs
         else
             xs
 
@@ -225,7 +225,7 @@ resizelIndexed n f xs =
         if l > n then
             slice 0 n xs
         else if l < n then
-            xs `append` gen (n - l) (f << (\i -> i + l))
+            append xs (gen (n - l) (f << (\i -> i + l)))
         else
             xs
 
@@ -244,7 +244,7 @@ resizerIndexed n f xs =
         if l > n then
             slice (l - n) l xs
         else if l < n then
-            gen (n - l) f `append` xs
+            append (gen (n - l) f) xs
         else
             xs
 
@@ -287,4 +287,4 @@ removeAt index xs =
         if len1 == 0 then
             xs0
         else
-            xs0 `append` slice 1 len1 xs1
+            append xs0 (slice 1 len1 xs1)
