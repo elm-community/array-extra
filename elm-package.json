@@ -1,5 +1,5 @@
 {
-    "version": "1.0.1",
+    "version": "1.0.2",
     "summary": "Convenience functions for working with Array",
     "repository": "https://github.com/elm-community/array-extra.git",
     "license": "MIT",
