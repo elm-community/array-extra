@@ -3,7 +3,7 @@ module Array.Extra exposing (..)
 {-| Convenience functions for working with Array
 
 # Transformations
-@docs update, sliceFrom, sliceUntil
+@docs update, sliceFrom, sliceUntil, pop
 
 # Higher order helpers
 @docs filterMap, apply, map2, map3, map4, map5, removeWhen
@@ -64,6 +64,15 @@ sliceUntil n a =
         slice 0 n a
     else
         slice 0 (length a + n) a
+
+
+{-| Remove the last element from an array.
+
+    pop (fromList [1 2 3]) == fromList [1 2]
+-}
+pop : Array a -> Array a
+pop arr =
+    slice 0 -1 arr
 
 
 {-| Unsafe version of get, don't use this unless you know what you're doing!
