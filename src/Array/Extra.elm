@@ -28,7 +28,6 @@ module Array.Extra exposing
 @docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt
 
 
-# Unsafe
 
 @docs getUnsafe
 
