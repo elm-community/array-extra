@@ -190,7 +190,7 @@ removeWhen pred xs =
 -}
 zip : Array a -> Array b -> Array ( a, b )
 zip =
-    map2 (\a b -> ( a, b ))
+    map2 Tuple.pair
 
 
 {-| -}
