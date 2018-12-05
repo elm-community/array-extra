@@ -29,7 +29,6 @@ module Array.Extra exposing
 
 
 
-@docs getUnsafe
 
 -}
 
