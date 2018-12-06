@@ -20,7 +20,7 @@ module Array.Extra exposing
 
 # Zips
 
-@docs zip, zip3, zip4, zip5
+@docs zip, zip3
 
 
 # Slicing / resizing
