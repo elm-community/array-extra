@@ -3,6 +3,7 @@ module Array.Extra exposing
     , filterMap, apply, map2, map3, map4, map5, removeWhen
     , zip, zip3
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt
+    , insertAt
     )
 
 {-| Convenience functions for working with Array
@@ -312,3 +313,30 @@ removeAt index xs =
 
     else
         append xs0 (slice 1 len1 xs1)
+
+
+{-| Insert an element at the given index.
+
+    insertAt 1 'b' (fromList [ 'a', 'c' ]) == fromList [ 'a', 'b', 'c' ]
+
+    insertAt -1 'b' (fromList [ 'a', 'c' ]) == fromList [ 'b', 'a', 'c' ]
+
+    insertAt 10 'b' (fromList [ 'a', 'c' ]) == fromList [ 'a', 'c', 'b' ]
+
+-}
+insertAt : Int -> a -> Array a -> Array a
+insertAt index val values =
+    let
+        length =
+            Array.length values
+
+        index_ =
+            clamp 0 length index
+
+        before =
+            Array.slice 0 index_ values
+
+        after =
+            Array.slice index_ length values
+    in
+    Array.append (Array.push val before) after
