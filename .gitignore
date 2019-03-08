@@ -1,5 +1,2 @@
 # Ignore build or dist files
 /elm-stuff
-
-# Ignore IntelliJ config files
-/.idea
