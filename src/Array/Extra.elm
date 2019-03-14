@@ -2,8 +2,7 @@ module Array.Extra exposing
     ( update, sliceFrom, sliceUntil, pop
     , filterMap, apply, map2, map3, map4, map5, removeWhen
     , zip, zip3
-    , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt
-    , insertAt
+    , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt, insertAt
     )
 
 {-| Convenience functions for working with Array
@@ -26,7 +25,7 @@ module Array.Extra exposing
 
 # Slicing / resizing
 
-@docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt
+@docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt, insertAt
 
 -}
 
