@@ -234,7 +234,8 @@ zip3 =
 
 
 {-| Unzip array of tuples into a tuple containing two arrays
-    unzip [ (1, 'a'), (2, 'b'), (3, 'c') ] == ([ 1, 2, 3 ], [ 'a', 'b', 'c' ])
+
+    (unzip <| Array.fromList [ (1, 'a'), (2, 'b'), (3, 'c') ]) == ([ 1, 2, 3 ], [ 'a', 'b', 'c' ])
 -}
 unzip : Array (a, b) -> (Array a, Array b)
 unzip arrAB =
