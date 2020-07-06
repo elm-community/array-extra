@@ -1,7 +1,7 @@
 module Array.Extra exposing
     ( update, sliceFrom, sliceUntil, pop
     , filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen
-    , zip, zip3
+    , zip, zip3, unzip
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt, insertAt
     )
 
@@ -231,6 +231,20 @@ zip =
 zip3 : Array a -> Array b -> Array c -> Array ( a, b, c )
 zip3 =
     map3 (\a b c -> ( a, b, c ))
+
+
+{-| Unzip array of tuples into a tuple containing two arrays
+
+    (unzip <| fromList [ (1, 'a'), (2, 'b'), (3, 'c') ]) == ([ 1, 2, 3 ], [ 'a', 'b', 'c' ])
+-}
+unzip : Array (a, b) -> (Array a, Array b)
+unzip arrAB =
+    Array.foldl
+        (\(a, b) (arrA, arrB) ->
+          (Array.push a arrA, Array.push b arrB)
+        )
+        (Array.empty, Array.empty)
+        arrAB
 
 
 {-| Resize an array from the left, padding the right-hand side with the given value.
