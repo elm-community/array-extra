@@ -1,31 +1,31 @@
 module Array.Extra exposing
-    ( update, sliceFrom, sliceUntil, pop
-    , filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen
+    ( filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen, reverse
     , zip, zip3, unzip
-    , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt, insertAt
+    , sliceFrom, sliceUntil, resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt
+    , removeAt, insertAt, pop, update
     )
 
 {-| Convenience functions for working with Array
 
 
-# Transformations
+# Transform
 
-@docs update, sliceFrom, sliceUntil, pop
-
-
-# Higher order helpers
-
-@docs filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen
+@docs filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen, reverse
 
 
-# Zips
+# Zip
 
 @docs zip, zip3, unzip
 
 
-# Slicing / resizing
+# Slice / resize
 
-@docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt, insertAt
+@docs sliceFrom, sliceUntil, resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt
+
+
+# Modify
+
+@docs removeAt, insertAt, pop, update
 
 -}
 
@@ -302,6 +302,19 @@ resizerIndexed n f xs =
 
     else
         xs
+
+
+{-| Reverse an array.
+
+    reverse [ 1, 2, 3 ] == [ 3, 2, 1 ]
+
+-}
+reverse : Array a -> Array a
+reverse xs =
+    xs
+        |> Array.toList
+        |> List.reverse
+        |> Array.fromList
 
 
 {-| Split an array into two arrays, the first ending at and the second starting at the given index
