@@ -306,7 +306,7 @@ resizerIndexed n f xs =
 
 {-| Reverse an array.
 
-    reverse [ 1, 2, 3 ] == [ 3, 2, 1 ]
+    reverse (fromList [ 1, 2, 3 ]) == fromList [ 3, 2, 1 ]
 
 -}
 reverse : Array a -> Array a
