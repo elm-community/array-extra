@@ -53,4 +53,18 @@ suite =
                     ]
                     ()
             )
+        , test "filterMap"
+            (\() ->
+                Expect.all
+                    [ \() ->
+                        filterMap String.toInt
+                            (fromList [ "3", "4.0", "5", "hats" ])
+                            |> Expect.equal (fromList [ 3, 5 ])
+                    , \() ->
+                        filterMap identity
+                            (fromList [ Just 3, Nothing, Just 5, Nothing ])
+                            |> Expect.equal (fromList [ 3, 5 ])
+                    ]
+                    ()
+            )
         ]
