@@ -1,6 +1,6 @@
 module Tests exposing (..)
 
-import Array exposing (empty, fromList)
+import Array exposing (empty, fromList, repeat)
 import Array.Extra exposing (..)
 import Expect exposing (Expectation)
 import Test exposing (..)
@@ -66,5 +66,49 @@ suite =
                             |> Expect.equal (fromList [ 3, 5 ])
                     ]
                     ()
+            )
+        , test "apply"
+            (\() ->
+                apply
+                    (fromList
+                        [ \x -> -x
+                        , identity
+                        , (+) 10
+                        , \x -> x - 10
+                        , always 0
+                        ]
+                    )
+                    |> Expect.all
+                        [ \apply5 ->
+                            apply5 (repeat 5 123)
+                                |> Expect.equal
+                                    (fromList
+                                        [ -123
+                                        , 123
+                                        , 133
+                                        , 113
+                                        , 0
+                                        ]
+                                    )
+                        , \apply5 ->
+                            apply5 (repeat 2 123)
+                                |> Expect.equal
+                                    (fromList
+                                        [ -123
+                                        , 123
+                                        ]
+                                    )
+                        , \apply5 ->
+                            apply5 (repeat 8 123)
+                                |> Expect.equal
+                                    (fromList
+                                        [ -123
+                                        , 123
+                                        , 133
+                                        , 113
+                                        , 0
+                                        ]
+                                    )
+                        ]
             )
         ]
