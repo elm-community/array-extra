@@ -26,4 +26,12 @@ suite =
                         , sliceFrom -3 >> Expect.equal (fromList [ 7, 8, 9 ])
                         ]
             )
+        , test "sliceUntil"
+            (\() ->
+                fromList (List.range 0 9)
+                    |> Expect.all
+                        [ sliceUntil 5 >> Expect.equal (fromList [ 0, 1, 2, 3, 4 ])
+                        , sliceUntil -3 >> Expect.equal (fromList [ 0, 1, 2, 3, 4, 5, 6 ])
+                        ]
+            )
         ]
