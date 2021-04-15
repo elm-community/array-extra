@@ -85,7 +85,7 @@ sliceUntil n a =
 
 {-| Remove the last element from an array.
 
-    pop (fromList [ 1 2 3 ]) == fromList [ 1 2 ]
+    pop (fromList [ 1, 2, 3 ]) == fromList [ 1, 2 ]
 
 -}
 pop : Array a -> Array a
