@@ -80,17 +80,6 @@ suite =
                     )
                     |> Expect.all
                         [ \apply5 ->
-                            apply5 (repeat 5 123)
-                                |> Expect.equal
-                                    (fromList
-                                        [ -123
-                                        , 123
-                                        , 133
-                                        , 113
-                                        , 0
-                                        ]
-                                    )
-                        , \apply5 ->
                             apply5 (repeat 2 123)
                                 |> Expect.equal
                                     (fromList
@@ -110,5 +99,18 @@ suite =
                                         ]
                                     )
                         ]
+            )
+        , test "mapToList"
+            (\() ->
+                mapToList String.fromInt (fromList [ 1, 2, 3 ])
+                    |> Expect.equal
+                        [ "1", "2", "3" ]
+            )
+        , test "indexedMapToList"
+            (\() ->
+                fromList (List.range 0 3)
+                    |> indexedMapToList (\i v -> ( i, v ))
+                    |> Expect.equal
+                        [ ( 0, 0 ), ( 1, 1 ), ( 2, 2 ), ( 3, 3 ) ]
             )
         ]
