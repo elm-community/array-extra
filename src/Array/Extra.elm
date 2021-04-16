@@ -150,7 +150,10 @@ collecting the results in a List.
 -}
 indexedMapToList : (Int -> a -> b) -> Array a -> List b
 indexedMapToList f xs =
-    Array.foldr (\x ( i, ys ) -> ( i - 1, f i x :: ys )) ( Array.length xs - 1, [] ) xs
+    Array.foldr
+        (\x ( i, ys ) -> ( i - 1, f i x :: ys ))
+        ( Array.length xs - 1, [] )
+        xs
         |> Tuple.second
 
 
@@ -193,7 +196,7 @@ map5 f ws xs ys zs =
 {-| Take a predicate and an array, return an array that contains elements which fails to satisfy the predicate.
 This is equivalent to `Array.filter (not << predicate) list`
 
-    removeWhen isEven [ 1, 2, 3, 4 ] == [ 1, 3 ]
+    removeWhen isEven (fromList [ 1, 2, 3, 4 ]) == fromList [ 1, 3 ]
 
 -}
 removeWhen : (a -> Bool) -> Array a -> Array a
@@ -214,9 +217,12 @@ zip3 =
     map3 (\a b c -> ( a, b, c ))
 
 
-{-| Unzip array of tuples into a tuple containing two arrays
+{-| Unzip an array of tuples into a tuple containing two arrays for the values first & the second in the tuples.
 
-    (unzip <| fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]) == ( [ 1, 2, 3 ], [ 'a', 'b', 'c' ] )
+    unzip (fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ])
+        == ( fromList [ 1, 2, 3 ]
+           , fromList [ 'a', 'b', 'c' ]
+           )
 
 -}
 unzip : Array ( a, b ) -> ( Array a, Array b )
@@ -317,7 +323,17 @@ reverse xs =
         |> Array.fromList
 
 
-{-| Split an array into two arrays, the first ending at and the second starting at the given index
+{-| Split an array into two arrays, the first ending at and the second starting at the given index.
+
+    splitAt 2 (fromList [ 1, 2, 3, 4 ])
+        == ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
+
+    splitAt -1 (fromList [ 1, 2, 3, 4 ])
+        == ( empty, fromList [ 1, 2, 3, 4 ] )
+
+    splitAt 100 (fromList [ 1, 2, 3, 4 ])
+        == ( fromList [ 1, 2, 3, 4 ], empty )
+
 -}
 splitAt : Int -> Array a -> ( Array a, Array a )
 splitAt index xs =
@@ -340,23 +356,37 @@ splitAt index xs =
             ( empty, empty )
 
 
-{-| Remove the element at the given index
+{-| Remove the element at the given index.
+
+    removeAt 2 (fromList [ 1, 2, 3, 4 ])
+        == fromList [ 1, 2, 4 ]
+
+    removeAt -1 (fromList [ 1, 2, 3, 4 ])
+        == fromList [ 1, 2, 3, 4 ]
+
+    removeAt 100 (fromList [ 1, 2, 3, 4 ])
+        == fromList [ 1, 2, 3, 4 ]
+
 -}
 removeAt : Int -> Array a -> Array a
 removeAt index xs =
     -- TODO: refactor (written this way to help avoid Array bugs)
     let
-        ( xs0, xs1 ) =
+        ( beforeIndex, startingAtIndex ) =
             splitAt index xs
 
-        len1 =
-            length xs1
+        lenStartingAtIndex =
+            length startingAtIndex
     in
-    if len1 == 0 then
-        xs0
+    if length beforeIndex == 0 then
+        startingAtIndex
+
+    else if lenStartingAtIndex == 0 then
+        beforeIndex
 
     else
-        append xs0 (slice 1 len1 xs1)
+        append beforeIndex
+            (slice 1 lenStartingAtIndex startingAtIndex)
 
 
 {-| Insert an element at the given index.
