@@ -4,7 +4,7 @@ module Tests exposing (..)
 the tests are here to allow confident refactoring & changing.
 -}
 
-import Array exposing (empty, fromList, repeat)
+import Array exposing (Array, empty, fromList, repeat)
 import Array.Extra exposing (..)
 import Expect exposing (Expectation)
 import Test exposing (..)
@@ -13,169 +13,198 @@ import Test exposing (..)
 suite : Test
 suite =
     describe "Array.Extra"
-        [ test "update"
-            (\() ->
-                fromList [ 1, 2, 3 ]
-                    |> Expect.all
-                        [ update 1 ((+) 10)
-                            >> Expect.equal (fromList [ 1, 12, 3 ])
-                        , update 4 ((+) 10)
-                            >> Expect.equal (fromList [ 1, 2, 3 ])
-                        , update -1 ((+) 10)
-                            >> Expect.equal (fromList [ 1, 2, 3 ])
-                        ]
-            )
-        , test "sliceFrom"
-            (\() ->
-                fromList (List.range 0 9)
-                    |> Expect.all
-                        [ sliceFrom 5
-                            >> Expect.equal (fromList [ 5, 6, 7, 8, 9 ])
-                        , sliceFrom -3
-                            >> Expect.equal (fromList [ 7, 8, 9 ])
-                        ]
-            )
-        , test "sliceUntil"
-            (\() ->
-                fromList (List.range 0 9)
-                    |> Expect.all
-                        [ sliceUntil 5
-                            >> Expect.equal (fromList [ 0, 1, 2, 3, 4 ])
-                        , sliceUntil -3
-                            >> Expect.equal (fromList [ 0, 1, 2, 3, 4, 5, 6 ])
-                        ]
-            )
-        , test "pop"
-            (\() ->
-                Expect.all
-                    [ \() ->
-                        pop (fromList [ 1, 2, 3 ])
-                            |> Expect.equal (fromList [ 1, 2 ])
-                    , \() ->
-                        pop empty
-                            |> Expect.equal empty
-                    ]
-                    ()
-            )
+        [ describe "update"
+            [ test "valid index"
+                (\() ->
+                    update 1 ((+) 10) (fromList [ 1, 2, 3 ])
+                        |> Expect.equal (fromList [ 1, 12, 3 ])
+                )
+            , test "negative index"
+                (\() ->
+                    update -1 ((+) 10) (fromList [ 1, 2, 3 ])
+                        |> Expect.equal (fromList [ 1, 2, 3 ])
+                )
+            , test "too high index"
+                (\() ->
+                    update 4 ((+) 10) (fromList [ 1, 2, 3 ])
+                        |> Expect.equal (fromList [ 1, 2, 3 ])
+                )
+            ]
+        , describe "sliceFrom"
+            [ test "valid positive index"
+                (\() ->
+                    sliceFrom 3 (fromList (List.range 0 6))
+                        |> Expect.equal (fromList [ 3, 4, 5, 6 ])
+                )
+            , test "valid negative index"
+                (\() ->
+                    sliceFrom -3 (fromList (List.range 0 6))
+                        |> Expect.equal (fromList [ 4, 5, 6 ])
+                )
+            , test "too high positive index"
+                (\() ->
+                    sliceFrom 6 (fromList (List.range 1 3))
+                        |> Expect.equal empty
+                )
+            , test "too low negative index"
+                (\() ->
+                    sliceFrom -6 (fromList (List.range 1 3))
+                        |> Expect.equal (fromList [ 1, 2, 3 ])
+                )
+            ]
+        , describe "sliceUntil"
+            [ test "valid positive index"
+                (\() ->
+                    sliceUntil 3 (fromList (List.range 0 6))
+                        |> Expect.equal (fromList [ 0, 1, 2 ])
+                )
+            , test "valid negative index"
+                (\() ->
+                    sliceUntil -3 (fromList (List.range 0 6))
+                        |> Expect.equal (fromList [ 0, 1, 2, 3 ])
+                )
+            , test "index 0"
+                (\() ->
+                    sliceUntil 0 (fromList (List.range 0 6))
+                        |> Expect.equal empty
+                )
+            , test "too high positive index"
+                (\() ->
+                    sliceUntil 6 (fromList (List.range 1 3))
+                        |> Expect.equal (fromList [ 1, 2, 3 ])
+                )
+            , test "too low negative index"
+                (\() ->
+                    sliceUntil -6 (fromList (List.range 1 3))
+                        |> Expect.equal empty
+                )
+            ]
+        , describe "pop"
+            [ test "nonempty array"
+                (\() ->
+                    pop (fromList [ 1, 2, 3 ])
+                        |> Expect.equal (fromList [ 1, 2 ])
+                )
+            , test "empty"
+                (\() ->
+                    pop empty
+                        |> Expect.equal empty
+                )
+            ]
         , test "filterMap"
             (\() ->
-                Expect.all
-                    [ \() ->
-                        filterMap String.toInt
-                            (fromList [ "3", "4.0", "5", "hats" ])
-                            |> Expect.equal (fromList [ 3, 5 ])
-                    , \() ->
-                        filterMap identity
-                            (fromList [ Just 3, Nothing, Just 5, Nothing ])
-                            |> Expect.equal (fromList [ 3, 5 ])
-                    ]
-                    ()
+                filterMap identity
+                    (fromList [ Just 3, Nothing, Just 5, Nothing ])
+                    |> Expect.equal (fromList [ 3, 5 ])
             )
-        , test "apply"
-            (\() ->
-                apply
-                    (fromList
+        , describe "apply"
+            (let
+                fun4 =
+                    fromList
                         [ \x -> -x
                         , identity
                         , (+) 10
-                        , \x -> x - 10
                         , always 0
                         ]
-                    )
-                    |> Expect.all
-                        [ \apply5 ->
-                            apply5 (repeat 8 123)
-                                |> Expect.equal
-                                    (fromList
-                                        [ -123
-                                        , 123
-                                        , 133
-                                        , 113
-                                        , 0
-                                        ]
-                                    )
-                        , \apply5 ->
-                            apply5 (repeat 2 123)
-                                |> Expect.equal
-                                    (fromList
-                                        [ -123, 123 ]
-                                    )
-                        ]
+             in
+             [ test "more elements than functions"
+                (\() ->
+                    apply fun4 (repeat 5 100)
+                        |> Expect.equal
+                            (fromList
+                                [ -100, 100, 110, 0 ]
+                            )
+                )
+             , test "more functions than elements"
+                (\() ->
+                    apply fun4 (repeat 3 100)
+                        |> Expect.equal
+                            (fromList
+                                [ -100, 100, 110 ]
+                            )
+                )
+             ]
             )
         , test "mapToList"
             (\() ->
-                mapToList String.fromInt (fromList [ 1, 2, 3 ])
+                mapToList String.fromInt num1234
                     |> Expect.equal
-                        [ "1", "2", "3" ]
+                        [ "1", "2", "3", "4" ]
             )
         , test "indexedMapToList"
             (\() ->
-                fromList (List.range 0 3)
-                    |> indexedMapToList (\i v -> ( i, v ))
+                indexedMapToList (\i v -> ( i, v )) strAbc
                     |> Expect.equal
-                        [ ( 0, 0 ), ( 1, 1 ), ( 2, 2 ), ( 3, 3 ) ]
+                        [ ( 0, "a" ), ( 1, "b" ), ( 2, "c" ) ]
             )
-        , test "map2"
-            (\() ->
-                -- zip is implemented that way... no need to test
-                map2 Tuple.pair
-                    (fromList (List.range 0 3))
-                    |> Expect.all
-                        [ \zipWith0To3 ->
-                            zipWith0To3 (fromList (List.range 3 8))
-                                |> Expect.equal
-                                    (fromList
-                                        [ ( 0, 3 )
-                                        , ( 1, 4 )
-                                        , ( 2, 5 )
-                                        , ( 3, 6 )
-                                        ]
-                                    )
-                        , \zipWith0To3 ->
-                            zipWith0To3 (fromList (List.range 3 5))
-                                |> Expect.equal
-                                    (fromList
-                                        [ ( 0, 3 )
-                                        , ( 1, 4 )
-                                        , ( 2, 5 )
-                                        ]
-                                    )
-                        ]
-            )
-        , test "map3"
-            (\() ->
-                -- zip3 is implemented that way... no need to test
-                map3 (\a b c -> ( a, b, c ))
-                    (fromList (List.range 0 3))
-                    |> Expect.all
-                        [ \zipWith0To3 ->
-                            zipWith0To3
-                                (fromList (List.range 10 13))
-                                (fromList (List.range 3 8))
-                                |> Expect.equal
-                                    (fromList
-                                        [ ( 0, 10, 3 )
-                                        , ( 1, 11, 4 )
-                                        , ( 2, 12, 5 )
-                                        , ( 3, 13, 6 )
-                                        ]
-                                    )
-                        , \zipWith0To3 ->
-                            zipWith0To3
-                                (fromList (List.range 10 13))
-                                (fromList (List.range 3 5))
-                                |> Expect.equal
-                                    (fromList
-                                        [ ( 0, 10, 3 )
-                                        , ( 1, 11, 4 )
-                                        , ( 2, 12, 5 )
-                                        ]
-                                    )
-                        ]
-            )
+        , describe "map2"
+            -- zip will always be implemented with map2...
+            -- no need for extra tests
+            [ test "first array longer than the last"
+                (\() ->
+                    map2 Tuple.pair num1234 chrAbcde
+                        |> Expect.equal
+                            (fromList
+                                [ ( 1, 'a' )
+                                , ( 2, 'b' )
+                                , ( 3, 'c' )
+                                , ( 4, 'd' )
+                                ]
+                            )
+                )
+            , test "first array shorter than the last"
+                (\() ->
+                    map2 Tuple.pair chrAbcde num1234
+                        |> Expect.equal
+                            (fromList
+                                [ ( 'a', 1 )
+                                , ( 'b', 2 )
+                                , ( 'c', 3 )
+                                , ( 'd', 4 )
+                                ]
+                            )
+                )
+            ]
+        , describe "map3"
+            -- zip3 will probably always be implemented using map3...
+            -- no need for extra tests
+            [ test "first array the shortest"
+                (\() ->
+                    map3 (\a b c -> ( a, b, c )) strAbc chrAbcde num1234
+                        |> Expect.equal
+                            (fromList
+                                [ ( "a", 'a', 1 )
+                                , ( "b", 'b', 2 )
+                                , ( "c", 'c', 3 )
+                                ]
+                            )
+                )
+            , test "second array the shortest"
+                (\() ->
+                    map3 (\a b c -> ( a, b, c )) chrAbcde strAbc num1234
+                        |> Expect.equal
+                            (fromList
+                                [ ( 'a', "a", 1 )
+                                , ( 'b', "b", 2 )
+                                , ( 'c', "c", 3 )
+                                ]
+                            )
+                )
+            , test "third array the shortest"
+                (\() ->
+                    map3 (\a b c -> ( a, b, c )) chrAbcde num1234 strAbc
+                        |> Expect.equal
+                            (fromList
+                                [ ( 'a', 1, "a" )
+                                , ( 'b', 2, "b" )
+                                , ( 'c', 3, "c" )
+                                ]
+                            )
+                )
+            ]
         , test "removeWhen"
             (\() ->
-                removeWhen isEven (fromList [ 1, 2, 3, 4 ])
+                removeWhen isEven num1234
                     |> Expect.equal (fromList [ 1, 3 ])
             )
         , test "unzip"
@@ -188,57 +217,93 @@ suite =
             )
         , test "reverse"
             (\() ->
-                reverse (fromList [ 1, 2, 3 ])
-                    |> Expect.equal (fromList [ 3, 2, 1 ])
+                reverse num1234
+                    |> Expect.equal (fromList [ 4, 3, 2, 1 ])
             )
 
         --skipped resizer/l methods just for now
         --todo: understand them
-        , test "splitAt"
-            (\() ->
-                fromList [ 1, 2, 3, 4 ]
-                    |> Expect.all
-                        [ splitAt 2
-                            >> Expect.equal
-                                ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
-                        , splitAt -1
-                            >> Expect.equal
-                                ( empty, fromList [ 1, 2, 3, 4 ] )
-                        , splitAt 100
-                            >> Expect.equal
-                                ( fromList [ 1, 2, 3, 4 ], empty )
-                        ]
-            )
-        , test "removeAt"
-            (\() ->
-                fromList [ 1, 2, 3, 4 ]
-                    |> Expect.all
-                        [ removeAt 2
-                            >> Expect.equal
-                                (fromList [ 1, 2, 4 ])
-                        , removeAt -1
-                            >> Expect.equal
-                                (fromList [ 1, 2, 3, 4 ])
-                        , removeAt 100
-                            >> Expect.equal
-                                (fromList [ 1, 2, 3, 4 ])
-                        ]
-            )
-        , test "insertAt"
-            (\() ->
-                fromList [ 'a', 'c' ]
-                    |> Expect.all
-                        [ insertAt 1 'b'
-                            >> Expect.equal
-                                (fromList [ 'a', 'b', 'c' ])
-                        , insertAt -1 'b'
-                            >> Expect.equal
-                                (fromList [ 'a', 'c' ])
-                        , insertAt 100 'b'
-                            >> Expect.equal (fromList [ 'a', 'c' ])
-                        ]
+        , describe "splitAt"
+            [ test "valid index"
+                (\() ->
+                    splitAt 2 num1234
+                        |> Expect.equal
+                            ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
+                )
+            , test "negative index"
+                (\() ->
+                    splitAt -1 num1234
+                        |> Expect.equal ( empty, num1234 )
+                )
+            , test "too high index"
+                (\() ->
+                    splitAt 100 num1234
+                        |> Expect.equal ( num1234, empty )
+                )
+            ]
+        , describe "removeAt"
+            [ test "valid index"
+                (\() ->
+                    removeAt 2 num1234
+                        |> Expect.equal
+                            (fromList [ 1, 2, 4 ])
+                )
+            , test "negative index"
+                (\() ->
+                    removeAt -1 num1234
+                        |> Expect.equal num1234
+                )
+            , test "too high index"
+                (\() ->
+                    removeAt 100 num1234
+                        |> Expect.equal num1234
+                )
+            ]
+        , describe "insertAt"
+            (let
+                ac =
+                    fromList [ 'a', 'c' ]
+             in
+             [ test "valid index"
+                (\() ->
+                    insertAt 1 'b' ac
+                        |> Expect.equal
+                            (fromList [ 'a', 'b', 'c' ])
+                )
+             , test "negative index"
+                (\() ->
+                    insertAt -1 'b' ac
+                        |> Expect.equal ac
+                )
+             , test "too high index"
+                (\() ->
+                    insertAt 100 'b' ac
+                        |> Expect.equal ac
+                )
+             ]
             )
         ]
+
+
+
+-- used
+
+
+num1234 : Array number
+num1234 =
+    fromList [ 1, 2, 3, 4 ]
+
+
+{-| All lowercase letter 'a' to 'e'.
+-}
+chrAbcde : Array Char
+chrAbcde =
+    fromList [ 'a', 'b', 'c', 'd', 'e' ]
+
+
+strAbc : Array String
+strAbc =
+    fromList [ "a", "b", "c" ]
 
 
 isEven : Int -> Bool
