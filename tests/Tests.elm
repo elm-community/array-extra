@@ -80,14 +80,6 @@ suite =
                     )
                     |> Expect.all
                         [ \apply5 ->
-                            apply5 (repeat 2 123)
-                                |> Expect.equal
-                                    (fromList
-                                        [ -123
-                                        , 123
-                                        ]
-                                    )
-                        , \apply5 ->
                             apply5 (repeat 8 123)
                                 |> Expect.equal
                                     (fromList
@@ -97,6 +89,12 @@ suite =
                                         , 113
                                         , 0
                                         ]
+                                    )
+                        , \apply5 ->
+                            apply5 (repeat 2 123)
+                                |> Expect.equal
+                                    (fromList
+                                        [ -123, 123 ]
                                     )
                         ]
             )
@@ -112,5 +110,63 @@ suite =
                     |> indexedMapToList (\i v -> ( i, v ))
                     |> Expect.equal
                         [ ( 0, 0 ), ( 1, 1 ), ( 2, 2 ), ( 3, 3 ) ]
+            )
+        , test "map2"
+            (\() ->
+                -- zip is implemented that way... no need to test
+                map2 Tuple.pair
+                    (fromList (List.range 0 3))
+                    |> Expect.all
+                        [ \zipWith0To3 ->
+                            zipWith0To3 (fromList (List.range 3 8))
+                                |> Expect.equal
+                                    (fromList
+                                        [ ( 0, 3 )
+                                        , ( 1, 4 )
+                                        , ( 2, 5 )
+                                        , ( 3, 6 )
+                                        ]
+                                    )
+                        , \zipWith0To3 ->
+                            zipWith0To3 (fromList (List.range 3 5))
+                                |> Expect.equal
+                                    (fromList
+                                        [ ( 0, 3 )
+                                        , ( 1, 4 )
+                                        , ( 2, 5 )
+                                        ]
+                                    )
+                        ]
+            )
+        , test "map3"
+            (\() ->
+                -- zip3 is implemented that way... no need to test
+                map3 (\a b c -> ( a, b, c ))
+                    (fromList (List.range 0 3))
+                    |> Expect.all
+                        [ \zipWith0To3 ->
+                            zipWith0To3
+                                (fromList (List.range 10 13))
+                                (fromList (List.range 3 8))
+                                |> Expect.equal
+                                    (fromList
+                                        [ ( 0, 10, 3 )
+                                        , ( 1, 11, 4 )
+                                        , ( 2, 12, 5 )
+                                        , ( 3, 13, 6 )
+                                        ]
+                                    )
+                        , \zipWith0To3 ->
+                            zipWith0To3
+                                (fromList (List.range 10 13))
+                                (fromList (List.range 3 5))
+                                |> Expect.equal
+                                    (fromList
+                                        [ ( 0, 10, 3 )
+                                        , ( 1, 11, 4 )
+                                        , ( 2, 12, 5 )
+                                        ]
+                                    )
+                        ]
             )
         ]
