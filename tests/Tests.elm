@@ -224,6 +224,20 @@ suite =
                                 (fromList [ 1, 2, 3, 4 ])
                         ]
             )
+        , test "insertAt"
+            (\() ->
+                fromList [ 'a', 'c' ]
+                    |> Expect.all
+                        [ insertAt 1 'b'
+                            >> Expect.equal
+                                (fromList [ 'a', 'b', 'c' ])
+                        , insertAt -1 'b'
+                            >> Expect.equal
+                                (fromList [ 'a', 'c' ])
+                        , insertAt 100 'b'
+                            >> Expect.equal (fromList [ 'a', 'c' ])
+                        ]
+            )
         ]
 
 
