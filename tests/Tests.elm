@@ -169,4 +169,13 @@ suite =
                                     )
                         ]
             )
+        , test "removeWhen"
+            (\() ->
+                let
+                    isEven =
+                        modBy 2 >> (==) 0
+                in
+                removeWhen isEven (fromList [ 1, 2, 3, 4 ])
+                    |> Expect.equal (fromList [ 1, 3 ])
+            )
         ]
