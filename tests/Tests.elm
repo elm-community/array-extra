@@ -1,5 +1,9 @@
 module Tests exposing (..)
 
+{-| Even though most implementations seem robust as they are now,
+the tests are here to allow confident refactoring & changing.
+-}
+
 import Array exposing (empty, fromList, repeat)
 import Array.Extra exposing (..)
 import Expect exposing (Expectation)
@@ -171,11 +175,58 @@ suite =
             )
         , test "removeWhen"
             (\() ->
-                let
-                    isEven =
-                        modBy 2 >> (==) 0
-                in
                 removeWhen isEven (fromList [ 1, 2, 3, 4 ])
                     |> Expect.equal (fromList [ 1, 3 ])
             )
+        , test "unzip"
+            (\() ->
+                unzip (fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ])
+                    |> Expect.equal
+                        ( fromList [ 1, 2, 3 ]
+                        , fromList [ 'a', 'b', 'c' ]
+                        )
+            )
+        , test "reverse"
+            (\() ->
+                reverse (fromList [ 1, 2, 3 ])
+                    |> Expect.equal (fromList [ 3, 2, 1 ])
+            )
+
+        --skipped resizer/l methods just for now
+        --todo: understand them
+        , test "splitAt"
+            (\() ->
+                fromList [ 1, 2, 3, 4 ]
+                    |> Expect.all
+                        [ splitAt 2
+                            >> Expect.equal
+                                ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
+                        , splitAt -1
+                            >> Expect.equal
+                                ( empty, fromList [ 1, 2, 3, 4 ] )
+                        , splitAt 100
+                            >> Expect.equal
+                                ( fromList [ 1, 2, 3, 4 ], empty )
+                        ]
+            )
+        , test "removeAt"
+            (\() ->
+                fromList [ 1, 2, 3, 4 ]
+                    |> Expect.all
+                        [ removeAt 2
+                            >> Expect.equal
+                                (fromList [ 1, 2, 4 ])
+                        , removeAt -1
+                            >> Expect.equal
+                                (fromList [ 1, 2, 3, 4 ])
+                        , removeAt 100
+                            >> Expect.equal
+                                (fromList [ 1, 2, 3, 4 ])
+                        ]
+            )
         ]
+
+
+isEven : Int -> Bool
+isEven =
+    modBy 2 >> (==) 0
