@@ -371,22 +371,23 @@ splitAt index xs =
 removeAt : Int -> Array a -> Array a
 removeAt index xs =
     -- TODO: refactor (written this way to help avoid Array bugs)
-    let
-        ( beforeIndex, startingAtIndex ) =
-            splitAt index xs
-
-        lenStartingAtIndex =
-            length startingAtIndex
-    in
-    if length beforeIndex == 0 then
-        startingAtIndex
-
-    else if lenStartingAtIndex == 0 then
-        beforeIndex
+    if index < 0 then
+        xs
 
     else
-        append beforeIndex
-            (slice 1 lenStartingAtIndex startingAtIndex)
+        let
+            ( beforeIndex, startingAtIndex ) =
+                splitAt index xs
+
+            lengthStartingAtIndex =
+                length startingAtIndex
+        in
+        if lengthStartingAtIndex == 0 then
+            beforeIndex
+
+        else
+            append beforeIndex
+                (slice 1 lengthStartingAtIndex startingAtIndex)
 
 
 {-| Insert an element at the given index.
