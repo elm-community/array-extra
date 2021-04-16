@@ -6,7 +6,7 @@ the tests are here to allow confident refactoring & changing.
 
 import Array exposing (Array, empty, fromList, repeat)
 import Array.Extra exposing (..)
-import Expect exposing (Expectation)
+import Expect
 import Test exposing (..)
 
 
@@ -294,13 +294,15 @@ num1234 =
     fromList [ 1, 2, 3, 4 ]
 
 
-{-| All lowercase letter 'a' to 'e'.
+{-| Lowercase letters 'a' to 'e'.
 -}
 chrAbcde : Array Char
 chrAbcde =
     fromList [ 'a', 'b', 'c', 'd', 'e' ]
 
 
+{-| Lowercase character strings "a", "b", "c".
+-}
 strAbc : Array String
 strAbc =
     fromList [ "a", "b", "c" ]
