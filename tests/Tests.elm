@@ -209,7 +209,10 @@ suite =
             )
         , test "unzip"
             (\() ->
-                unzip (fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ])
+                unzip
+                    (fromList
+                        [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]
+                    )
                     |> Expect.equal
                         ( fromList [ 1, 2, 3 ]
                         , fromList [ 'a', 'b', 'c' ]
@@ -220,9 +223,82 @@ suite =
                 reverse num1234
                     |> Expect.equal (fromList [ 4, 3, 2, 1 ])
             )
-
-        --skipped resizer/l methods just for now
-        --todo: understand them
+        , describe "resizelRepeat"
+            [ test "length less than current"
+                (\() ->
+                    resizelRepeat 3 0 num1234
+                        |> Expect.equal
+                            (fromList [ 1, 2, 3 ])
+                )
+            , test "length greater than current"
+                (\() ->
+                    resizelRepeat 6 0 num1234
+                        |> Expect.equal
+                            (fromList [ 1, 2, 3, 4, 0, 0 ])
+                )
+            , test "negative length"
+                (\() ->
+                    resizelRepeat -1 0 num1234
+                        |> Expect.equal Array.empty
+                )
+            ]
+        , describe "resizerRepeat"
+            [ test "length less than current"
+                (\() ->
+                    resizerRepeat 3 0 num1234
+                        |> Expect.equal
+                            (fromList [ 2, 3, 4 ])
+                )
+            , test "length greater than current"
+                (\() ->
+                    resizerRepeat 6 0 num1234
+                        |> Expect.equal
+                            (fromList [ 0, 0, 1, 2, 3, 4 ])
+                )
+            , test "negative length"
+                (\() ->
+                    resizelRepeat -1 0 num1234
+                        |> Expect.equal Array.empty
+                )
+            ]
+        , describe "resizelIndexed"
+            [ test "length less than current"
+                (\() ->
+                    resizelIndexed 2 String.fromInt strAbc
+                        |> Expect.equal
+                            (fromList [ "a", "b" ])
+                )
+            , test "length greater than current"
+                (\() ->
+                    resizelIndexed 5 String.fromInt strAbc
+                        |> Expect.equal
+                            (fromList [ "a", "b", "c", "3", "4" ])
+                )
+            , test "negative length"
+                (\() ->
+                    resizelIndexed -1 String.fromInt strAbc
+                        |> Expect.equal Array.empty
+                )
+            ]
+        , describe "resizerIndexed"
+            [ test "length less than current"
+                (\() ->
+                    resizerIndexed 2 String.fromInt strAbc
+                        |> Expect.equal
+                            (fromList [ "b", "c" ])
+                )
+            , test "length greater than current"
+                (\() ->
+                    resizerIndexed 5 String.fromInt strAbc
+                        |> Expect.equal
+                            (fromList [ "0", "1", "a", "b", "c" ])
+                )
+            , test "negative length"
+                (\() ->
+                    resizerIndexed -1 String.fromInt strAbc
+                        |> Expect.equal Array.empty
+                )
+            ]
         , describe "splitAt"
             [ test "valid index"
                 (\() ->
