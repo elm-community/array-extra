@@ -86,12 +86,15 @@ Given negative argument, count the beginning of the slice from the end of the ar
 
 -}
 sliceUntil : Int -> Array a -> Array a
-sliceUntil n array =
-    if n >= 0 then
-        slice 0 n array
+sliceUntil newLength array =
+    slice 0
+        (if newLength >= 0 then
+            newLength
 
-    else
-        slice 0 (length array + n) array
+         else
+            length array + newLength
+        )
+        array
 
 
 {-| Remove the last element from an array.
@@ -175,7 +178,9 @@ indexedMapToList mapIndexAndValue array =
 {-| Combine two arrays, combining them with the given function.
 If one array is longer, the extra elements are dropped.
 
-    map2 (+) [ 1, 2, 3 ] [ 1, 2, 3, 4 ] == [ 2, 4, 6 ]
+    map2 (+) [ 1, 2, 3 ] [ 1, 2, 3, 4 ]
+        == [ 2, 4, 6 ]
+
     map2 Tuple.pair [ 1, 2, 3 ] [ 'a', 'b' ]
         == [ ( 1, 'a' ), ( 2, 'b' ) ]
 
@@ -228,16 +233,16 @@ map5 combineAbcde aArray bArray cArray dArray eArray =
     apply (map4 combineAbcde aArray bArray cArray dArray) eArray
 
 
-{-| Take a predicate and an array, return an array that contains elements which fails to satisfy the predicate.
-This is equivalent to `Array.filter (not << predicate) list`
+{-| Return an array that only contains elements which fail to satisfy the predicate.
+This is equivalent to `Array.filter (not << predicate)`.
 
     removeWhen isEven (fromList [ 1, 2, 3, 4 ])
         == fromList [ 1, 3 ]
 
 -}
 removeWhen : (a -> Bool) -> Array a -> Array a
-removeWhen pred xs =
-    Array.filter (not << pred) xs
+removeWhen isBad array =
+    Array.filter (not << isBad) array
 
 
 {-| Zip the elements of two arrays into tuples.
@@ -252,6 +257,10 @@ zip =
 
 
 {-| Zip the elements of three arrays into 3-tuples.
+
+    zip3 [ 1, 2, 3 ] [ 'a', 'b' ] [ "a", "b", "c", "d" ]
+        == [ ( 1, 'a', "b" ), ( 2, 'b', "b" ) ]
+
 -}
 zip3 : Array a -> Array b -> Array c -> Array ( a, b, c )
 zip3 =
@@ -274,81 +283,149 @@ unzip tupleArray =
 
 
 {-| Resize an array from the left, padding the right-hand side with the given value.
+
+    resizelRepeat 4 0 (fromList [ 1, 2 ])
+        == fromList [ 1, 2, 0, 0 ]
+
+    resizelRepeat 2 0 (fromList [ 1, 2, 3 ])
+        == fromList [ 1, 2 ]
+
+    resizelRepeat -1 0 (fromList [ 1, 2 ])
+        == empty
+
 -}
 resizelRepeat : Int -> a -> Array a -> Array a
-resizelRepeat n val xs =
-    let
-        l =
-            length xs
-    in
-    if l > n then
-        slice 0 n xs
-
-    else if l < n then
-        append xs (repeat (n - l) val)
+resizelRepeat newLength defaultValue array =
+    if newLength <= 0 then
+        Array.empty
 
     else
-        xs
+        let
+            len =
+                length array
+        in
+        case compare len newLength of
+            GT ->
+                sliceUntil newLength array
+
+            LT ->
+                append array (repeat (newLength - len) defaultValue)
+
+            EQ ->
+                array
 
 
 {-| Resize an array from the right, padding the left-hand side with the given value.
+
+    resizerRepeat 4 0 (fromList [ 1, 2 ])
+        == fromList [ 0, 0, 1, 2 ]
+
+    resizerRepeat 2 0 (fromList [ 1, 2, 3 ])
+        == fromList [ 2, 3 ]
+
+    resizerRepeat -1 0 (fromList [ 1, 2 ])
+        == empty
+
 -}
 resizerRepeat : Int -> a -> Array a -> Array a
-resizerRepeat n val xs =
+resizerRepeat newLength defaultValue array =
     let
-        l =
-            length xs
+        len =
+            length array
     in
-    if l > n then
-        slice (l - n) l xs
+    case compare len newLength of
+        GT ->
+            slice (len - newLength) len array
 
-    else if l < n then
-        append (repeat (n - l) val) xs
+        LT ->
+            append (repeat (newLength - len) defaultValue) array
 
-    else
-        xs
+        EQ ->
+            array
 
 
 {-| Resize an array from the left, padding the right-hand side with the given index function.
+
+    resizelIndexed 5
+        toLetterInAlphabet
+        (fromList [ 'a', 'b', 'c' ])
+        == fromList [ 'a', 'b', 'c', 'd', 'e' ]
+
+    resizelIndexed 2
+        toLetterInAlphabet
+        (fromList [ 'a', 'b', 'c' ])
+        == fromList [ 'a', 'b' ]
+
+    resizelIndexed -1
+        toLetterInAlphabet
+        (fromList [ 'a', 'b', 'c' ])
+        == empty
+
+    toLetterInAlphabet : Int -> Char
+    toLetterInAlphabet inAlphabet =
+        (Char.toCode 'a') + inAlphabet
+            |> Char.fromCode
+
 -}
 resizelIndexed : Int -> (Int -> a) -> Array a -> Array a
-resizelIndexed n f xs =
-    let
-        l =
-            length xs
-
-        gen m g =
-            indexedMap (\i _ -> g i) <| repeat m ()
-    in
-    if l > n then
-        slice 0 n xs
-
-    else if l < n then
-        append xs (gen (n - l) (f << (\i -> i + l)))
+resizelIndexed newLength defaultValueAtIndex array =
+    if newLength <= 0 then
+        Array.empty
 
     else
-        xs
+        let
+            len =
+                length array
+        in
+        case compare len newLength of
+            GT ->
+                sliceUntil newLength array
+
+            LT ->
+                append array
+                    (initialize (newLength - len)
+                        (defaultValueAtIndex << (\i -> i + len))
+                    )
+
+            EQ ->
+                array
 
 
 {-| Resize an array from the right, padding the left-hand side with the given index function.
+
+    resizerIndexed 5
+        ((*) 5)
+        (fromList [ 10, 25, 36 ])
+        == fromList [ 0, 5, 10, 25, 36 ]
+
+    resizerIndexed 2
+        ((*) 5)
+        (fromList [ 10, 25, 36 ])
+        == fromList [ 25, 36 ]
+
+    resizerIndexed -1
+        ((*) 5)
+        (fromList [ 10, 25, 36 ])
+        == empty
+
 -}
 resizerIndexed : Int -> (Int -> a) -> Array a -> Array a
-resizerIndexed n f xs =
+resizerIndexed newLength defaultValueAtIndex array =
     let
-        l =
-            length xs
-
-        gen m g =
-            indexedMap (\i _ -> g i) <| repeat m ()
+        len =
+            length array
     in
-    if l > n then
-        slice (l - n) l xs
+    case compare len newLength of
+        GT ->
+            slice (len - newLength) len array
 
-    else if l < n then
-        append (gen (n - l) f) xs
+        LT ->
+            append
+                (initialize (newLength - len) defaultValueAtIndex)
+                array
 
-    else
-        xs
+        EQ ->
+            array
 
 
 {-| Reverse an array.
@@ -370,32 +447,22 @@ reverse xs =
     splitAt 2 (fromList [ 1, 2, 3, 4 ])
         == ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
 
-    splitAt -1 (fromList [ 1, 2, 3, 4 ])
-        == ( empty, fromList [ 1, 2, 3, 4 ] )
-
     splitAt 100 (fromList [ 1, 2, 3, 4 ])
         == ( fromList [ 1, 2, 3, 4 ], empty )
 
+    splitAt -1 (fromList [ 1, 2, 3, 4 ])
+        == ( empty, fromList [ 1, 2, 3, 4 ] )
+
 -}
 splitAt : Int -> Array a -> ( Array a, Array a )
-splitAt index xs =
-    -- TODO: refactor (written this way to help avoid Array bugs)
-    let
-        len =
-            length xs
-    in
-    case ( index > 0, index < len ) of
-        ( True, True ) ->
-            ( slice 0 index xs, slice index len xs )
+splitAt index array =
+    if index > 0 then
+        ( sliceUntil index array
+        , sliceFrom index array
+        )
 
-        ( True, False ) ->
-            ( xs, empty )
-
-        ( False, True ) ->
-            ( empty, xs )
-
-        ( False, False ) ->
-            ( empty, empty )
+    else
+        ( empty, array )
 
 
 {-| Remove the element at the given index.
@@ -411,12 +478,11 @@ splitAt index xs =
 
 -}
 removeAt : Int -> Array a -> Array a
-removeAt index xs =
-    -- TODO: refactor (written this way to help avoid Array bugs)
+removeAt index array =
     if index >= 0 then
         let
             ( beforeIndex, startingAtIndex ) =
-                splitAt index xs
+                splitAt index array
 
             lengthStartingAtIndex =
                 length startingAtIndex
@@ -429,7 +495,7 @@ removeAt index xs =
                 (slice 1 lengthStartingAtIndex startingAtIndex)
 
     else
-        xs
+        array
 
 
 {-| Insert an element at the given index.
