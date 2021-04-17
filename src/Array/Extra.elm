@@ -112,7 +112,9 @@ pop array =
 {-| Apply a function that may succeed to all values in the array, but only keep the successes.
 
     String.toInt : String -> Maybe Int
-    filterMap String.toInt (fromList [ "3", "4.0", "5", "hats" ]) == fromList [ 3, 5 ]
+    filterMap String.toInt
+        (fromList [ "3", "4.0", "5", "hats" ])
+        == fromList [ 3, 5 ]
 
 -}
 filterMap : (a -> Maybe b) -> Array a -> Array b
@@ -124,6 +126,17 @@ filterMap tryMap array =
 
 
 {-| Apply an array of functions to an array of values.
+
+    apply
+        (fromList
+            [ \x -> -x
+            , identity
+            , always 0
+            ]
+        )
+        (repeat 5 100)
+        == fromList [ -100, 100, 0 ]
+
 -}
 apply : Array (a -> b) -> Array a -> Array b
 apply maps array =
