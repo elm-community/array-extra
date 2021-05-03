@@ -1,37 +1,35 @@
 module Array.Extra exposing
-    ( update, sliceFrom, sliceUntil, pop
-    , filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen
+    ( filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen, reverse
     , zip, zip3, unzip
-    , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt, insertAt
+    , sliceFrom, sliceUntil, resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt
+    , removeAt, insertAt, pop, update
     )
 
 {-| Convenience functions for working with Array
 
 
-# Transformations
+# Transform
 
-@docs update, sliceFrom, sliceUntil, pop
-
-
-# Higher order helpers
-
-@docs filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen
+@docs filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen, reverse
 
 
-# Zips
+# Zip
 
 @docs zip, zip3, unzip
 
 
-# Slicing / resizing
+# Slice / resize
 
-@docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt, removeAt, insertAt
+@docs sliceFrom, sliceUntil, resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt
+
+
+# Modify
+
+@docs removeAt, insertAt, pop, update
 
 -}
 
 import Array exposing (..)
-import Debug
-import Maybe
 
 
 {-| Update the element at the index using a function. Returns the array unchanged if the index is out of bounds.
@@ -98,43 +96,22 @@ pop arr =
 {-| Apply a function that may succeed to all values in the array, but only keep the successes.
 
     String.toInt : String -> Maybe Int
-    filterMap String.toInt (fromList ["3", "4.0", "5", "hats"]) == fromList [3,5]
+    filterMap String.toInt (fromList [ "3", "4.0", "5", "hats" ]) == fromList [ 3, 5 ]
 
 -}
 filterMap : (a -> Maybe b) -> Array a -> Array b
 filterMap f xs =
-    let
-        maybePush : (a -> Maybe b) -> a -> Array b -> Array b
-        maybePush f_ mx xs_ =
-            case f_ mx of
-                Just x ->
-                    push x xs_
-
-                Nothing ->
-                    xs_
-    in
-    foldl (maybePush f) empty xs
+    xs
+        |> Array.toList
+        |> List.filterMap f
+        |> Array.fromList
 
 
 {-| Apply an array of functions to an array of values.
 -}
 apply : Array (a -> b) -> Array a -> Array b
 apply fs xs =
-    let
-        l =
-            min (length fs) (length xs)
-
-        fs_ =
-            slice 0 l fs
-                |> Array.toList
-    in
-    fs_
-        |> List.indexedMap
-            (\n f ->
-                Maybe.map f (get n xs)
-            )
-        |> List.filterMap identity
-        |> Array.fromList
+    map2 (\f b -> f b) fs xs
 
 
 {-| Apply a function to the array, collecting the result in a List.
@@ -152,7 +129,8 @@ mapToList f =
 {-| Apply a function to the array with the index as the first argument,
 collecting the results in a List.
 
-    type alias Exercise = { name : String }
+    type alias Exercise =
+        { name : String }
 
     renderExercise : Int -> Exercise -> Html msg
     renderExercise index exercise =
@@ -179,16 +157,19 @@ indexedMapToList f xs =
 {-| Combine two arrays, combining them with the given function.
 If one array is longer, the extra elements are dropped.
 
-    map2 (+) [1,2,3] [1,2,3,4] == [2,4,6]
-    map2 (,) [1,2,3] ['a','b'] == [ (1,'a'), (2,'b') ]
-    pairs : Array a -> Array b -> Array (a,b)
+    map2 (+) [ 1, 2, 3 ] [ 1, 2, 3, 4 ] == [ 2, 4, 6 ]
+    map2 Tuple.pair [ 1, 2, 3 ] [ 'a', 'b' ] == [ ( 1, 'a' ), ( 2, 'b' ) ]
+
+    pairs : Array a -> Array b -> Array ( a, b )
     pairs lefts rights =
-        map2 (,) lefts rights
+        map2 Tuple.pair lefts rights
 
 -}
 map2 : (a -> b -> result) -> Array a -> Array b -> Array result
 map2 f ws =
-    apply (map f ws)
+    Array.toList
+        >> List.map2 f (ws |> Array.toList)
+        >> Array.fromList
 
 
 {-| -}
@@ -220,7 +201,7 @@ removeWhen pred xs =
     Array.filter (not << pred) xs
 
 
-{-| Zip arrays into tuples
+{-| Zip arrays into tuples.
 -}
 zip : Array a -> Array b -> Array ( a, b )
 zip =
@@ -235,16 +216,14 @@ zip3 =
 
 {-| Unzip array of tuples into a tuple containing two arrays
 
-    (unzip <| fromList [ (1, 'a'), (2, 'b'), (3, 'c') ]) == ([ 1, 2, 3 ], [ 'a', 'b', 'c' ])
+    (unzip <| fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]) == ( [ 1, 2, 3 ], [ 'a', 'b', 'c' ] )
+
 -}
-unzip : Array (a, b) -> (Array a, Array b)
+unzip : Array ( a, b ) -> ( Array a, Array b )
 unzip arrAB =
-    Array.foldl
-        (\(a, b) (arrA, arrB) ->
-          (Array.push a arrA, Array.push b arrB)
-        )
-        (Array.empty, Array.empty)
-        arrAB
+    ( arrAB |> Array.map Tuple.first
+    , arrAB |> Array.map Tuple.second
+    )
 
 
 {-| Resize an array from the left, padding the right-hand side with the given value.
@@ -323,6 +302,19 @@ resizerIndexed n f xs =
 
     else
         xs
+
+
+{-| Reverse an array.
+
+    reverse (fromList [ 1, 2, 3 ]) == fromList [ 3, 2, 1 ]
+
+-}
+reverse : Array a -> Array a
+reverse xs =
+    xs
+        |> Array.toList
+        |> List.reverse
+        |> Array.fromList
 
 
 {-| Split an array into two arrays, the first ending at and the second starting at the given index
