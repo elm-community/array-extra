@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "name": "array-extra",
+  "scripts": {
+    "test": "npx --no-install elm-test"
+  },
+  "devDependencies": {
+    "elm-test": "^0.19.1-revision7"
+  }
+}
