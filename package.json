@@ -2,9 +2,11 @@
   "private": true,
   "name": "array-extra",
   "scripts": {
-    "test": "npx --no-install elm-test"
+    "test": "npx --no-install elm-test",
+    "postinstall": "elm-tooling install"
   },
   "devDependencies": {
-    "elm-test": "^0.19.1-revision7"
+    "elm-test": "^0.19.1-revision7",
+    "elm-tooling": "^1.3.0"
   }
 }
