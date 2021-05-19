@@ -1,7 +1,6 @@
 module Array.Extra exposing
     ( removeWhen, filterMap, reverse, mapToList, indexedMapToList
-    , apply, map2, map3, map4, map5
-    , zip, zip3, unzip
+    , apply, map2, map3, map4, map5, zip, zip3, unzip
     , sliceFrom, sliceUntil, splitAt
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
     , removeAt, insertAt, pop, update
@@ -17,12 +16,7 @@ module Array.Extra exposing
 
 ## Combine
 
-@docs apply, map2, map3, map4, map5
-
-
-## Zip
-
-@docs zip, zip3, unzip
+@docs apply, map2, map3, map4, map5, zip, zip3, unzip
 
 
 # change size
@@ -69,7 +63,7 @@ update index alter array =
             Array.set index (alter element) array
 
 
-{-| Drop a number of first elements from an array.
+{-| Drop a number of elements from the start of an array.
 In other words, slice an array from an index until the very end.
 Given negative argument, count the end of the slice from the end of the array.
 
@@ -85,7 +79,7 @@ sliceFrom lengthDropped array =
     slice lengthDropped (length array) array
 
 
-{-| Take a number of first elements from an array.
+{-| Take a number of elements from the start of an array.
 In other words, slice an array from the very beginning until index not including.
 Given negative argument, count the beginning of the slice from the end of the array.
 
