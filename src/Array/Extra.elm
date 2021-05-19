@@ -194,8 +194,8 @@ indexedMapToList mapIndexAndValue array =
         |> Tuple.second
 
 
-{-| Combine two arrays, combining them with the given function.
-If one array is longer, the extra elements are dropped.
+{-| Combine the elements of two arrays with the given function.
+If one array is longer, its extra elements are not used.
 
     map2 (+) [ 1, 2, 3 ] [ 1, 2, 3, 4 ]
         == [ 2, 4, 6 ]
@@ -203,12 +203,14 @@ If one array is longer, the extra elements are dropped.
     map2 Tuple.pair [ 1, 2, 3 ] [ 'a', 'b' ]
         == [ ( 1, 'a' ), ( 2, 'b' ) ]
 
-    pairs : Array a -> Array b -> Array ( a, b )
-    pairs lefts rights =
-        map2 Tuple.pair lefts rights
+Note: [`zip`](Array-Extra#zip) can also be used instead of `map2 Tuple.pair`.
 
 -}
-map2 : (a -> b -> result) -> Array a -> Array b -> Array result
+map2 :
+    (a -> b -> result)
+    -> Array a
+    -> Array b
+    -> Array result
 map2 combineAb aArray bArray =
     List.map2 combineAb
         (aArray |> Array.toList)
@@ -216,7 +218,8 @@ map2 combineAb aArray bArray =
         |> Array.fromList
 
 
-{-| -}
+{-| Combine the elements of three arrays with the given function. See [`map2`](Array-Extra#map2).
+-}
 map3 :
     (a -> b -> c -> result)
     -> Array a
@@ -227,7 +230,8 @@ map3 combineAbc aArray bArray cArray =
     apply (map2 combineAbc aArray bArray) cArray
 
 
-{-| -}
+{-| Combine the elements of four arrays with the given function. See [`map2`](Array-Extra#map2).
+-}
 map4 :
     (a -> b -> c -> d -> result)
     -> Array a
@@ -239,7 +243,8 @@ map4 combineAbcd aArray bArray cArray dArray =
     apply (map3 combineAbcd aArray bArray cArray) dArray
 
 
-{-| -}
+{-| Combine the elements of five arrays with the given function. See [`map2`](Array-Extra#map2).
+-}
 map5 :
     (a -> b -> c -> d -> e -> result)
     -> Array a
@@ -250,6 +255,54 @@ map5 :
     -> Array result
 map5 combineAbcde aArray bArray cArray dArray eArray =
     apply (map4 combineAbcde aArray bArray cArray dArray) eArray
+
+
+{-| Zip the elements of two arrays into tuples.
+
+    zip
+        (fromList [ 1, 2, 3 ])
+        (fromList [ 'a', 'b' ])
+        == fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
+
+-}
+zip : Array a -> Array b -> Array ( a, b )
+zip =
+    map2 Tuple.pair
+
+
+{-| Zip the elements of three arrays into 3-tuples.
+
+    zip3
+        (fromList [ 1, 2, 3 ])
+        (fromList [ 'a', 'b' ])
+        (fromList [ "a", "b", "c", "d" ])
+        == fromList
+            [ ( 1, 'a', "a" )
+            , ( 2, 'b', "b" )
+            ]
+
+-}
+zip3 : Array a -> Array b -> Array c -> Array ( a, b, c )
+zip3 =
+    map3 (\a b c -> ( a, b, c ))
+
+
+{-| Unzip an array of tuples into a tuple containing two arrays for the values first & the second in the tuples.
+
+    unzip
+        (fromList
+            [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]
+        )
+        == ( fromList [ 1, 2, 3 ]
+           , fromList [ 'a', 'b', 'c' ]
+           )
+
+-}
+unzip : Array ( a, b ) -> ( Array a, Array b )
+unzip tupleArray =
+    ( tupleArray |> Array.map Tuple.first
+    , tupleArray |> Array.map Tuple.second
+    )
 
 
 {-| Return an array that only contains elements which fail to satisfy the predicate.
@@ -263,43 +316,6 @@ This is equivalent to `Array.filter (not << predicate)`.
 removeWhen : (a -> Bool) -> Array a -> Array a
 removeWhen isBad array =
     Array.filter (not << isBad) array
-
-
-{-| Zip the elements of two arrays into tuples.
-
-    zip [ 1, 2, 3 ] [ 'a', 'b' ]
-        == [ ( 1, 'a' ), ( 2, 'b' ) ]
-
--}
-zip : Array a -> Array b -> Array ( a, b )
-zip =
-    map2 Tuple.pair
-
-
-{-| Zip the elements of three arrays into 3-tuples.
-
-    zip3 [ 1, 2, 3 ] [ 'a', 'b' ] [ "a", "b", "c", "d" ]
-        == [ ( 1, 'a', "a" ), ( 2, 'b', "b" ) ]
-
--}
-zip3 : Array a -> Array b -> Array c -> Array ( a, b, c )
-zip3 =
-    map3 (\a b c -> ( a, b, c ))
-
-
-{-| Unzip an array of tuples into a tuple containing two arrays for the values first & the second in the tuples.
-
-    unzip (fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ])
-        == ( fromList [ 1, 2, 3 ]
-           , fromList [ 'a', 'b', 'c' ]
-           )
-
--}
-unzip : Array ( a, b ) -> ( Array a, Array b )
-unzip tupleArray =
-    ( tupleArray |> Array.map Tuple.first
-    , tupleArray |> Array.map Tuple.second
-    )
 
 
 {-| Resize an array from the left, padding the right-hand side with the given value.
