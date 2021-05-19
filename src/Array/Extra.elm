@@ -44,10 +44,10 @@ module Array.Extra exposing
 
 -}
 
-import Array exposing (..)
+import Array exposing (Array, append, empty, initialize, length, repeat, slice)
 
 
-{-| Update the element at the index using a function. Returns the array unchanged if the index is out of bounds.
+{-| Update the element at the index based on its current value. If the index is out of bounds, nothing gets changed.
 
     update 1 ((+) 10) (fromList [ 1, 2, 3 ])
         == fromList [ 1, 12, 3 ]
@@ -60,20 +60,16 @@ import Array exposing (..)
 
 -}
 update : Int -> (a -> a) -> Array a -> Array a
-update n f a =
-    let
-        element =
-            Array.get n a
-    in
-    case element of
+update index alter array =
+    case Array.get index array of
         Nothing ->
-            a
+            array
 
-        Just element_ ->
-            Array.set n (f element_) a
+        Just element ->
+            Array.set index (alter element) array
 
 
-{-| Drop _n_ first elements from an array.
+{-| Drop a number of first elements from an array.
 In other words, slice an array from an index until the very end.
 Given negative argument, count the end of the slice from the end of the array.
 
@@ -85,11 +81,11 @@ Given negative argument, count the end of the slice from the end of the array.
 
 -}
 sliceFrom : Int -> Array a -> Array a
-sliceFrom n array =
-    slice n (length array) array
+sliceFrom lengthDropped array =
+    slice lengthDropped (length array) array
 
 
-{-| Take _n_ first elements from an array.
+{-| Take a number of first elements from an array.
 In other words, slice an array from the very beginning until index not including.
 Given negative argument, count the beginning of the slice from the end of the array.
 
@@ -114,7 +110,8 @@ sliceUntil newLength array =
 
 {-| Remove the last element from an array.
 
-    pop (fromList [ 1, 2, 3 ]) == fromList [ 1, 2 ]
+    pop (fromList [ 1, 2, 3 ])
+        == fromList [ 1, 2 ]
 
     pop empty == empty
 
@@ -264,7 +261,8 @@ map5 combineAbcde aArray bArray cArray dArray eArray =
 {-| Return an array that only contains elements which fail to satisfy the predicate.
 This is equivalent to `Array.filter (not << predicate)`.
 
-    removeWhen isEven (fromList [ 1, 2, 3, 4 ])
+    removeWhen isEven
+        (fromList [ 1, 2, 3, 4 ])
         == fromList [ 1, 3 ]
 
 -}
@@ -287,7 +285,7 @@ zip =
 {-| Zip the elements of three arrays into 3-tuples.
 
     zip3 [ 1, 2, 3 ] [ 'a', 'b' ] [ "a", "b", "c", "d" ]
-        == [ ( 1, 'a', "b" ), ( 2, 'b', "b" ) ]
+        == [ ( 1, 'a', "a" ), ( 2, 'b', "b" ) ]
 
 -}
 zip3 : Array a -> Array b -> Array c -> Array ( a, b, c )
@@ -323,7 +321,7 @@ unzip tupleArray =
 
 -}
 resizelRepeat : Int -> a -> Array a -> Array a
-resizelRepeat newLength defaultValue array =
+resizelRepeat newLength paddingValue array =
     if newLength <= 0 then
         Array.empty
 
@@ -337,7 +335,7 @@ resizelRepeat newLength defaultValue array =
                 sliceUntil newLength array
 
             LT ->
-                append array (repeat (newLength - len) defaultValue)
+                append array (repeat (newLength - len) paddingValue)
 
             EQ ->
                 array
@@ -463,14 +461,14 @@ resizerIndexed newLength defaultValueAtIndex array =
 
 -}
 reverse : Array a -> Array a
-reverse xs =
-    xs
+reverse array =
+    array
         |> Array.toList
         |> List.reverse
         |> Array.fromList
 
 
-{-| Split an array into two arrays, the first ending at and the second starting at the given index.
+{-| Split an array into two arrays, the first ending before and the second starting at the given index.
 
     splitAt 2 (fromList [ 1, 2, 3, 4 ])
         == ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
@@ -493,7 +491,7 @@ splitAt index array =
         ( empty, array )
 
 
-{-| Remove the element at the given index.
+{-| Remove the element at the given index. If the index is out of bounds, nothing gets changed.
 
     removeAt 2 (fromList [ 1, 2, 3, 4 ])
         == fromList [ 1, 2, 4 ]
@@ -526,7 +524,7 @@ removeAt index array =
         array
 
 
-{-| Insert an element at the given index.
+{-| Insert an element at the given index. If the index is out of bounds, nothing gets changed.
 
     insertAt 1 'b' (fromList [ 'a', 'c' ])
         == fromList [ 'a', 'b', 'c' ]
