@@ -131,7 +131,7 @@ filterMap tryMap array =
         |> Array.fromList
 
 
-{-| Apply an array of functions to an array of values.
+{-| Apply an array of functions to an array of values. If one array is longer, its extra elements are not used.
 
     apply
         (fromList
