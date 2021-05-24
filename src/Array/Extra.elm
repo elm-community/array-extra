@@ -197,13 +197,17 @@ indexedMapToList mapIndexAndValue array =
 {-| Combine the elements of two arrays with the given function.
 If one array is longer, its extra elements are not used.
 
-    map2 (+) [ 1, 2, 3 ] [ 1, 2, 3, 4 ]
-        == [ 2, 4, 6 ]
+    map2 (+)
+        (fromList [ 1, 2, 3 ])
+        (fromList [ 1, 2, 3, 4 ])
+        == fromList [ 2, 4, 6 ]
 
-    map2 Tuple.pair [ 1, 2, 3 ] [ 'a', 'b' ]
-        == [ ( 1, 'a' ), ( 2, 'b' ) ]
+    map2 Tuple.pair
+        (fromList [ 1, 2, 3 ])
+        (fromList [ 'a', 'b' ])
+        == fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
 
-Note: [`zip`](Array-Extra#zip) can also be used instead of `map2 Tuple.pair`.
+Note: [`zip`](Array-Extra#zip) can be used instead of `map2 Tuple.pair`.
 
 -}
 map2 :
