@@ -294,7 +294,7 @@ zip3 =
     map3 (\a b c -> ( a, b, c ))
 
 
-{-| Unzip an array of tuples into a tuple containing two arrays for the values first & the second in the tuples.
+{-| Unzip an array of tuples into a tuple containing one array with the first and one with the second values.
 
     unzip
         (fromList
