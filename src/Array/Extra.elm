@@ -44,7 +44,7 @@ module Array.Extra exposing
 import Array exposing (Array, append, empty, initialize, length, repeat, slice)
 
 
-{-| Update the element at the index based on its current value. If the index is out of bounds, nothing gets changed.
+{-| Update the element at the index based on its current value. If the index is out of bounds, nothing is changed.
 
     update 1 ((+) 10) (fromList [ 1, 2, 3 ])
         == fromList [ 1, 12, 3 ]
@@ -508,7 +508,7 @@ splitAt index array =
         ( empty, array )
 
 
-{-| Remove the element at the given index. If the index is out of bounds, nothing gets changed.
+{-| Remove the element at the given index. If the index is out of bounds, nothing is changed.
 
     removeAt 2 (fromList [ 1, 2, 3, 4 ])
         == fromList [ 1, 2, 4 ]
@@ -541,7 +541,7 @@ removeAt index array =
         array
 
 
-{-| Insert an element at the given index. If the index is out of bounds, nothing gets changed.
+{-| Insert an element at the given index. If the index is out of bounds, nothing is changed.
 
     insertAt 1 'b' (fromList [ 'a', 'c' ])
         == fromList [ 'a', 'b', 'c' ]
