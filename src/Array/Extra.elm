@@ -138,13 +138,10 @@ filterMap tryMap array =
 
     apply
         (fromList
-            [ \x -> -x
-            , identity
-            , always 0
-            ]
+            [ \x -> -x, identity, (+) 10 ]
         )
         (repeat 5 100)
-        == fromList [ -100, 100, 0 ]
+        == fromList [ -100, 100, 110 ]
 
 -}
 apply : Array (a -> b) -> Array a -> Array b
@@ -152,20 +149,19 @@ apply maps array =
     map2 (\f b -> f b) maps array
 
 
-{-| Apply a function to the array, collecting the result in a List.
-This is useful for building HTML out of an array:
+{-| Apply a function to the elements in the array and collect the result in a List.
 
     Html.text : String -> Html msg
     mapToList Html.text : Array String -> List (Html msg)
 
 -}
 mapToList : (a -> b) -> Array a -> List b
-mapToList alter =
-    Array.foldr (alter >> (::)) []
+mapToList mapElement =
+    Array.foldr (mapElement >> (::)) []
 
 
-{-| Apply a function to the array with the index as the first argument,
-collecting the results in a List.
+{-| Apply a function to the elements in the array with their indices as the first argument
+and collect the result in a List.
 
     type alias Exercise =
         { name : String }
@@ -187,10 +183,10 @@ collecting the results in a List.
 
 -}
 indexedMapToList : (Int -> a -> b) -> Array a -> List b
-indexedMapToList mapIndexAndValue array =
+indexedMapToList mapIndexAndElement array =
     Array.foldr
         (\x ( i, ys ) ->
-            ( i - 1, mapIndexAndValue i x :: ys )
+            ( i - 1, mapIndexAndElement i x :: ys )
         )
         ( Array.length array - 1, [] )
         array
@@ -226,6 +222,9 @@ map2 combineAb aArray bArray =
 
 
 {-| Combine the elements of three arrays with the given function. See [`map2`](Array-Extra#map2).
+
+Note: [`zip3`](Array-Extra#zip3) can be used instead of `map3 (\a b c -> ( a, b, c ))`.
+
 -}
 map3 :
     (a -> b -> c -> result)
@@ -264,7 +263,7 @@ map5 combineAbcde aArray bArray cArray dArray eArray =
     apply (map4 combineAbcde aArray bArray cArray dArray) eArray
 
 
-{-| Zip the elements of two arrays into tuples.
+{-| Zip the elements of two arrays into tuples. If one array is longer, its extra elements are not used.
 
     zip
         (fromList [ 1, 2, 3 ])
@@ -277,7 +276,7 @@ zip =
     map2 Tuple.pair
 
 
-{-| Zip the elements of three arrays into 3-tuples.
+{-| Zip the elements of three arrays into 3-tuples. Only the indices of the shortest array are used.
 
     zip3
         (fromList [ 1, 2, 3 ])
