@@ -479,9 +479,13 @@ resizerIndexed newLength defaultValueAtIndex array =
 reverse : Array a -> Array a
 reverse array =
     array
-        |> Array.toList
-        |> List.reverse
+        |> reverseToList
         |> Array.fromList
+
+
+reverseToList : Array a -> List a
+reverseToList =
+    Array.foldl (::) []
 
 
 {-| Split an array into two arrays, the first ending before and the second starting at the given index.
