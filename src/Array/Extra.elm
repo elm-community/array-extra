@@ -146,7 +146,7 @@ filterMap tryMap array =
 -}
 apply : Array (a -> b) -> Array a -> Array b
 apply maps array =
-    map2 (\f b -> f b) maps array
+    map2 (\map element -> map element) maps array
 
 
 {-| Apply a function to the elements in the array and collect the result in a List.
@@ -185,8 +185,8 @@ and collect the result in a List.
 indexedMapToList : (Int -> a -> b) -> Array a -> List b
 indexedMapToList mapIndexAndElement array =
     Array.foldr
-        (\x ( i, ys ) ->
-            ( i - 1, mapIndexAndElement i x :: ys )
+        (\element ( i, listSoFar ) ->
+            ( i - 1, mapIndexAndElement i element :: listSoFar )
         )
         ( Array.length array - 1, [] )
         array
