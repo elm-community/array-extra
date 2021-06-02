@@ -1,8 +1,10 @@
 module Array.Extra exposing
-    ( filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen, reverse
-    , zip, zip3, unzip
-    , sliceFrom, sliceUntil, resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt
-    , removeAt, insertAt, pop, update
+    ( removeWhen, filterMap, reverse, mapToList, indexedMapToList
+    , apply, map2, map3, map4, map5, zip, zip3, unzip
+    , pop
+    , sliceFrom, sliceUntil, splitAt
+    , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
+    , removeAt, insertAt, update
     )
 
 {-| Convenience functions for working with Array
@@ -10,29 +12,39 @@ module Array.Extra exposing
 
 # Transform
 
-@docs filterMap, apply, mapToList, indexedMapToList, map2, map3, map4, map5, removeWhen, reverse
+@docs removeWhen, filterMap, reverse, mapToList, indexedMapToList
 
 
-# Zip
+## Combine
 
-@docs zip, zip3, unzip
+@docs apply, map2, map3, map4, map5, zip, zip3, unzip
 
 
-# Slice / resize
+# Slice & Resize
 
-@docs sliceFrom, sliceUntil, resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed, splitAt
+@docs pop
+
+
+## Slice
+
+@docs sliceFrom, sliceUntil, splitAt
+
+
+## Resize
+
+@docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
 
 
 # Modify
 
-@docs removeAt, insertAt, pop, update
+@docs removeAt, insertAt, update
 
 -}
 
-import Array exposing (..)
+import Array exposing (Array, append, empty, initialize, length, repeat, slice)
 
 
-{-| Update the element at the index using a function. Returns the array unchanged if the index is out of bounds.
+{-| Update the element at the index based on its current value. If the index is out of bounds, nothing is changed.
 
     update 1 ((+) 10) (fromList [ 1, 2, 3 ])
         == fromList [ 1, 12, 3 ]
@@ -45,20 +57,16 @@ import Array exposing (..)
 
 -}
 update : Int -> (a -> a) -> Array a -> Array a
-update n f a =
-    let
-        element =
-            Array.get n a
-    in
-    case element of
+update index alter array =
+    case Array.get index array of
         Nothing ->
-            a
+            array
 
-        Just element_ ->
-            Array.set n (f element_) a
+        Just element ->
+            Array.set index (alter element) array
 
 
-{-| Drop _n_ first elements from an array.
+{-| Drop a number of elements from the start of an array.
 In other words, slice an array from an index until the very end.
 Given negative argument, count the end of the slice from the end of the array.
 
@@ -70,11 +78,11 @@ Given negative argument, count the end of the slice from the end of the array.
 
 -}
 sliceFrom : Int -> Array a -> Array a
-sliceFrom n array =
-    slice n (length array) array
+sliceFrom lengthDropped array =
+    slice lengthDropped (length array) array
 
 
-{-| Take _n_ first elements from an array.
+{-| Take a number of elements from the start of an array.
 In other words, slice an array from the very beginning until index not including.
 Given negative argument, count the beginning of the slice from the end of the array.
 
@@ -99,7 +107,8 @@ sliceUntil newLength array =
 
 {-| Remove the last element from an array.
 
-    pop (fromList [ 1, 2, 3 ]) == fromList [ 1, 2 ]
+    pop (fromList [ 1, 2, 3 ])
+        == fromList [ 1, 2 ]
 
     pop empty == empty
 
@@ -125,38 +134,34 @@ filterMap tryMap array =
         |> Array.fromList
 
 
-{-| Apply an array of functions to an array of values.
+{-| Apply an array of functions to an array of values. If one array is longer, its extra elements are not used.
 
     apply
         (fromList
-            [ \x -> -x
-            , identity
-            , always 0
-            ]
+            [ \x -> -x, identity, (+) 10 ]
         )
         (repeat 5 100)
-        == fromList [ -100, 100, 0 ]
+        == fromList [ -100, 100, 110 ]
 
 -}
 apply : Array (a -> b) -> Array a -> Array b
 apply maps array =
-    map2 (\f b -> f b) maps array
+    map2 (\map element -> map element) maps array
 
 
-{-| Apply a function to the array, collecting the result in a List.
-This is useful for building HTML out of an array:
+{-| Apply a function to the elements in the array and collect the result in a List.
 
     Html.text : String -> Html msg
     mapToList Html.text : Array String -> List (Html msg)
 
 -}
 mapToList : (a -> b) -> Array a -> List b
-mapToList alter =
-    Array.foldr (alter >> (::)) []
+mapToList mapElement =
+    Array.foldr (mapElement >> (::)) []
 
 
-{-| Apply a function to the array with the index as the first argument,
-collecting the results in a List.
+{-| Apply a function to the elements in the array with their indices as the first argument
+and collect the result in a List.
 
     type alias Exercise =
         { name : String }
@@ -178,31 +183,37 @@ collecting the results in a List.
 
 -}
 indexedMapToList : (Int -> a -> b) -> Array a -> List b
-indexedMapToList mapIndexAndValue array =
+indexedMapToList mapIndexAndElement array =
     Array.foldr
-        (\x ( i, ys ) ->
-            ( i - 1, mapIndexAndValue i x :: ys )
+        (\element ( i, listSoFar ) ->
+            ( i - 1, mapIndexAndElement i element :: listSoFar )
         )
         ( Array.length array - 1, [] )
         array
         |> Tuple.second
 
 
-{-| Combine two arrays, combining them with the given function.
-If one array is longer, the extra elements are dropped.
+{-| Combine the elements of two arrays with the given function.
+If one array is longer, its extra elements are not used.
 
-    map2 (+) [ 1, 2, 3 ] [ 1, 2, 3, 4 ]
-        == [ 2, 4, 6 ]
+    map2 (+)
+        (fromList [ 1, 2, 3 ])
+        (fromList [ 1, 2, 3, 4 ])
+        == fromList [ 2, 4, 6 ]
 
-    map2 Tuple.pair [ 1, 2, 3 ] [ 'a', 'b' ]
-        == [ ( 1, 'a' ), ( 2, 'b' ) ]
+    map2 Tuple.pair
+        (fromList [ 1, 2, 3 ])
+        (fromList [ 'a', 'b' ])
+        == fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
 
-    pairs : Array a -> Array b -> Array ( a, b )
-    pairs lefts rights =
-        map2 Tuple.pair lefts rights
+Note: [`zip`](Array-Extra#zip) can be used instead of `map2 Tuple.pair`.
 
 -}
-map2 : (a -> b -> result) -> Array a -> Array b -> Array result
+map2 :
+    (a -> b -> result)
+    -> Array a
+    -> Array b
+    -> Array result
 map2 combineAb aArray bArray =
     List.map2 combineAb
         (aArray |> Array.toList)
@@ -210,7 +221,11 @@ map2 combineAb aArray bArray =
         |> Array.fromList
 
 
-{-| -}
+{-| Combine the elements of three arrays with the given function. See [`map2`](Array-Extra#map2).
+
+Note: [`zip3`](Array-Extra#zip3) can be used instead of `map3 (\a b c -> ( a, b, c ))`.
+
+-}
 map3 :
     (a -> b -> c -> result)
     -> Array a
@@ -221,7 +236,8 @@ map3 combineAbc aArray bArray cArray =
     apply (map2 combineAbc aArray bArray) cArray
 
 
-{-| -}
+{-| Combine the elements of four arrays with the given function. See [`map2`](Array-Extra#map2).
+-}
 map4 :
     (a -> b -> c -> d -> result)
     -> Array a
@@ -233,7 +249,8 @@ map4 combineAbcd aArray bArray cArray dArray =
     apply (map3 combineAbcd aArray bArray cArray) dArray
 
 
-{-| -}
+{-| Combine the elements of five arrays with the given function. See [`map2`](Array-Extra#map2).
+-}
 map5 :
     (a -> b -> c -> d -> e -> result)
     -> Array a
@@ -246,22 +263,12 @@ map5 combineAbcde aArray bArray cArray dArray eArray =
     apply (map4 combineAbcde aArray bArray cArray dArray) eArray
 
 
-{-| Return an array that only contains elements which fail to satisfy the predicate.
-This is equivalent to `Array.filter (not << predicate)`.
+{-| Zip the elements of two arrays into tuples. If one array is longer, its extra elements are not used.
 
-    removeWhen isEven (fromList [ 1, 2, 3, 4 ])
-        == fromList [ 1, 3 ]
-
--}
-removeWhen : (a -> Bool) -> Array a -> Array a
-removeWhen isBad array =
-    Array.filter (not << isBad) array
-
-
-{-| Zip the elements of two arrays into tuples.
-
-    zip [ 1, 2, 3 ] [ 'a', 'b' ]
-        == [ ( 1, 'a' ), ( 2, 'b' ) ]
+    zip
+        (fromList [ 1, 2, 3 ])
+        (fromList [ 'a', 'b' ])
+        == fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
 
 -}
 zip : Array a -> Array b -> Array ( a, b )
@@ -269,10 +276,16 @@ zip =
     map2 Tuple.pair
 
 
-{-| Zip the elements of three arrays into 3-tuples.
+{-| Zip the elements of three arrays into 3-tuples. Only the indices of the shortest array are used.
 
-    zip3 [ 1, 2, 3 ] [ 'a', 'b' ] [ "a", "b", "c", "d" ]
-        == [ ( 1, 'a', "b" ), ( 2, 'b', "b" ) ]
+    zip3
+        (fromList [ 1, 2, 3 ])
+        (fromList [ 'a', 'b' ])
+        (fromList [ "a", "b", "c", "d" ])
+        == fromList
+            [ ( 1, 'a', "a" )
+            , ( 2, 'b', "b" )
+            ]
 
 -}
 zip3 : Array a -> Array b -> Array c -> Array ( a, b, c )
@@ -280,9 +293,12 @@ zip3 =
     map3 (\a b c -> ( a, b, c ))
 
 
-{-| Unzip an array of tuples into a tuple containing two arrays for the values first & the second in the tuples.
+{-| Unzip an array of tuples into a tuple containing one array with the first and one with the second values.
 
-    unzip (fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ])
+    unzip
+        (fromList
+            [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]
+        )
         == ( fromList [ 1, 2, 3 ]
            , fromList [ 'a', 'b', 'c' ]
            )
@@ -293,6 +309,19 @@ unzip tupleArray =
     ( tupleArray |> Array.map Tuple.first
     , tupleArray |> Array.map Tuple.second
     )
+
+
+{-| Return an array that only contains elements which fail to satisfy the predicate.
+This is equivalent to `Array.filter (not << predicate)`.
+
+    removeWhen isEven
+        (fromList [ 1, 2, 3, 4 ])
+        == fromList [ 1, 3 ]
+
+-}
+removeWhen : (a -> Bool) -> Array a -> Array a
+removeWhen isBad array =
+    Array.filter (not << isBad) array
 
 
 {-| Resize an array from the left, padding the right-hand side with the given value.
@@ -308,7 +337,7 @@ unzip tupleArray =
 
 -}
 resizelRepeat : Int -> a -> Array a -> Array a
-resizelRepeat newLength defaultValue array =
+resizelRepeat newLength paddingValue array =
     if newLength <= 0 then
         Array.empty
 
@@ -322,7 +351,7 @@ resizelRepeat newLength defaultValue array =
                 sliceUntil newLength array
 
             LT ->
-                append array (repeat (newLength - len) defaultValue)
+                append array (repeat (newLength - len) paddingValue)
 
             EQ ->
                 array
@@ -448,14 +477,18 @@ resizerIndexed newLength defaultValueAtIndex array =
 
 -}
 reverse : Array a -> Array a
-reverse xs =
-    xs
-        |> Array.toList
-        |> List.reverse
+reverse array =
+    array
+        |> reverseToList
         |> Array.fromList
 
 
-{-| Split an array into two arrays, the first ending at and the second starting at the given index.
+reverseToList : Array a -> List a
+reverseToList =
+    Array.foldl (::) []
+
+
+{-| Split an array into two arrays, the first ending before and the second starting at the given index.
 
     splitAt 2 (fromList [ 1, 2, 3, 4 ])
         == ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
@@ -478,7 +511,7 @@ splitAt index array =
         ( empty, array )
 
 
-{-| Remove the element at the given index.
+{-| Remove the element at the given index. If the index is out of bounds, nothing is changed.
 
     removeAt 2 (fromList [ 1, 2, 3, 4 ])
         == fromList [ 1, 2, 4 ]
@@ -511,7 +544,7 @@ removeAt index array =
         array
 
 
-{-| Insert an element at the given index.
+{-| Insert an element at the given index. If the index is out of bounds, nothing is changed.
 
     insertAt 1 'b' (fromList [ 'a', 'c' ])
         == fromList [ 'a', 'b', 'c' ]
