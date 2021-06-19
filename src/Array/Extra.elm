@@ -210,10 +210,10 @@ Note: [`zip`](Array-Extra#zip) can be used instead of `map2 Tuple.pair`.
 
 -}
 map2 :
-    (a -> b -> result)
+    (a -> b -> combined)
     -> Array a
     -> Array b
-    -> Array result
+    -> Array combined
 map2 combineAb aArray bArray =
     List.map2 combineAb
         (aArray |> Array.toList)
@@ -227,11 +227,11 @@ Note: [`zip3`](Array-Extra#zip3) can be used instead of `map3 (\a b c -> ( a, b,
 
 -}
 map3 :
-    (a -> b -> c -> result)
+    (a -> b -> c -> combined)
     -> Array a
     -> Array b
     -> Array c
-    -> Array result
+    -> Array combined
 map3 combineAbc aArray bArray cArray =
     apply (map2 combineAbc aArray bArray) cArray
 
@@ -239,12 +239,12 @@ map3 combineAbc aArray bArray cArray =
 {-| Combine the elements of four arrays with the given function. See [`map2`](Array-Extra#map2).
 -}
 map4 :
-    (a -> b -> c -> d -> result)
+    (a -> b -> c -> d -> combined)
     -> Array a
     -> Array b
     -> Array c
     -> Array d
-    -> Array result
+    -> Array combined
 map4 combineAbcd aArray bArray cArray dArray =
     apply (map3 combineAbcd aArray bArray cArray) dArray
 
@@ -252,13 +252,13 @@ map4 combineAbcd aArray bArray cArray dArray =
 {-| Combine the elements of five arrays with the given function. See [`map2`](Array-Extra#map2).
 -}
 map5 :
-    (a -> b -> c -> d -> e -> result)
+    (a -> b -> c -> d -> e -> combined)
     -> Array a
     -> Array b
     -> Array c
     -> Array d
     -> Array e
-    -> Array result
+    -> Array combined
 map5 combineAbcde aArray bArray cArray dArray eArray =
     apply (map4 combineAbcde aArray bArray cArray dArray) eArray
 
