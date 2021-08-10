@@ -596,8 +596,10 @@ insertAt index val values =
 
 -}
 all : (a -> Bool) -> Array a -> Bool
-all isOkay =
-    Array.toList >> List.all isOkay
+all isOkay array =
+    array
+        |> Array.toList
+        |> List.all isOkay
 
 
 {-| Whether any elements satisfy a test.
@@ -613,5 +615,7 @@ all isOkay =
 
 -}
 any : (a -> Bool) -> Array a -> Bool
-any isOkay =
-    Array.toList >> List.any isOkay
+any isOkay array =
+    array
+        |> Array.toList
+        |> List.any isOkay
