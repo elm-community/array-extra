@@ -585,13 +585,13 @@ insertAt index val values =
 
 {-| Whether all elements satisfy a test.
 
-    Arr.all isEven (fromList [ 2, 4 ])
+    all isEven (fromList [ 2, 4 ])
         == True
 
-    Arr.all isEven (fromList [ 2, 3 ])
+    all isEven (fromList [ 2, 3 ])
         == False
 
-    Arr.all isEven empty
+    all isEven empty
         == True
 
 -}
@@ -604,13 +604,13 @@ all isOkay array =
 
 {-| Whether any elements satisfy a test.
 
-    Arr.any isEven (fromList [ 1, 3 ])
+    any isEven (fromList [ 1, 3 ])
     --> True
 
-    Arr.any isEven (fromList [ 1, 2 ])
+    any isEven (fromList [ 1, 2 ])
     --> False
 
-    Arr.any isEven empty
+    any isEven empty
     --> False
 
 -}
