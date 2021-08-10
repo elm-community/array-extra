@@ -335,29 +335,56 @@ suite =
                         |> Expect.equal num1234
                 )
             ]
-        , describe "insertAt"
-            (let
-                ac =
-                    fromList [ 'a', 'c' ]
-             in
-             [ test "valid index"
+        , let
+            ac =
+                fromList [ 'a', 'c' ]
+          in
+          describe "insertAt"
+            [ test "valid index"
                 (\() ->
                     insertAt 1 'b' ac
                         |> Expect.equal
                             (fromList [ 'a', 'b', 'c' ])
                 )
-             , test "negative index"
+            , test "negative index"
                 (\() ->
                     insertAt -1 'b' ac
                         |> Expect.equal ac
                 )
-             , test "too high index"
+            , test "too high index"
                 (\() ->
                     insertAt 100 'b' ac
                         |> Expect.equal ac
                 )
-             ]
-            )
+            ]
+        , describe "all"
+            [ test "True"
+                (\() ->
+                    all isEven
+                        ([ 2, 4 ] |> Array.fromList)
+                        |> Expect.equal True
+                )
+            , test "False"
+                (\() ->
+                    all isEven
+                        ([ 2, 3 ] |> Array.fromList)
+                        |> Expect.equal False
+                )
+            ]
+        , describe "any"
+            [ test "True"
+                (\() ->
+                    any isEven
+                        ([ 1, 2 ] |> Array.fromList)
+                        |> Expect.equal True
+                )
+            , test "False"
+                (\() ->
+                    any isEven
+                        ([ 1, 3 ] |> Array.fromList)
+                        |> Expect.equal False
+                )
+            ]
         ]
 
 

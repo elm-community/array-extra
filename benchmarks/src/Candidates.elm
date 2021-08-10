@@ -1,6 +1,7 @@
 module Candidates exposing (..)
 
 import Array exposing (Array)
+import Array.Extra as Array
 
 
 reverseWithFoldlToList : Array a -> Array a
@@ -127,3 +128,26 @@ filterMapWithListFilterMap tryMap =
     Array.toList
         >> List.filterMap tryMap
         >> Array.fromList
+
+
+allWithLastAndPop : (a -> Bool) -> Array a -> Bool
+allWithLastAndPop isOkay array =
+    case
+        Array.get (Array.length array - 1) array
+            |> Maybe.map isOkay
+    of
+        Nothing ->
+            True
+
+        Just False ->
+            False
+
+        Just True ->
+            Array.pop array
+                |> allWithLastAndPop isOkay
+
+
+allWithListAll : (a -> Bool) -> Array a -> Bool
+allWithListAll isOkay =
+    Array.toList
+        >> List.all isOkay

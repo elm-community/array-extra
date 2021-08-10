@@ -5,6 +5,7 @@ module Array.Extra exposing
     , sliceFrom, sliceUntil, splitAt
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
     , removeAt, insertAt, update
+    , all, any
     )
 
 {-| Convenience functions for working with Array
@@ -38,6 +39,11 @@ module Array.Extra exposing
 # Modify
 
 @docs removeAt, insertAt, update
+
+
+# Scan
+
+@docs all, any
 
 -}
 
@@ -110,7 +116,8 @@ sliceUntil newLength array =
     pop (fromList [ 1, 2, 3 ])
         == fromList [ 1, 2 ]
 
-    pop empty == empty
+    pop empty
+        == empty
 
 -}
 pop : Array a -> Array a
@@ -574,3 +581,37 @@ insertAt index val values =
 
     else
         values
+
+
+{-| Whether all elements satisfy a test.
+
+    Arr.all isEven (fromList [ 2, 4 ])
+        == True
+
+    Arr.all isEven (fromList [ 2, 3 ])
+        == False
+
+    Arr.all isEven empty
+        == True
+
+-}
+all : (a -> Bool) -> Array a -> Bool
+all isOkay =
+    Array.toList >> List.all isOkay
+
+
+{-| Whether any elements satisfy a test.
+
+    Arr.any isEven (fromList [ 1, 3 ])
+    --> True
+
+    Arr.any isEven (fromList [ 1, 2 ])
+    --> False
+
+    Arr.any isEven empty
+    --> False
+
+-}
+any : (a -> Bool) -> Array a -> Bool
+any isOkay =
+    Array.toList >> List.any isOkay

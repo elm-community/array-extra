@@ -15,14 +15,18 @@ main =
 suite : Benchmark
 suite =
     describe "array extra"
-        [ compare "from 0 to 99"
+        [ compare "range from 0"
             (\f -> f ())
             ( "initialize"
-            , \() -> Array.initialize 100 (\i -> i)
+            , \() -> Array.initialize 100 identity
             )
-            ( "fromList (List.range 0 _)"
+            ( "from List.range 0 _"
             , \() -> Array.fromList (List.range 0 99)
             )
+        , compare "List.any/List.all"
+            (\f -> f identity (List.repeat 100 True))
+            ( "any", List.any )
+            ( "all", List.all )
         , compare "mapToList"
             (\mapToList -> mapToList (\v -> -v) ints1To100)
             ( "with foldr", mapToListWithFoldr )
@@ -108,6 +112,16 @@ suite =
             (\filterMap -> filterMap identity maybeInts)
             ( "with List.filterMap", filterMapWithListFilterMap )
             ( "with push", filterMapWithPush )
+        , let
+            allTrue =
+                Array.repeat 100 True
+          in
+          compare "all"
+            (\all ->
+                all identity allTrue
+            )
+            ( "with last and pop", allWithLastAndPop )
+            ( "with List.all", allWithListAll )
         ]
 
 
