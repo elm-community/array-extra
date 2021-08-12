@@ -1,6 +1,6 @@
 module Tests exposing (..)
 
-import Array
+import Array exposing (Array)
 import Candidates exposing (..)
 import Expect exposing (Expectation)
 import Test exposing (..)
@@ -13,7 +13,8 @@ suite =
             (\() ->
                 reverseWithFoldlToList
                     (Array.fromList [ 1, 2, 3 ])
-                    |> Expect.equal (Array.fromList [ 3, 2, 1 ])
+                    |> expectEqualArrays
+                        (Array.fromList [ 3, 2, 1 ])
             )
         , test "mapToList with Array.foldr"
             (\() ->
@@ -37,4 +38,20 @@ suite =
                         |> Expect.equal False
                 )
             ]
+        , test "intersperse with Array.foldr"
+            (\() ->
+                intersperseWithArrayFoldr "on"
+                    (fromList [ "turtles", "turtles", "turtles" ])
+                    |> expectEqualArrays
+                        (Array.fromList
+                            [ "turtles", "on", "turtles", "on", "turtles" ]
+                        )
+            )
         ]
+
+
+expectEqualArrays : Array a -> Array a -> Expectation
+expectEqualArrays expected actual =
+    Expect.equalLists
+        (expected |> Array.toList)
+        (actual |> Array.toList)
