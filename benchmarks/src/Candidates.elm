@@ -1,4 +1,4 @@
-module Candidates exposing (..)
+module Candidates exposing (allWithLastAndPop, allWithListAll, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
 
 import Array exposing (Array)
 import Array.Extra as Array
@@ -151,3 +151,34 @@ allWithListAll : (a -> Bool) -> Array a -> Bool
 allWithListAll isOkay =
     Array.toList
         >> List.all isOkay
+
+
+
+intersperseWithArrayFoldr : a -> Array a -> Array a
+intersperseWithArrayFoldr separator array =
+    case Array.get (Array.length array - 1) array of
+        Just last ->
+            let
+                beforeLast =
+                    Array.pop array
+
+                step element =
+                    Array.push element
+                        >> Array.push separator
+
+                spersed =
+                    beforeLast
+                        |> Array.foldr step Array.empty
+            in
+            spersed |> Array.push last
+
+        Nothing ->
+            Array.empty
+
+
+intersperseWithList : a -> Array a -> Array a
+intersperseWithList separator array =
+    array
+        |> Array.toList
+        |> List.intersperse separator
+        |> Array.fromList

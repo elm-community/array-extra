@@ -23,7 +23,7 @@ suite =
             ( "from List.range 0 _"
             , \() -> Array.fromList (List.range 0 99)
             )
-        , compare "List.any/List.all"
+        , compare "List.any vs all"
             (\f -> f identity (List.repeat 100 True))
             ( "any", List.any )
             ( "all", List.all )
@@ -122,6 +122,12 @@ suite =
             )
             ( "with last and pop", allWithLastAndPop )
             ( "with List.all", allWithListAll )
+        , compare "intersperse"
+            (\intersperse ->
+                intersperse 0 ints1To100
+            )
+            ( "with Array.foldr", intersperseWithArrayFoldr )
+            ( "with List.intersperse", intersperseWithList )
         ]
 
 
