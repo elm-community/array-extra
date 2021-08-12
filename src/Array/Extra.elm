@@ -1,10 +1,9 @@
 module Array.Extra exposing
-    ( removeWhen, filterMap, reverse, mapToList, indexedMapToList
+    ( filterMap, mapToList, indexedMapToList
     , apply, map2, map3, map4, map5, zip, zip3, unzip
-    , pop
+    , pop, removeAt, insertAt, update, removeWhen, reverse, intersperse
     , sliceFrom, sliceUntil, splitAt
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
-    , removeAt, insertAt, update
     , all, any
     )
 
@@ -13,7 +12,7 @@ module Array.Extra exposing
 
 # Transform
 
-@docs removeWhen, filterMap, reverse, mapToList, indexedMapToList
+@docs filterMap, mapToList, indexedMapToList
 
 
 ## Combine
@@ -21,9 +20,9 @@ module Array.Extra exposing
 @docs apply, map2, map3, map4, map5, zip, zip3, unzip
 
 
-# Slice & Resize
+# Modify
 
-@docs pop
+@docs pop, removeAt, insertAt, update, removeWhen, reverse, intersperse
 
 
 ## Slice
@@ -34,11 +33,6 @@ module Array.Extra exposing
 ## Resize
 
 @docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
-
-
-# Modify
-
-@docs removeAt, insertAt, update
 
 
 # Scan
@@ -123,6 +117,22 @@ sliceUntil newLength array =
 pop : Array a -> Array a
 pop array =
     slice 0 -1 array
+
+
+{-| Places a given value between all members of the given array.
+
+    intersperse "on"
+        (fromList [ "turtles", "turtles", "turtles" ])
+        == fromList
+            [ "turtles", "on", "turtles", "on", "turtles" ]
+
+-}
+intersperse : a -> Array a -> Array a
+intersperse separator array =
+    array
+        |> Array.toList
+        |> List.intersperse separator
+        |> Array.fromList
 
 
 {-| Apply a function that may succeed to all values in the array, but only keep the successes.
