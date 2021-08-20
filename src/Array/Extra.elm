@@ -119,7 +119,7 @@ pop array =
     slice 0 -1 array
 
 
-{-| Places a given value between all members of the given array.
+{-| Place a value between all members of the given array.
 
     intersperse "on"
         (fromList [ "turtles", "turtles", "turtles" ])
