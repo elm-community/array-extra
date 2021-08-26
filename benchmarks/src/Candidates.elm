@@ -1,4 +1,4 @@
-module Candidates exposing (allWithFold, allWithLastAndPop, allWithListAll, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
+module Candidates exposing (allRecursive, allWithFold, allWithListAll, anyRecursive, anyWithFold, anyWithListAny, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
 
 import Array exposing (Array)
 import Array.Extra as Array
@@ -130,21 +130,19 @@ filterMapWithListFilterMap tryMap =
         >> Array.fromList
 
 
-allWithLastAndPop : (a -> Bool) -> Array a -> Bool
-allWithLastAndPop isOkay array =
-    case
-        Array.get (Array.length array - 1) array
-            |> Maybe.map isOkay
-    of
+allRecursive : (a -> Bool) -> Array a -> Bool
+allRecursive isOkay array =
+    -- read & write is faster on the last element
+    case Array.get (Array.length array - 1) array of
         Nothing ->
             True
 
-        Just False ->
-            False
+        Just last ->
+            if last |> isOkay then
+                allRecursive isOkay (array |> Array.pop)
 
-        Just True ->
-            Array.pop array
-                |> allWithLastAndPop isOkay
+            else
+                False
 
 
 allWithListAll : (a -> Bool) -> Array a -> Bool
@@ -156,6 +154,32 @@ allWithListAll isOkay =
 allWithFold : (a -> Bool) -> Array a -> Bool
 allWithFold isOkay =
     Array.foldl (\element -> (&&) (isOkay element)) True
+
+
+anyWithListAny : (a -> Bool) -> Array a -> Bool
+anyWithListAny isOkay =
+    Array.toList
+        >> List.any isOkay
+
+
+anyWithFold : (a -> Bool) -> Array a -> Bool
+anyWithFold isOkay =
+    Array.foldl (\element -> (||) (isOkay element)) False
+
+
+anyRecursive : (a -> Bool) -> Array a -> Bool
+anyRecursive isOkay array =
+    -- read & write is faster on the last element
+    case Array.get (Array.length array - 1) array of
+        Nothing ->
+            False
+
+        Just last ->
+            if last |> isOkay then
+                True
+
+            else
+                anyRecursive isOkay (array |> Array.pop)
 
 
 intersperseWithArrayFoldr : a -> Array a -> Array a

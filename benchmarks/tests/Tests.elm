@@ -23,16 +23,16 @@ suite =
                     |> Expect.equal [ -1, -2, -3 ]
             )
         , describe "all"
-            [ describe "with last and pop"
+            [ describe "recursive"
                 [ test "True"
                     (\() ->
-                        allWithLastAndPop identity
+                        allRecursive identity
                             (Array.repeat 10 True)
                             |> Expect.equal True
                     )
                 , test "False"
                     (\() ->
-                        allWithLastAndPop identity
+                        allRecursive identity
                             (Array.repeat 10 True
                                 |> Array.push False
                             )
@@ -56,6 +56,36 @@ suite =
                     )
                 ]
             ]
+        , describe "any"
+            [ describe "recursive"
+                [ test "True"
+                    (\() ->
+                        anyRecursive isEven
+                            ([ 1, 2 ] |> Array.fromList)
+                            |> Expect.equal True
+                    )
+                , test "False"
+                    (\() ->
+                        anyRecursive isEven
+                            ([ 1, 3 ] |> Array.fromList)
+                            |> Expect.equal False
+                    )
+                ]
+            , describe "with fold"
+                [ test "True"
+                    (\() ->
+                        anyWithFold isEven
+                            ([ 1, 2 ] |> Array.fromList)
+                            |> Expect.equal True
+                    )
+                , test "False"
+                    (\() ->
+                        anyWithFold isEven
+                            ([ 1, 3 ] |> Array.fromList)
+                            |> Expect.equal False
+                    )
+                ]
+            ]
         , test "intersperse with Array.foldr"
             (\() ->
                 intersperseWithArrayFoldr "on"
@@ -73,3 +103,8 @@ expectEqualArrays expected actual =
     Expect.equalLists
         (expected |> Array.toList)
         (actual |> Array.toList)
+
+
+isEven : Int -> Bool
+isEven =
+    modBy 2 >> (==) 0

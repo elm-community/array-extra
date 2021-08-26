@@ -16,19 +16,10 @@ main =
 suite : Benchmark
 suite =
     describe "array extra"
-        [ rank "range from 0"
-            (\f -> f ())
-            [ ( "initialize"
-              , \() -> Array.initialize 100 identity
-              )
-            , ( "from List.range 0 _"
-              , \() -> Array.fromList (List.range 0 99)
-              )
-            ]
-        , rank "List.any vs all"
-            (\f -> f identity (List.repeat 100 True))
-            [ ( "any", List.any )
-            , ( "all", List.all )
+        [ rank "Array.fold"
+            (\fold -> ints1To100 |> fold (+) 0)
+            [ ( "foldl", Array.foldl )
+            , ( "foldr", Array.foldr )
             ]
         , rank "mapToList"
             (\mapToList -> mapToList (\v -> -v) ints1To100)
@@ -98,9 +89,19 @@ suite =
           in
           rank "all"
             (\all -> all identity allTrue)
-            [ ( "with last and pop", allWithLastAndPop )
+            [ ( "recursive", allRecursive )
             , ( "with List.all", allWithListAll )
             , ( "with fold", allWithFold )
+            ]
+        , let
+            allFalse =
+                Array.repeat 100 False
+          in
+          rank "any"
+            (\any -> any identity allFalse)
+            [ ( "recursive", anyRecursive )
+            , ( "with List.any", anyWithListAny )
+            , ( "with fold", anyWithFold )
             ]
         , rank "intersperse"
             (\intersperse -> intersperse 0 ints1To100)
