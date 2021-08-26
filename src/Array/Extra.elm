@@ -608,8 +608,9 @@ insertAt index val values =
 all : (a -> Bool) -> Array a -> Bool
 all isOkay array =
     array
-        |> Array.toList
-        |> List.all isOkay
+        |> Array.foldl
+            (\element -> (&&) (isOkay element))
+            True
 
 
 {-| Whether any elements satisfy a test.
@@ -627,5 +628,6 @@ all isOkay array =
 any : (a -> Bool) -> Array a -> Bool
 any isOkay array =
     array
-        |> Array.toList
-        |> List.any isOkay
+        |> Array.foldl
+            (\element -> (||) (isOkay element))
+            False
