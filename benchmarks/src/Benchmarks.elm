@@ -35,66 +35,37 @@ suite =
             [ ( "with foldr", mapToListWithFoldr )
             , ( "with Array.toIndexedList", mapToListWithListMap )
             ]
-        , let
-            compareToWithFoldr ( description, function ) =
-                rank (description ++ " vs with Array.foldr")
-                    (\indexedMapToList ->
-                        indexedMapToList Tuple.pair
-                            ints1To100
-                    )
-                    [ ( "with Array.foldr"
-                      , indexedMapToListWithFoldr
-                      )
-                    , ( description, function )
-                    ]
-          in
-          describe "indexedMapToList"
-            [ compareToWithFoldr
-                ( "with toIndexedList"
-                , indexedMapToListWithToIndexedList
-                )
-            , compareToWithFoldr
-                ( "with Array.indexedMap"
-                , indexedMapToListWithArrayIndexedMap
-                )
-            , compareToWithFoldr
-                ( "with List.indexedMap"
-                , indexedMapToListWithListIndexedMap
-                )
+        , rank "indexedMapToList"
+            (\indexedMapToList ->
+                indexedMapToList Tuple.pair
+                    ints1To100
+            )
+            [ ( "with Array.foldr", indexedMapToListWithFoldr )
+            , ( "with toIndexedList"
+              , indexedMapToListWithToIndexedList
+              )
+            , ( "with Array.indexedMap"
+              , indexedMapToListWithArrayIndexedMap
+              )
+            , ( "with List.indexedMap"
+              , indexedMapToListWithListIndexedMap
+              )
             ]
-        , let
-            compareToFoldlToList ( description, function ) =
-                rank
-                    (description ++ " vs with Array.foldl to list")
-                    (\reverse -> reverse ints1To100)
-                    [ ( "with Array.foldl to list", reverseWithFoldlToList )
-                    , ( description, function )
-                    ]
-          in
-          describe "reverse"
-            [ compareToFoldlToList
-                ( "with List.reverse", reverseWithListReverse )
-            , compareToFoldlToList
-                ( "with Array.foldr to array", reverseWithFoldl )
+        , rank "reverse"
+            (\reverse -> reverse ints1To100)
+            [ ( "with Array.foldl to list", reverseWithFoldlToList )
+            , ( "with List.reverse", reverseWithListReverse )
+            , ( "with Array.foldr to array", reverseWithFoldl )
             ]
         , let
             zipped =
-                Array.zip
-                    ints1To100
-                    ints1To100
-
-            compareToWithArrayMaps ( description, function ) =
-                rank "vs with Array.maps"
-                    (\unzip -> unzip zipped)
-                    [ ( "with Array.maps", unzipWithMaps )
-                    , ( description, function )
-                    ]
+                Array.zip ints1To100 ints1To100
           in
-          describe "unzip"
-            [ compareToWithArrayMaps
-                ( "with List.unzip", unzipWithListUnzip )
-            , compareToWithArrayMaps
-                ( "with foldl to Arrays", unzipWithFoldlToArrays )
+          rank "unzip"
+            (\unzip -> unzip zipped)
+            [ ( "with Array.maps", unzipWithMaps )
+            , ( "with List.unzip", unzipWithListUnzip )
+            , ( "with foldl to Arrays", unzipWithFoldlToArrays )
             ]
         , rank "map2"
             (\map2 ->
