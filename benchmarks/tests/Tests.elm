@@ -22,26 +22,44 @@ suite =
                     (Array.fromList [ 1, 2, 3 ])
                     |> Expect.equal [ -1, -2, -3 ]
             )
-        , describe "all with last and pop"
-            [ test "True"
-                (\() ->
-                    allWithLastAndPop identity
-                        (Array.repeat 10 True)
-                        |> Expect.equal True
-                )
-            , test "False"
-                (\() ->
-                    allWithLastAndPop identity
-                        (Array.repeat 10 True
-                            |> Array.push False
-                        )
-                        |> Expect.equal False
-                )
+        , describe "all"
+            [ describe "with last and pop"
+                [ test "True"
+                    (\() ->
+                        allWithLastAndPop identity
+                            (Array.repeat 10 True)
+                            |> Expect.equal True
+                    )
+                , test "False"
+                    (\() ->
+                        allWithLastAndPop identity
+                            (Array.repeat 10 True
+                                |> Array.push False
+                            )
+                            |> Expect.equal False
+                    )
+                ]
+            , describe "with fold"
+                [ test "True"
+                    (\() ->
+                        allWithFold identity
+                            (Array.repeat 10 True)
+                            |> Expect.equal True
+                    )
+                , test "False"
+                    (\() ->
+                        allWithFold identity
+                            (Array.repeat 10 True
+                                |> Array.push False
+                            )
+                            |> Expect.equal False
+                    )
+                ]
             ]
         , test "intersperse with Array.foldr"
             (\() ->
                 intersperseWithArrayFoldr "on"
-                    (fromList [ "turtles", "turtles", "turtles" ])
+                    (Array.fromList [ "turtles", "turtles", "turtles" ])
                     |> expectEqualArrays
                         (Array.fromList
                             [ "turtles", "on", "turtles", "on", "turtles" ]
