@@ -129,11 +129,10 @@ suite =
             (\all -> all identity allTrue)
             [ ( "with last and pop", allWithLastAndPop )
             , ( "with List.all", allWithListAll )
+            , ( "with fold", allWithFold )
             ]
         , rank "intersperse"
-            (\intersperse ->
-                intersperse 0 ints1To100
-            )
+            (\intersperse -> intersperse 0 ints1To100)
             [ ( "with Array.foldr", intersperseWithArrayFoldr )
             , ( "with List.intersperse", intersperseWithList )
             ]
