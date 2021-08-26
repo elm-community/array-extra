@@ -372,28 +372,24 @@ suite =
         , describe "all"
             [ test "True"
                 (\() ->
-                    all isEven
-                        ([ 2, 4 ] |> Array.fromList)
+                    all isEven (fromList [ 2, 4 ])
                         |> Expect.equal True
                 )
             , test "False"
                 (\() ->
-                    all isEven
-                        ([ 2, 3 ] |> Array.fromList)
+                    all isEven (fromList [ 2, 3 ])
                         |> Expect.equal False
                 )
             ]
         , describe "any"
             [ test "True"
                 (\() ->
-                    any isEven
-                        ([ 1, 2 ] |> Array.fromList)
+                    any isEven (fromList [ 1, 2 ])
                         |> Expect.equal True
                 )
             , test "False"
                 (\() ->
-                    any isEven
-                        ([ 1, 3 ] |> Array.fromList)
+                    any isEven (fromList [ 1, 3 ])
                         |> Expect.equal False
                 )
             ]
