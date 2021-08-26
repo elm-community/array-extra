@@ -2,46 +2,51 @@ module Benchmarks exposing (main)
 
 import Array exposing (Array)
 import Array.Extra as Array
-import Benchmark exposing (Benchmark, benchmark, describe)
-import Benchmark.Runner exposing (BenchmarkProgram)
+import Benchmark exposing (Benchmark, describe)
+import Benchmark.Alternative exposing (rank)
+import Benchmark.Runner.Alternative as BenchmarkRunner
 import Candidates exposing (..)
 
 
-main : BenchmarkProgram
+main : BenchmarkRunner.Program
 main =
-    Benchmark.Runner.program suite
+    BenchmarkRunner.program suite
 
 
 suite : Benchmark
 suite =
     describe "array extra"
-        [ compare "range from 0"
+        [ rank "range from 0"
             (\f -> f ())
-            ( "initialize"
-            , \() -> Array.initialize 100 identity
-            )
-            ( "from List.range 0 _"
-            , \() -> Array.fromList (List.range 0 99)
-            )
-        , compare "List.any vs all"
+            [ ( "initialize"
+              , \() -> Array.initialize 100 identity
+              )
+            , ( "from List.range 0 _"
+              , \() -> Array.fromList (List.range 0 99)
+              )
+            ]
+        , rank "List.any vs all"
             (\f -> f identity (List.repeat 100 True))
-            ( "any", List.any )
-            ( "all", List.all )
-        , compare "mapToList"
+            [ ( "any", List.any )
+            , ( "all", List.all )
+            ]
+        , rank "mapToList"
             (\mapToList -> mapToList (\v -> -v) ints1To100)
-            ( "with foldr", mapToListWithFoldr )
-            ( "with Array.toIndexedList", mapToListWithListMap )
+            [ ( "with foldr", mapToListWithFoldr )
+            , ( "with Array.toIndexedList", mapToListWithListMap )
+            ]
         , let
             compareToWithFoldr ( description, function ) =
-                compare (description ++ " vs with Array.foldr")
+                rank (description ++ " vs with Array.foldr")
                     (\indexedMapToList ->
                         indexedMapToList Tuple.pair
                             ints1To100
                     )
-                    ( "with Array.foldr"
-                    , indexedMapToListWithFoldr
-                    )
-                    ( description, function )
+                    [ ( "with Array.foldr"
+                      , indexedMapToListWithFoldr
+                      )
+                    , ( description, function )
+                    ]
           in
           describe "indexedMapToList"
             [ compareToWithFoldr
@@ -59,11 +64,12 @@ suite =
             ]
         , let
             compareToFoldlToList ( description, function ) =
-                compare
+                rank
                     (description ++ " vs with Array.foldl to list")
                     (\reverse -> reverse ints1To100)
-                    ( "with Array.foldl to list", reverseWithFoldlToList )
-                    ( description, function )
+                    [ ( "with Array.foldl to list", reverseWithFoldlToList )
+                    , ( description, function )
+                    ]
           in
           describe "reverse"
             [ compareToFoldlToList
@@ -78,10 +84,11 @@ suite =
                     ints1To100
 
             compareToWithArrayMaps ( description, function ) =
-                compare "vs with Array.maps"
+                rank "vs with Array.maps"
                     (\unzip -> unzip zipped)
-                    ( "with Array.maps", unzipWithMaps )
-                    ( description, function )
+                    [ ( "with Array.maps", unzipWithMaps )
+                    , ( description, function )
+                    ]
           in
           describe "unzip"
             [ compareToWithArrayMaps
@@ -89,14 +96,15 @@ suite =
             , compareToWithArrayMaps
                 ( "with foldl to Arrays", unzipWithFoldlToArrays )
             ]
-        , compare "map2"
+        , rank "map2"
             (\map2 ->
                 map2 Tuple.pair
                     ints1To100
                     ints1To100
             )
-            ( "with List.map2", map2WithListMap2 )
-            ( "with List.indexedMap", map2WithListIndexedMap )
+            [ ( "with List.map2", map2WithListMap2 )
+            , ( "with List.indexedMap", map2WithListIndexedMap )
+            ]
         , let
             maybeInts =
                 Array.initialize 100
@@ -108,41 +116,28 @@ suite =
                             Just x
                     )
           in
-          compare "filterMap"
+          rank "filterMap"
             (\filterMap -> filterMap identity maybeInts)
-            ( "with List.filterMap", filterMapWithListFilterMap )
-            ( "with push", filterMapWithPush )
+            [ ( "with List.filterMap", filterMapWithListFilterMap )
+            , ( "with push", filterMapWithPush )
+            ]
         , let
             allTrue =
                 Array.repeat 100 True
           in
-          compare "all"
-            (\all ->
-                all identity allTrue
-            )
-            ( "with last and pop", allWithLastAndPop )
-            ( "with List.all", allWithListAll )
-        , compare "intersperse"
+          rank "all"
+            (\all -> all identity allTrue)
+            [ ( "with last and pop", allWithLastAndPop )
+            , ( "with List.all", allWithListAll )
+            ]
+        , rank "intersperse"
             (\intersperse ->
                 intersperse 0 ints1To100
             )
-            ( "with Array.foldr", intersperseWithArrayFoldr )
-            ( "with List.intersperse", intersperseWithList )
+            [ ( "with Array.foldr", intersperseWithArrayFoldr )
+            , ( "with List.intersperse", intersperseWithList )
+            ]
         ]
-
-
-compare :
-    String
-    -> (a -> b_)
-    -> ( String, a )
-    -> ( String, a )
-    -> Benchmark
-compare name applyArguments ( aDescription, aFunction ) ( bDescription, bFunction ) =
-    Benchmark.compare name
-        aDescription
-        (\() -> applyArguments aFunction)
-        bDescription
-        (\() -> applyArguments bFunction)
 
 
 ints1To100 : Array Int
