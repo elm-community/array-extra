@@ -1,4 +1,4 @@
-module Candidates exposing (allWithLastAndPop, allWithListAll, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
+module Candidates exposing (allWithFold, allWithLastAndPop, allWithListAll, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
 
 import Array exposing (Array)
 import Array.Extra as Array
@@ -152,6 +152,10 @@ allWithListAll isOkay =
     Array.toList
         >> List.all isOkay
 
+
+allWithFold : (a -> Bool) -> Array a -> Bool
+allWithFold isOkay =
+    Array.foldl (\element -> (&&) (isOkay element)) True
 
 
 intersperseWithArrayFoldr : a -> Array a -> Array a
