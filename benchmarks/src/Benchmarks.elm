@@ -2,97 +2,71 @@ module Benchmarks exposing (main)
 
 import Array exposing (Array)
 import Array.Extra as Array
-import Benchmark exposing (Benchmark, benchmark, describe)
-import Benchmark.Runner exposing (BenchmarkProgram)
+import Benchmark exposing (Benchmark, describe)
+import Benchmark.Alternative exposing (rank)
+import Benchmark.Runner.Alternative as BenchmarkRunner
 import Candidates exposing (..)
 
 
-main : BenchmarkProgram
+main : BenchmarkRunner.Program
 main =
-    Benchmark.Runner.program suite
+    BenchmarkRunner.program suite
 
 
 suite : Benchmark
 suite =
     describe "array extra"
-        [ compare "from 0 to 99"
-            (\f -> f ())
-            ( "initialize"
-            , \() -> Array.initialize 100 (\i -> i)
-            )
-            ( "fromList (List.range 0 _)"
-            , \() -> Array.fromList (List.range 0 99)
-            )
-        , compare "mapToList"
-            (\mapToList -> mapToList (\v -> -v) ints1To100)
-            ( "with foldr", mapToListWithFoldr )
-            ( "with Array.toIndexedList", mapToListWithListMap )
-        , let
-            compareToWithFoldr ( description, function ) =
-                compare (description ++ " vs with Array.foldr")
-                    (\indexedMapToList ->
-                        indexedMapToList Tuple.pair
-                            ints1To100
-                    )
-                    ( "with Array.foldr"
-                    , indexedMapToListWithFoldr
-                    )
-                    ( description, function )
-          in
-          describe "indexedMapToList"
-            [ compareToWithFoldr
-                ( "with toIndexedList"
-                , indexedMapToListWithToIndexedList
-                )
-            , compareToWithFoldr
-                ( "with Array.indexedMap"
-                , indexedMapToListWithArrayIndexedMap
-                )
-            , compareToWithFoldr
-                ( "with List.indexedMap"
-                , indexedMapToListWithListIndexedMap
-                )
+        [ rank "Array.fold"
+            (\fold -> ints1To100 |> fold (+) 0)
+            [ ( "foldl", Array.foldl )
+            , ( "foldr", Array.foldr )
             ]
-        , let
-            compareToFoldlToList ( description, function ) =
-                compare
-                    (description ++ " vs with Array.foldl to list")
-                    (\reverse -> reverse ints1To100)
-                    ( "with Array.foldl to list", reverseWithFoldlToList )
-                    ( description, function )
-          in
-          describe "reverse"
-            [ compareToFoldlToList
-                ( "with List.reverse", reverseWithListReverse )
-            , compareToFoldlToList
-                ( "with Array.foldr to array", reverseWithFoldl )
+        , rank "mapToList"
+            (\mapToList -> mapToList (\v -> -v) ints1To100)
+            [ ( "with foldr", mapToListWithFoldr )
+            , ( "with Array.toIndexedList", mapToListWithListMap )
+            ]
+        , rank "indexedMapToList"
+            (\indexedMapToList ->
+                indexedMapToList Tuple.pair
+                    ints1To100
+            )
+            [ ( "with Array.foldr", indexedMapToListWithFoldr )
+            , ( "with toIndexedList"
+              , indexedMapToListWithToIndexedList
+              )
+            , ( "with Array.indexedMap"
+              , indexedMapToListWithArrayIndexedMap
+              )
+            , ( "with List.indexedMap"
+              , indexedMapToListWithListIndexedMap
+              )
+            ]
+        , rank "reverse"
+            (\reverse -> reverse ints1To100)
+            [ ( "with Array.foldl to list", reverseWithFoldlToList )
+            , ( "with List.reverse", reverseWithListReverse )
+            , ( "with Array.foldr to array", reverseWithFoldl )
             ]
         , let
             zipped =
-                Array.zip
-                    ints1To100
-                    ints1To100
-
-            compareToWithArrayMaps ( description, function ) =
-                compare "vs with Array.maps"
-                    (\unzip -> unzip zipped)
-                    ( "with Array.maps", unzipWithMaps )
-                    ( description, function )
+                Array.zip ints1To100 ints1To100
           in
-          describe "unzip"
-            [ compareToWithArrayMaps
-                ( "with List.unzip", unzipWithListUnzip )
-            , compareToWithArrayMaps
-                ( "with foldl to Arrays", unzipWithFoldlToArrays )
+          rank "unzip"
+            (\unzip -> unzip zipped)
+            [ ( "with Array.maps", unzipWithMaps )
+            , ( "with List.unzip", unzipWithListUnzip )
+            , ( "with foldl to Arrays", unzipWithFoldlToArrays )
             ]
-        , compare "map2"
+        , rank "map2"
             (\map2 ->
                 map2 Tuple.pair
                     ints1To100
                     ints1To100
             )
-            ( "with List.map2", map2WithListMap2 )
-            ( "with List.indexedMap", map2WithListIndexedMap )
+            [ ( "with List.map2", map2WithListMap2 )
+            , ( "with List.indexedMap", map2WithListIndexedMap )
+            ]
         , let
             maybeInts =
                 Array.initialize 100
@@ -104,25 +78,37 @@ suite =
                             Just x
                     )
           in
-          compare "filterMap"
+          rank "filterMap"
             (\filterMap -> filterMap identity maybeInts)
-            ( "with List.filterMap", filterMapWithListFilterMap )
-            ( "with push", filterMapWithPush )
+            [ ( "with List.filterMap", filterMapWithListFilterMap )
+            , ( "with push", filterMapWithPush )
+            ]
+        , let
+            allTrue =
+                Array.repeat 100 True
+          in
+          rank "all"
+            (\all -> all identity allTrue)
+            [ ( "recursive", allRecursive )
+            , ( "with List.all", allWithListAll )
+            , ( "with fold", allWithFold )
+            ]
+        , let
+            allFalse =
+                Array.repeat 100 False
+          in
+          rank "any"
+            (\any -> any identity allFalse)
+            [ ( "recursive", anyRecursive )
+            , ( "with List.any", anyWithListAny )
+            , ( "with fold", anyWithFold )
+            ]
+        , rank "intersperse"
+            (\intersperse -> intersperse 0 ints1To100)
+            [ ( "with Array.foldr", intersperseWithArrayFoldr )
+            , ( "with List.intersperse", intersperseWithList )
+            ]
         ]
-
-
-compare :
-    String
-    -> (a -> b_)
-    -> ( String, a )
-    -> ( String, a )
-    -> Benchmark
-compare name applyArguments ( aDescription, aFunction ) ( bDescription, bFunction ) =
-    Benchmark.compare name
-        aDescription
-        (\() -> applyArguments aFunction)
-        bDescription
-        (\() -> applyArguments bFunction)
 
 
 ints1To100 : Array Int

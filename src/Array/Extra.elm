@@ -1,10 +1,10 @@
 module Array.Extra exposing
-    ( removeWhen, filterMap, reverse, mapToList, indexedMapToList
+    ( filterMap, mapToList, indexedMapToList
     , apply, map2, map3, map4, map5, zip, zip3, unzip
-    , pop
+    , pop, removeAt, insertAt, update, removeWhen, reverse, intersperse
     , sliceFrom, sliceUntil, splitAt
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
-    , removeAt, insertAt, update
+    , all, any
     )
 
 {-| Convenience functions for working with Array
@@ -12,7 +12,7 @@ module Array.Extra exposing
 
 # Transform
 
-@docs removeWhen, filterMap, reverse, mapToList, indexedMapToList
+@docs filterMap, mapToList, indexedMapToList
 
 
 ## Combine
@@ -20,9 +20,9 @@ module Array.Extra exposing
 @docs apply, map2, map3, map4, map5, zip, zip3, unzip
 
 
-# Slice & Resize
+# Modify
 
-@docs pop
+@docs pop, removeAt, insertAt, update, removeWhen, reverse, intersperse
 
 
 ## Slice
@@ -35,9 +35,9 @@ module Array.Extra exposing
 @docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
 
 
-# Modify
+# Scan
 
-@docs removeAt, insertAt, update
+@docs all, any
 
 -}
 
@@ -110,12 +110,29 @@ sliceUntil newLength array =
     pop (fromList [ 1, 2, 3 ])
         == fromList [ 1, 2 ]
 
-    pop empty == empty
+    pop empty
+        == empty
 
 -}
 pop : Array a -> Array a
 pop array =
     slice 0 -1 array
+
+
+{-| Place a value between all members of the given array.
+
+    intersperse "on"
+        (fromList [ "turtles", "turtles", "turtles" ])
+        == fromList
+            [ "turtles", "on", "turtles", "on", "turtles" ]
+
+-}
+intersperse : a -> Array a -> Array a
+intersperse separator array =
+    array
+        |> Array.toList
+        |> List.intersperse separator
+        |> Array.fromList
 
 
 {-| Apply a function that may succeed to all values in the array, but only keep the successes.
@@ -210,10 +227,10 @@ Note: [`zip`](Array-Extra#zip) can be used instead of `map2 Tuple.pair`.
 
 -}
 map2 :
-    (a -> b -> result)
+    (a -> b -> combined)
     -> Array a
     -> Array b
-    -> Array result
+    -> Array combined
 map2 combineAb aArray bArray =
     List.map2 combineAb
         (aArray |> Array.toList)
@@ -227,11 +244,11 @@ Note: [`zip3`](Array-Extra#zip3) can be used instead of `map3 (\a b c -> ( a, b,
 
 -}
 map3 :
-    (a -> b -> c -> result)
+    (a -> b -> c -> combined)
     -> Array a
     -> Array b
     -> Array c
-    -> Array result
+    -> Array combined
 map3 combineAbc aArray bArray cArray =
     apply (map2 combineAbc aArray bArray) cArray
 
@@ -239,12 +256,12 @@ map3 combineAbc aArray bArray cArray =
 {-| Combine the elements of four arrays with the given function. See [`map2`](Array-Extra#map2).
 -}
 map4 :
-    (a -> b -> c -> d -> result)
+    (a -> b -> c -> d -> combined)
     -> Array a
     -> Array b
     -> Array c
     -> Array d
-    -> Array result
+    -> Array combined
 map4 combineAbcd aArray bArray cArray dArray =
     apply (map3 combineAbcd aArray bArray cArray) dArray
 
@@ -252,13 +269,13 @@ map4 combineAbcd aArray bArray cArray dArray =
 {-| Combine the elements of five arrays with the given function. See [`map2`](Array-Extra#map2).
 -}
 map5 :
-    (a -> b -> c -> d -> e -> result)
+    (a -> b -> c -> d -> e -> combined)
     -> Array a
     -> Array b
     -> Array c
     -> Array d
     -> Array e
-    -> Array result
+    -> Array combined
 map5 combineAbcde aArray bArray cArray dArray eArray =
     apply (map4 combineAbcde aArray bArray cArray dArray) eArray
 
@@ -574,3 +591,43 @@ insertAt index val values =
 
     else
         values
+
+
+{-| Whether all elements satisfy a test.
+
+    all isEven (fromList [ 2, 4 ])
+        == True
+
+    all isEven (fromList [ 2, 3 ])
+        == False
+
+    all isEven empty
+        == True
+
+-}
+all : (a -> Bool) -> Array a -> Bool
+all isOkay array =
+    array
+        |> Array.foldl
+            (\element -> (&&) (isOkay element))
+            True
+
+
+{-| Whether any elements satisfy a test.
+
+    any isEven (fromList [ 1, 3 ])
+    --> True
+
+    any isEven (fromList [ 1, 2 ])
+    --> False
+
+    any isEven empty
+    --> False
+
+-}
+any : (a -> Bool) -> Array a -> Bool
+any isOkay array =
+    array
+        |> Array.foldl
+            (\element -> (||) (isOkay element))
+            False
