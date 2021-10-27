@@ -168,8 +168,9 @@ apply maps array =
 
 {-| Apply a function to the elements in the array and collect the result in a List.
 
-    Html.text : String -> Html msg
-    mapToList Html.text : Array String -> List (Html msg)
+    mapToList Html.text
+        (fromList [ "a", "b", "c" ])
+        == [ Html.text "a", Html.text "b", Html.text "c" ]
 
 -}
 mapToList : (a -> b) -> Array a -> List b
