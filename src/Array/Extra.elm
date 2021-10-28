@@ -46,14 +46,16 @@ import Array exposing (Array, append, empty, initialize, length, repeat, slice)
 
 {-| Update the element at the index based on its current value. If the index is out of bounds, nothing is changed.
 
+    import Array exposing (fromList)
+
     update 1 ((+) 10) (fromList [ 1, 2, 3 ])
-        == fromList [ 1, 12, 3 ]
+    --> fromList [ 1, 12, 3 ]
 
     update 4 ((+) 10) (fromList [ 1, 2, 3 ])
-        == fromList [ 1, 2, 3 ]
+    --> fromList [ 1, 2, 3 ]
 
     update -1 ((+) 10) (fromList [ 1, 2, 3 ])
-        == fromList [ 1, 2, 3 ]
+    --> fromList [ 1, 2, 3 ]
 
 -}
 update : Int -> (a -> a) -> Array a -> Array a
@@ -70,11 +72,13 @@ update index alter array =
 In other words, slice an array from an index until the very end.
 Given negative argument, count the end of the slice from the end of the array.
 
+    import Array exposing (fromList)
+
     sliceFrom 3 (fromList (List.range 0 6))
-        == fromList [ 3, 4, 5, 6 ]
+    --> fromList [ 3, 4, 5, 6 ]
 
     sliceFrom -3 (fromList (List.range 0 6))
-        == fromList [ 4, 5, 6 ]
+    --> fromList [ 4, 5, 6 ]
 
 -}
 sliceFrom : Int -> Array a -> Array a
@@ -86,11 +90,13 @@ sliceFrom lengthDropped array =
 In other words, slice an array from the very beginning until index not including.
 Given negative argument, count the beginning of the slice from the end of the array.
 
+    import Array exposing (fromList)
+
     sliceUntil 3 (fromList (List.range 0 6))
-        == fromList [ 0, 1, 2 ]
+    --> fromList [ 0, 1, 2 ]
 
     sliceUntil -3 (fromList (List.range 0 6))
-        == fromList [ 0, 1, 2, 3 ]
+    --> fromList [ 0, 1, 2, 3 ]
 
 -}
 sliceUntil : Int -> Array a -> Array a
@@ -107,11 +113,13 @@ sliceUntil newLength array =
 
 {-| Remove the last element from an array.
 
+    import Array exposing (fromList, empty)
+
     pop (fromList [ 1, 2, 3 ])
-        == fromList [ 1, 2 ]
+    --> fromList [ 1, 2 ]
 
     pop empty
-        == empty
+    --> empty
 
 -}
 pop : Array a -> Array a
@@ -121,10 +129,12 @@ pop array =
 
 {-| Place a value between all members of the given array.
 
+    import Array exposing (fromList)
+
     intersperse "on"
         (fromList [ "turtles", "turtles", "turtles" ])
-        == fromList
-            [ "turtles", "on", "turtles", "on", "turtles" ]
+    --> fromList
+    -->     [ "turtles", "on", "turtles", "on", "turtles" ]
 
 -}
 intersperse : a -> Array a -> Array a
@@ -137,10 +147,11 @@ intersperse separator array =
 
 {-| Apply a function that may succeed to all values in the array, but only keep the successes.
 
-    String.toInt : String -> Maybe Int
+    import Array exposing (fromList)
+
     filterMap String.toInt
         (fromList [ "3", "4.0", "5", "hats" ])
-        == fromList [ 3, 5 ]
+    --> fromList [ 3, 5 ]
 
 -}
 filterMap : (a -> Maybe b) -> Array a -> Array b
@@ -153,12 +164,14 @@ filterMap tryMap array =
 
 {-| Apply an array of functions to an array of values. If one array is longer, its extra elements are not used.
 
+    import Array exposing (fromList, repeat)
+
     apply
         (fromList
             [ \x -> -x, identity, (+) 10 ]
         )
         (repeat 5 100)
-        == fromList [ -100, 100, 110 ]
+    --> fromList [ -100, 100, 110 ]
 
 -}
 apply : Array (a -> b) -> Array a -> Array b
@@ -168,9 +181,12 @@ apply maps array =
 
 {-| Apply a function to the elements in the array and collect the result in a List.
 
+    import Array exposing (fromList)
+    import Html
+
     mapToList Html.text
         (fromList [ "a", "b", "c" ])
-        == [ Html.text "a", Html.text "b", Html.text "c" ]
+    --> [ Html.text "a", Html.text "b", Html.text "c" ]
 
 -}
 mapToList : (a -> b) -> Array a -> List b
@@ -180,6 +196,9 @@ mapToList mapElement =
 
 {-| Apply a function to the elements in the array with their indices as the first argument
 and collect the result in a List.
+
+    import Array exposing (Array, fromList)
+    import Html exposing (Html)
 
     type alias Exercise =
         { name : String }
@@ -214,15 +233,17 @@ indexedMapToList mapIndexAndElement array =
 {-| Combine the elements of two arrays with the given function.
 If one array is longer, its extra elements are not used.
 
+    import Array exposing (fromList)
+
     map2 (+)
         (fromList [ 1, 2, 3 ])
         (fromList [ 1, 2, 3, 4 ])
-        == fromList [ 2, 4, 6 ]
+    --> fromList [ 2, 4, 6 ]
 
     map2 Tuple.pair
         (fromList [ 1, 2, 3 ])
         (fromList [ 'a', 'b' ])
-        == fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
+    --> fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
 
 Note: [`zip`](Array-Extra#zip) can be used instead of `map2 Tuple.pair`.
 
@@ -283,10 +304,12 @@ map5 combineAbcde aArray bArray cArray dArray eArray =
 
 {-| Zip the elements of two arrays into tuples. If one array is longer, its extra elements are not used.
 
+    import Array exposing (fromList)
+
     zip
         (fromList [ 1, 2, 3 ])
         (fromList [ 'a', 'b' ])
-        == fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
+    --> fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
 
 -}
 zip : Array a -> Array b -> Array ( a, b )
@@ -296,14 +319,16 @@ zip =
 
 {-| Zip the elements of three arrays into 3-tuples. Only the indices of the shortest array are used.
 
+    import Array exposing (fromList)
+
     zip3
         (fromList [ 1, 2, 3 ])
         (fromList [ 'a', 'b' ])
         (fromList [ "a", "b", "c", "d" ])
-        == fromList
-            [ ( 1, 'a', "a" )
-            , ( 2, 'b', "b" )
-            ]
+    --> fromList
+    -->     [ ( 1, 'a', "a" )
+    -->     , ( 2, 'b', "b" )
+    -->     ]
 
 -}
 zip3 : Array a -> Array b -> Array c -> Array ( a, b, c )
@@ -313,13 +338,15 @@ zip3 =
 
 {-| Unzip an array of tuples into a tuple containing one array with the first and one with the second values.
 
+    import Array exposing (fromList)
+
     unzip
         (fromList
             [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]
         )
-        == ( fromList [ 1, 2, 3 ]
-           , fromList [ 'a', 'b', 'c' ]
-           )
+    --> ( fromList [ 1, 2, 3 ]
+    --> , fromList [ 'a', 'b', 'c' ]
+    --> )
 
 -}
 unzip : Array ( a, b ) -> ( Array a, Array b )
@@ -332,9 +359,11 @@ unzip tupleArray =
 {-| Return an array that only contains elements which fail to satisfy the predicate.
 This is equivalent to `Array.filter (not << predicate)`.
 
-    removeWhen isEven
-        (fromList [ 1, 2, 3, 4 ])
-        == fromList [ 1, 3 ]
+    import Array exposing (fromList)
+
+    removeWhen (\x -> x < 0)
+        (fromList [ -1, 92, 0, 14, -3 ])
+    --> fromList [ 92, 0, 14 ]
 
 -}
 removeWhen : (a -> Bool) -> Array a -> Array a
@@ -344,14 +373,16 @@ removeWhen isBad array =
 
 {-| Resize an array from the left, padding the right-hand side with the given value.
 
+    import Array exposing (fromList, empty)
+
     resizelRepeat 4 0 (fromList [ 1, 2 ])
-        == fromList [ 1, 2, 0, 0 ]
+    --> fromList [ 1, 2, 0, 0 ]
 
     resizelRepeat 2 0 (fromList [ 1, 2, 3 ])
-        == fromList [ 1, 2 ]
+    --> fromList [ 1, 2 ]
 
     resizelRepeat -1 0 (fromList [ 1, 2 ])
-        == empty
+    --> empty
 
 -}
 resizelRepeat : Int -> a -> Array a -> Array a
@@ -377,14 +408,16 @@ resizelRepeat newLength paddingValue array =
 
 {-| Resize an array from the right, padding the left-hand side with the given value.
 
+    import Array exposing (fromList, empty)
+
     resizerRepeat 4 0 (fromList [ 1, 2 ])
-        == fromList [ 0, 0, 1, 2 ]
+    --> fromList [ 0, 0, 1, 2 ]
 
     resizerRepeat 2 0 (fromList [ 1, 2, 3 ])
-        == fromList [ 2, 3 ]
+    --> fromList [ 2, 3 ]
 
     resizerRepeat -1 0 (fromList [ 1, 2 ])
-        == empty
+    --> empty
 
 -}
 resizerRepeat : Int -> a -> Array a -> Array a
@@ -406,20 +439,22 @@ resizerRepeat newLength defaultValue array =
 
 {-| Resize an array from the left, padding the right-hand side with the given index function.
 
+    import Array exposing (fromList, empty)
+
     resizelIndexed 5
         toLetterInAlphabet
         (fromList [ 'a', 'b', 'c' ])
-        == fromList [ 'a', 'b', 'c', 'd', 'e' ]
+    --> fromList [ 'a', 'b', 'c', 'd', 'e' ]
 
     resizelIndexed 2
         toLetterInAlphabet
         (fromList [ 'a', 'b', 'c' ])
-        == fromList [ 'a', 'b' ]
+    --> fromList [ 'a', 'b' ]
 
     resizelIndexed -1
         toLetterInAlphabet
         (fromList [ 'a', 'b', 'c' ])
-        == empty
+    --> empty
 
     toLetterInAlphabet : Int -> Char
     toLetterInAlphabet inAlphabet =
@@ -453,20 +488,22 @@ resizelIndexed newLength defaultValueAtIndex array =
 
 {-| Resize an array from the right, padding the left-hand side with the given index function.
 
+    import Array exposing (fromList, empty)
+
     resizerIndexed 5
         ((*) 5)
         (fromList [ 10, 25, 36 ])
-        == fromList [ 0, 5, 10, 25, 36 ]
+    --> fromList [ 0, 5, 10, 25, 36 ]
 
     resizerIndexed 2
         ((*) 5)
         (fromList [ 10, 25, 36 ])
-        == fromList [ 25, 36 ]
+    --> fromList [ 25, 36 ]
 
     resizerIndexed -1
         ((*) 5)
         (fromList [ 10, 25, 36 ])
-        == empty
+    --> empty
 
 -}
 resizerIndexed : Int -> (Int -> a) -> Array a -> Array a
@@ -490,8 +527,10 @@ resizerIndexed newLength defaultValueAtIndex array =
 
 {-| Reverse an array.
 
+    import Array exposing (fromList)
+
     reverse (fromList [ 1, 2, 3, 4 ])
-        == fromList [ 4, 3, 2, 1 ]
+    --> fromList [ 4, 3, 2, 1 ]
 
 -}
 reverse : Array a -> Array a
@@ -508,14 +547,16 @@ reverseToList =
 
 {-| Split an array into two arrays, the first ending before and the second starting at the given index.
 
+    import Array exposing (fromList, empty)
+
     splitAt 2 (fromList [ 1, 2, 3, 4 ])
-        == ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
+    --> ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
 
     splitAt 100 (fromList [ 1, 2, 3, 4 ])
-        == ( fromList [ 1, 2, 3, 4 ], empty )
+    --> ( fromList [ 1, 2, 3, 4 ], empty )
 
     splitAt -1 (fromList [ 1, 2, 3, 4 ])
-        == ( empty, fromList [ 1, 2, 3, 4 ] )
+    --> ( empty, fromList [ 1, 2, 3, 4 ] )
 
 -}
 splitAt : Int -> Array a -> ( Array a, Array a )
@@ -531,14 +572,16 @@ splitAt index array =
 
 {-| Remove the element at the given index. If the index is out of bounds, nothing is changed.
 
+    import Array exposing (fromList)
+
     removeAt 2 (fromList [ 1, 2, 3, 4 ])
-        == fromList [ 1, 2, 4 ]
+    --> fromList [ 1, 2, 4 ]
 
     removeAt -1 (fromList [ 1, 2, 3, 4 ])
-        == fromList [ 1, 2, 3, 4 ]
+    --> fromList [ 1, 2, 3, 4 ]
 
     removeAt 100 (fromList [ 1, 2, 3, 4 ])
-        == fromList [ 1, 2, 3, 4 ]
+    --> fromList [ 1, 2, 3, 4 ]
 
 -}
 removeAt : Int -> Array a -> Array a
@@ -564,14 +607,16 @@ removeAt index array =
 
 {-| Insert an element at the given index. If the index is out of bounds, nothing is changed.
 
+    import Array exposing (fromList)
+
     insertAt 1 'b' (fromList [ 'a', 'c' ])
-        == fromList [ 'a', 'b', 'c' ]
+    --> fromList [ 'a', 'b', 'c' ]
 
     insertAt -1 'b' (fromList [ 'a', 'c' ])
-        == fromList [ 'a', 'c' ]
+    --> fromList [ 'a', 'c' ]
 
     insertAt 100 'b' (fromList [ 'a', 'c' ])
-        == fromList [ 'a', 'c' ]
+    --> fromList [ 'a', 'c' ]
 
 -}
 insertAt : Int -> a -> Array a -> Array a
@@ -596,14 +641,16 @@ insertAt index val values =
 
 {-| Whether all elements satisfy a test.
 
-    all isEven (fromList [ 2, 4 ])
-        == True
+    import Array exposing (fromList, empty)
 
-    all isEven (fromList [ 2, 3 ])
-        == False
+    all (\x -> x < 5) (fromList [ 2, 4 ])
+    --> True
 
-    all isEven empty
-        == True
+    all (\x -> x < 5) (fromList [ 4, 16 ])
+    --> False
+
+    all (\x -> x < 5) empty
+    --> True
 
 -}
 all : (a -> Bool) -> Array a -> Bool
@@ -616,13 +663,15 @@ all isOkay array =
 
 {-| Whether any elements satisfy a test.
 
-    any isEven (fromList [ 1, 3 ])
+    import Array exposing (fromList, empty)
+
+    any (\x -> x < 5) (fromList [ 6, 3 ])
     --> True
 
-    any isEven (fromList [ 1, 2 ])
+    any (\x -> x < 5) (fromList [ 12, 33 ])
     --> False
 
-    any isEven empty
+    any (\x -> x < 5) empty
     --> False
 
 -}
