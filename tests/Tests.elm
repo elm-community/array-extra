@@ -7,6 +7,7 @@ the tests are here to allow confident refactoring & changing.
 import Array exposing (Array, empty, fromList, repeat)
 import Array.Extra exposing (..)
 import Expect exposing (Expectation)
+import Fuzz
 import Test exposing (Test, describe, test)
 
 
@@ -402,6 +403,28 @@ suite =
                             [ "turtles", "on", "turtles", "on", "turtles" ]
                         )
             )
+        , describe "interweave"
+            [ test "less to interweave"
+                (\() ->
+                    fromList [ "a0", "a1", "a2" ]
+                        |> interweave
+                            (fromList [ "b0" ])
+                        |> expectEqualArrays
+                            (fromList
+                                [ "a0", "b0", "a1", "a2" ]
+                            )
+                )
+            , test "more to interweave"
+                (\() ->
+                    fromList [ "a0", "a1", "a2" ]
+                        |> interweave
+                            (fromList [ "b0", "b1", "b2", "b3", "b4" ])
+                        |> expectEqualArrays
+                            (fromList
+                                [ "a0", "b0", "a1", "b1", "a2", "b2", "b3", "b4" ]
+                            )
+                )
+            ]
         ]
 
 

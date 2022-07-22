@@ -4,7 +4,7 @@ module Array.Extra exposing
     , sliceFrom, sliceUntil, splitAt
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
     , filterMap, mapToList, indexedMapToList
-    , apply, map2, map3, map4, map5, zip, zip3, unzip
+    , interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
     )
 
 {-| Convenience functions for working with Array
@@ -37,7 +37,7 @@ module Array.Extra exposing
 
 ## Combine
 
-@docs apply, map2, map3, map4, map5, zip, zip3, unzip
+@docs interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
 
 -}
 
@@ -681,3 +681,55 @@ any isOkay array =
         |> Array.foldl
             (\element -> (||) (isOkay element))
             False
+
+
+{-| Place all elements of a given `Array` between all current elements.
+Extra elements of either `Array` are glued to the end without anything in between.
+
+    import Array exposing (fromList, repeat)
+
+    fromList [ "turtles", "turtles", "turtles" ]
+        |> interweave (repeat 2 "on")
+    --> fromList [ "turtles", "on", "turtles", "on", "turtles" ]
+
+    fromList [ "turtles", "turtles", "turtles" ]
+        |> interweave (repeat 5 "on")
+    --> fromList [ "turtles", "on", "turtles", "on", "turtles", "on", "on", "on" ]
+
+    fromList [ "turtles", "turtles", "turtles" ]
+        |> interweave (repeat 1 "on")
+    --> fromList [ "turtles", "on", "turtles", "turtles" ]
+
+-}
+interweave : Array element -> (Array element -> Array element)
+interweave toInterweave =
+    \array ->
+        let
+            untilArrayEnd =
+                array
+                    |> Array.foldl
+                        (\element soFar ->
+                            case soFar.toInterweave of
+                                [] ->
+                                    { interwoven =
+                                        element :: soFar.interwoven
+                                    , toInterweave = []
+                                    }
+
+                                toInterweaveHead :: toInterweaveTail ->
+                                    { interwoven =
+                                        toInterweaveHead
+                                            :: element
+                                            :: soFar.interwoven
+                                    , toInterweave = toInterweaveTail
+                                    }
+                        )
+                        { interwoven = []
+                        , toInterweave = toInterweave |> Array.toList
+                        }
+        in
+        (untilArrayEnd.interwoven
+            |> List.reverse
+        )
+            ++ untilArrayEnd.toInterweave
+            |> Array.fromList
