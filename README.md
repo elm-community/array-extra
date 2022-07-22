@@ -1,6 +1,4 @@
-# Convenience functions for working with Array
-
-Experimental package with convenience functions for working with Array.
+# convenience functions for working with `Array`
 
 Some people like to import under the same namespace as `Array`:
 
