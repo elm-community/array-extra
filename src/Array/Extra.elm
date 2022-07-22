@@ -1,43 +1,47 @@
 module Array.Extra exposing
     ( all, any
-    , pop, removeAt, insertAt, update, removeWhen, reverse, intersperse
+    , reverse, update
+    , pop, removeAt, removeWhen
+    , insertAt, intersperse
     , sliceFrom, sliceUntil, splitAt
+    , interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
     , filterMap, mapToList, indexedMapToList
-    , interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
     )
 
-{-| Convenience functions for working with Array
+{-| Convenience functions for working with `Array`
 
 
-# Scan
+# scan
 
 @docs all, any
 
 
-# Alter
+# alter
 
-@docs pop, removeAt, insertAt, update, removeWhen, reverse, intersperse
+@docs reverse, update
+@docs pop, removeAt, removeWhen
+@docs insertAt, intersperse
 
 
-## Slice
+## part
 
 @docs sliceFrom, sliceUntil, splitAt
 
 
-## Resize
+## combine
+
+@docs interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
+
+
+## resize
 
 @docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
 
 
-# Transform
+# transform
 
 @docs filterMap, mapToList, indexedMapToList
-
-
-## Combine
-
-@docs interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
 
 -}
 
