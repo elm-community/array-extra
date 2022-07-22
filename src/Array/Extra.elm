@@ -48,7 +48,8 @@ module Array.Extra exposing
 import Array exposing (Array, append, empty, initialize, length, repeat, slice)
 
 
-{-| Update the element at the index based on its current value. If the index is out of bounds, nothing is changed.
+{-| Update the element at a given index based on its current value.
+If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
@@ -72,9 +73,9 @@ update index alter array =
             Array.set index (alter element) array
 
 
-{-| Drop a number of elements from the start of an array.
-In other words, slice an array from an index until the very end.
-Given negative argument, count the end of the slice from the end of the array.
+{-| Drop a given number of elements from the start.
+In other words, slice the `Array` from an index until the very end.
+Given a negative argument, count the end of the slice from the end.
 
     import Array exposing (fromList)
 
@@ -90,9 +91,9 @@ sliceFrom lengthDropped array =
     slice lengthDropped (length array) array
 
 
-{-| Take a number of elements from the start of an array.
-In other words, slice an array from the very beginning until index not including.
-Given negative argument, count the beginning of the slice from the end of the array.
+{-| Take a number of elements from the start.
+In other words, slice the `Array` from the very beginning until not including the index.
+Given a negative argument, count the beginning of the slice from the end.
 
     import Array exposing (fromList)
 
@@ -115,7 +116,7 @@ sliceUntil newLength array =
         array
 
 
-{-| Remove the last element from an array.
+{-| Remove the last element.
 
     import Array exposing (fromList, empty)
 
@@ -131,7 +132,7 @@ pop array =
     slice 0 -1 array
 
 
-{-| Place a value between all members of the given array.
+{-| Place a value between all members.
 
     import Array exposing (fromList)
 
@@ -139,6 +140,8 @@ pop array =
         (fromList [ "turtles", "turtles", "turtles" ])
     --> fromList
     -->     [ "turtles", "on", "turtles", "on", "turtles" ]
+
+To interlace an `Array`, [`interweave`](#interweave).
 
 -}
 intersperse : a -> Array a -> Array a
@@ -149,7 +152,7 @@ intersperse separator array =
         |> Array.fromList
 
 
-{-| Apply a function that may succeed to all values in the array, but only keep the successes.
+{-| Try transforming all elements but only keep the successes.
 
     import Array exposing (fromList)
 
@@ -166,7 +169,8 @@ filterMap tryMap array =
         |> Array.fromList
 
 
-{-| Apply an array of functions to an array of values. If one array is longer, its extra elements are not used.
+{-| Apply a given `Array` of changes to all elements.
+If one `Array` is longer, its extra elements are not used.
 
     import Array exposing (fromList, repeat)
 
@@ -198,8 +202,8 @@ mapToList mapElement =
     Array.foldr (mapElement >> (::)) []
 
 
-{-| Apply a function to the elements in the array with their indices as the first argument
-and collect the result in a List.
+{-| Transform all elements with their indexes as the first argument
+and collect the result in a `List`.
 
     import Array exposing (Array, fromList)
     import Html exposing (Html)
@@ -207,8 +211,8 @@ and collect the result in a List.
     type alias Exercise =
         { name : String }
 
-    renderExercise : Int -> Exercise -> Html msg
-    renderExercise index exercise =
+    exerciseRender : Int -> Exercise -> Html msg
+    exerciseRender index exercise =
         String.concat
             [ "Exercise #"
             , String.fromInt (index + 1)
@@ -217,8 +221,8 @@ and collect the result in a List.
             ]
             |> Html.text
 
-    renderExercises : Array Exercise -> Html msg
-    renderExercises exercises =
+    exercisesRender : Array Exercise -> Html msg
+    exercisesRender exercises =
         indexedMapToList renderExercise exercises
             |> Html.div []
 
@@ -234,8 +238,8 @@ indexedMapToList mapIndexAndElement array =
         |> Tuple.second
 
 
-{-| Combine the elements of two arrays with the given function.
-If one array is longer, its extra elements are not used.
+{-| Combine the elements of two `Array`s with a given function.
+If one `Array` is longer, its extra elements are not used.
 
     import Array exposing (fromList)
 
@@ -264,7 +268,7 @@ map2 combineAb aArray bArray =
         |> Array.fromList
 
 
-{-| Combine the elements of three arrays with the given function. See [`map2`](Array-Extra#map2).
+{-| Combine the elements of three `Array`s with the given function. See [`map2`](Array-Extra#map2).
 
 Note: [`zip3`](Array-Extra#zip3) can be used instead of `map3 (\a b c -> ( a, b, c ))`.
 
@@ -279,7 +283,7 @@ map3 combineAbc aArray bArray cArray =
     apply (map2 combineAbc aArray bArray) cArray
 
 
-{-| Combine the elements of four arrays with the given function. See [`map2`](Array-Extra#map2).
+{-| Combine the elements of four `Array`s with the given function. See [`map2`](Array-Extra#map2).
 -}
 map4 :
     (a -> b -> c -> d -> combined)
@@ -292,7 +296,7 @@ map4 combineAbcd aArray bArray cArray dArray =
     apply (map3 combineAbcd aArray bArray cArray) dArray
 
 
-{-| Combine the elements of five arrays with the given function. See [`map2`](Array-Extra#map2).
+{-| Combine the elements of five `Array`s with the given function. See [`map2`](Array-Extra#map2).
 -}
 map5 :
     (a -> b -> c -> d -> e -> combined)
@@ -306,7 +310,8 @@ map5 combineAbcde aArray bArray cArray dArray eArray =
     apply (map4 combineAbcde aArray bArray cArray dArray) eArray
 
 
-{-| Zip the elements of two arrays into tuples. If one array is longer, its extra elements are not used.
+{-| Combine the elements of two `Array`s into tuples.
+If one is longer, its extra elements are not used.
 
     import Array exposing (fromList)
 
@@ -321,7 +326,8 @@ zip =
     map2 Tuple.pair
 
 
-{-| Zip the elements of three arrays into 3-tuples. Only the indices of the shortest array are used.
+{-| Zip the elements of three `Array`s into 3-tuples.
+Only the indexes of the shortest `Array` are used.
 
     import Array exposing (fromList)
 
@@ -340,7 +346,7 @@ zip3 =
     map3 (\a b c -> ( a, b, c ))
 
 
-{-| Unzip an array of tuples into a tuple containing one array with the first and one with the second values.
+{-| Split all tuple elements into a tuple of one `Array` with the first and one with the second values.
 
     import Array exposing (fromList)
 
@@ -360,7 +366,7 @@ unzip tupleArray =
     )
 
 
-{-| Return an array that only contains elements which fail to satisfy the predicate.
+{-| Only keep elements which fail to satisfy a given predicate.
 This is equivalent to `Array.filter (not << predicate)`.
 
     import Array exposing (fromList)
@@ -375,7 +381,7 @@ removeWhen isBad array =
     Array.filter (not << isBad) array
 
 
-{-| Resize an array from the left, padding the right-hand side with the given value.
+{-| Resize from the left, padding the right-hand side with a given value.
 
     import Array exposing (fromList, empty)
 
@@ -410,7 +416,7 @@ resizelRepeat newLength paddingValue array =
                 array
 
 
-{-| Resize an array from the right, padding the left-hand side with the given value.
+{-| Resize from the right, padding the left-hand side with a given value.
 
     import Array exposing (fromList, empty)
 
@@ -441,7 +447,7 @@ resizerRepeat newLength defaultValue array =
             array
 
 
-{-| Resize an array from the left, padding the right-hand side with the given index function.
+{-| Resize from the left, padding the right-hand side with a given value based on index.
 
     import Array exposing (fromList, empty)
 
@@ -490,7 +496,7 @@ resizelIndexed newLength defaultValueAtIndex array =
                 array
 
 
-{-| Resize an array from the right, padding the left-hand side with the given index function.
+{-| Resize from the right, padding the left-hand side with a given value based on index.
 
     import Array exposing (fromList, empty)
 
@@ -529,7 +535,7 @@ resizerIndexed newLength defaultValueAtIndex array =
             array
 
 
-{-| Reverse an array.
+{-| Flip the element order.
 
     import Array exposing (fromList)
 
@@ -549,7 +555,7 @@ reverseToList =
     Array.foldl (::) []
 
 
-{-| Split an array into two arrays, the first ending before and the second starting at the given index.
+{-| Split into two `Array`s, the first ending before and the second starting with a given index.
 
     import Array exposing (fromList, empty)
 
@@ -574,7 +580,8 @@ splitAt index array =
         ( empty, array )
 
 
-{-| Remove the element at the given index. If the index is out of bounds, nothing is changed.
+{-| Remove the element at a given index.
+If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
@@ -609,7 +616,8 @@ removeAt index array =
         array
 
 
-{-| Insert an element at the given index. If the index is out of bounds, nothing is changed.
+{-| Insert an element at a given index.
+If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
@@ -643,7 +651,7 @@ insertAt index val values =
         values
 
 
-{-| Whether all elements satisfy a test.
+{-| Whether all elements satisfy a given test.
 
     import Array exposing (fromList, empty)
 
@@ -665,7 +673,7 @@ all isOkay array =
             True
 
 
-{-| Whether any elements satisfy a test.
+{-| Whether at least some elements satisfy a given test.
 
     import Array exposing (fromList, empty)
 
