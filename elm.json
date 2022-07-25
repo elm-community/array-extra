@@ -3,7 +3,7 @@
     "name": "elm-community/array-extra",
     "summary": "Convenience functions for working with Array",
     "license": "MIT",
-    "version": "2.4.0",
+    "version": "2.5.0",
     "exposed-modules": [
         "Array.Extra"
     ],
@@ -12,7 +12,7 @@
         "elm/core": "1.0.0 <= v < 2.0.0"
     },
     "test-dependencies": {
-        "elm-explorations/test": "1.2.2 <= v < 2.0.0",
-        "elm/html": "1.0.0 <= v < 2.0.0"
+        "elm/html": "1.0.0 <= v < 2.0.0",
+        "elm-explorations/test": "1.2.2 <= v < 2.0.0"
     }
 }
