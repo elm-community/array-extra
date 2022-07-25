@@ -1,50 +1,55 @@
 module Array.Extra exposing
     ( all, any
-    , pop, removeAt, insertAt, update, removeWhen, reverse, intersperse
+    , reverse, update
+    , pop, removeAt, removeWhen
+    , insertAt, intersperse
     , sliceFrom, sliceUntil, splitAt
+    , interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
     , filterMap, mapToList, indexedMapToList
-    , apply, map2, map3, map4, map5, zip, zip3, unzip
     )
 
-{-| Convenience functions for working with Array
+{-| Convenience functions for working with `Array`
 
 
-# Scan
+# scan
 
 @docs all, any
 
 
-# Alter
+# alter
 
-@docs pop, removeAt, insertAt, update, removeWhen, reverse, intersperse
+@docs reverse, update
+@docs pop, removeAt, removeWhen
+@docs insertAt, intersperse
 
 
-## Slice
+## part
 
 @docs sliceFrom, sliceUntil, splitAt
 
 
-## Resize
+## combine
+
+@docs interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
+
+
+## resize
 
 @docs resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
 
 
-# Transform
+# transform
 
 @docs filterMap, mapToList, indexedMapToList
-
-
-## Combine
-
-@docs apply, map2, map3, map4, map5, zip, zip3, unzip
 
 -}
 
 import Array exposing (Array, append, empty, initialize, length, repeat, slice)
 
 
-{-| Update the element at the index based on its current value. If the index is out of bounds, nothing is changed.
+{-| Update the element at a given index based on its current value.
+If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
@@ -59,18 +64,19 @@ import Array exposing (Array, append, empty, initialize, length, repeat, slice)
 
 -}
 update : Int -> (a -> a) -> Array a -> Array a
-update index alter array =
-    case Array.get index array of
-        Nothing ->
-            array
+update index alter =
+    \array ->
+        case array |> Array.get index of
+            Nothing ->
+                array
 
-        Just element ->
-            Array.set index (alter element) array
+            Just element ->
+                array |> Array.set index (alter element)
 
 
-{-| Drop a number of elements from the start of an array.
-In other words, slice an array from an index until the very end.
-Given negative argument, count the end of the slice from the end of the array.
+{-| Drop a given number of elements from the start.
+In other words, slice the `Array` from an index until the very end.
+Given a negative argument, count the end of the slice from the end.
 
     import Array exposing (fromList)
 
@@ -82,13 +88,14 @@ Given negative argument, count the end of the slice from the end of the array.
 
 -}
 sliceFrom : Int -> Array a -> Array a
-sliceFrom lengthDropped array =
-    slice lengthDropped (length array) array
+sliceFrom lengthDropped =
+    \array ->
+        array |> slice lengthDropped (array |> length)
 
 
-{-| Take a number of elements from the start of an array.
-In other words, slice an array from the very beginning until index not including.
-Given negative argument, count the beginning of the slice from the end of the array.
+{-| Take a number of elements from the start.
+In other words, slice the `Array` from the very beginning until not including the index.
+Given a negative argument, count the beginning of the slice from the end.
 
     import Array exposing (fromList)
 
@@ -100,18 +107,19 @@ Given negative argument, count the beginning of the slice from the end of the ar
 
 -}
 sliceUntil : Int -> Array a -> Array a
-sliceUntil newLength array =
-    slice 0
-        (if newLength >= 0 then
-            newLength
-
-         else
-            length array + newLength
-        )
+sliceUntil lengthNew =
+    \array ->
         array
+            |> slice 0
+                (if lengthNew >= 0 then
+                    lengthNew
+
+                 else
+                    (array |> length) + lengthNew
+                )
 
 
-{-| Remove the last element from an array.
+{-| Remove the last element.
 
     import Array exposing (fromList, empty)
 
@@ -123,11 +131,11 @@ sliceUntil newLength array =
 
 -}
 pop : Array a -> Array a
-pop array =
-    slice 0 -1 array
+pop =
+    slice 0 -1
 
 
-{-| Place a value between all members of the given array.
+{-| Place a value between all members.
 
     import Array exposing (fromList)
 
@@ -136,16 +144,17 @@ pop array =
     --> fromList
     -->     [ "turtles", "on", "turtles", "on", "turtles" ]
 
+To interlace an `Array`, [`interweave`](#interweave).
+
 -}
 intersperse : a -> Array a -> Array a
-intersperse separator array =
-    array
-        |> Array.toList
-        |> List.intersperse separator
-        |> Array.fromList
+intersperse separator =
+    Array.toList
+        >> List.intersperse separator
+        >> Array.fromList
 
 
-{-| Apply a function that may succeed to all values in the array, but only keep the successes.
+{-| Try transforming all elements but only keep the successes.
 
     import Array exposing (fromList)
 
@@ -155,14 +164,14 @@ intersperse separator array =
 
 -}
 filterMap : (a -> Maybe b) -> Array a -> Array b
-filterMap tryMap array =
-    array
-        |> Array.toList
-        |> List.filterMap tryMap
-        |> Array.fromList
+filterMap tryMap =
+    Array.toList
+        >> List.filterMap tryMap
+        >> Array.fromList
 
 
-{-| Apply an array of functions to an array of values. If one array is longer, its extra elements are not used.
+{-| Apply a given `Array` of changes to all elements.
+If one `Array` is longer, its extra elements are not used.
 
     import Array exposing (fromList, repeat)
 
@@ -175,8 +184,8 @@ filterMap tryMap array =
 
 -}
 apply : Array (a -> b) -> Array a -> Array b
-apply maps array =
-    map2 (\map element -> map element) maps array
+apply changes =
+    map2 (\map element -> map element) changes
 
 
 {-| Apply a function to the elements in the array and collect the result in a List.
@@ -194,8 +203,8 @@ mapToList mapElement =
     Array.foldr (mapElement >> (::)) []
 
 
-{-| Apply a function to the elements in the array with their indices as the first argument
-and collect the result in a List.
+{-| Transform all elements with their indexes as the first argument
+and collect the result in a `List`.
 
     import Array exposing (Array, fromList)
     import Html exposing (Html)
@@ -203,8 +212,8 @@ and collect the result in a List.
     type alias Exercise =
         { name : String }
 
-    renderExercise : Int -> Exercise -> Html msg
-    renderExercise index exercise =
+    exerciseRender : Int -> Exercise -> Html msg
+    exerciseRender index exercise =
         String.concat
             [ "Exercise #"
             , String.fromInt (index + 1)
@@ -213,25 +222,26 @@ and collect the result in a List.
             ]
             |> Html.text
 
-    renderExercises : Array Exercise -> Html msg
-    renderExercises exercises =
+    exercisesRender : Array Exercise -> Html msg
+    exercisesRender exercises =
         indexedMapToList renderExercise exercises
             |> Html.div []
 
 -}
 indexedMapToList : (Int -> a -> b) -> Array a -> List b
-indexedMapToList mapIndexAndElement array =
-    Array.foldr
-        (\element ( i, listSoFar ) ->
-            ( i - 1, mapIndexAndElement i element :: listSoFar )
-        )
-        ( Array.length array - 1, [] )
+indexedMapToList mapIndexedElement =
+    \array ->
         array
-        |> Tuple.second
+            |> Array.foldr
+                (\element ( i, listSoFar ) ->
+                    ( i - 1, mapIndexedElement i element :: listSoFar )
+                )
+                ( (array |> length) - 1, [] )
+            |> Tuple.second
 
 
-{-| Combine the elements of two arrays with the given function.
-If one array is longer, its extra elements are not used.
+{-| Combine the elements of two `Array`s with a given function.
+If one `Array` is longer, its extra elements are not used.
 
     import Array exposing (fromList)
 
@@ -260,7 +270,7 @@ map2 combineAb aArray bArray =
         |> Array.fromList
 
 
-{-| Combine the elements of three arrays with the given function. See [`map2`](Array-Extra#map2).
+{-| Combine the elements of three `Array`s with the given function. See [`map2`](Array-Extra#map2).
 
 Note: [`zip3`](Array-Extra#zip3) can be used instead of `map3 (\a b c -> ( a, b, c ))`.
 
@@ -275,7 +285,7 @@ map3 combineAbc aArray bArray cArray =
     apply (map2 combineAbc aArray bArray) cArray
 
 
-{-| Combine the elements of four arrays with the given function. See [`map2`](Array-Extra#map2).
+{-| Combine the elements of four `Array`s with the given function. See [`map2`](Array-Extra#map2).
 -}
 map4 :
     (a -> b -> c -> d -> combined)
@@ -288,7 +298,7 @@ map4 combineAbcd aArray bArray cArray dArray =
     apply (map3 combineAbcd aArray bArray cArray) dArray
 
 
-{-| Combine the elements of five arrays with the given function. See [`map2`](Array-Extra#map2).
+{-| Combine the elements of five `Array`s with the given function. See [`map2`](Array-Extra#map2).
 -}
 map5 :
     (a -> b -> c -> d -> e -> combined)
@@ -302,7 +312,8 @@ map5 combineAbcde aArray bArray cArray dArray eArray =
     apply (map4 combineAbcde aArray bArray cArray dArray) eArray
 
 
-{-| Zip the elements of two arrays into tuples. If one array is longer, its extra elements are not used.
+{-| Combine the elements of two `Array`s into tuples.
+If one is longer, its extra elements are not used.
 
     import Array exposing (fromList)
 
@@ -317,7 +328,8 @@ zip =
     map2 Tuple.pair
 
 
-{-| Zip the elements of three arrays into 3-tuples. Only the indices of the shortest array are used.
+{-| Zip the elements of three `Array`s into 3-tuples.
+Only the indexes of the shortest `Array` are used.
 
     import Array exposing (fromList)
 
@@ -336,7 +348,7 @@ zip3 =
     map3 (\a b c -> ( a, b, c ))
 
 
-{-| Unzip an array of tuples into a tuple containing one array with the first and one with the second values.
+{-| Split all tuple elements into a tuple of one `Array` with the first and one with the second values.
 
     import Array exposing (fromList)
 
@@ -350,13 +362,14 @@ zip3 =
 
 -}
 unzip : Array ( a, b ) -> ( Array a, Array b )
-unzip tupleArray =
-    ( tupleArray |> Array.map Tuple.first
-    , tupleArray |> Array.map Tuple.second
-    )
+unzip =
+    \arrayOfTuples ->
+        ( arrayOfTuples |> Array.map Tuple.first
+        , arrayOfTuples |> Array.map Tuple.second
+        )
 
 
-{-| Return an array that only contains elements which fail to satisfy the predicate.
+{-| Only keep elements which fail to satisfy a given predicate.
 This is equivalent to `Array.filter (not << predicate)`.
 
     import Array exposing (fromList)
@@ -367,11 +380,11 @@ This is equivalent to `Array.filter (not << predicate)`.
 
 -}
 removeWhen : (a -> Bool) -> Array a -> Array a
-removeWhen isBad array =
-    Array.filter (not << isBad) array
+removeWhen isBad =
+    Array.filter (not << isBad)
 
 
-{-| Resize an array from the left, padding the right-hand side with the given value.
+{-| Resize from the left, padding the right-hand side with a given value.
 
     import Array exposing (fromList, empty)
 
@@ -386,27 +399,28 @@ removeWhen isBad array =
 
 -}
 resizelRepeat : Int -> a -> Array a -> Array a
-resizelRepeat newLength paddingValue array =
-    if newLength <= 0 then
-        Array.empty
+resizelRepeat lengthNew padding =
+    \array ->
+        if lengthNew <= 0 then
+            Array.empty
 
-    else
-        let
-            len =
-                length array
-        in
-        case compare len newLength of
-            GT ->
-                sliceUntil newLength array
+        else
+            let
+                arrayLength =
+                    array |> length
+            in
+            case compare arrayLength lengthNew of
+                GT ->
+                    array |> sliceUntil lengthNew
 
-            LT ->
-                append array (repeat (newLength - len) paddingValue)
+                LT ->
+                    append array (repeat (lengthNew - arrayLength) padding)
 
-            EQ ->
-                array
+                EQ ->
+                    array
 
 
-{-| Resize an array from the right, padding the left-hand side with the given value.
+{-| Resize from the right, padding the left-hand side with a given value.
 
     import Array exposing (fromList, empty)
 
@@ -421,23 +435,26 @@ resizelRepeat newLength paddingValue array =
 
 -}
 resizerRepeat : Int -> a -> Array a -> Array a
-resizerRepeat newLength defaultValue array =
-    let
-        len =
-            length array
-    in
-    case compare len newLength of
-        GT ->
-            slice (len - newLength) len array
+resizerRepeat lengthNew defaultValue =
+    \array ->
+        let
+            arrayLength =
+                array |> length
+        in
+        case compare arrayLength lengthNew of
+            GT ->
+                array |> slice (arrayLength - lengthNew) arrayLength
 
-        LT ->
-            append (repeat (newLength - len) defaultValue) array
+            LT ->
+                append
+                    (repeat (lengthNew - arrayLength) defaultValue)
+                    array
 
-        EQ ->
-            array
+            EQ ->
+                array
 
 
-{-| Resize an array from the left, padding the right-hand side with the given index function.
+{-| Resize from the left, padding the right-hand side with a given value based on index.
 
     import Array exposing (fromList, empty)
 
@@ -463,30 +480,31 @@ resizerRepeat newLength defaultValue array =
 
 -}
 resizelIndexed : Int -> (Int -> a) -> Array a -> Array a
-resizelIndexed newLength defaultValueAtIndex array =
-    if newLength <= 0 then
-        Array.empty
+resizelIndexed lengthNew defaultValueAtIndex =
+    \array ->
+        if lengthNew <= 0 then
+            Array.empty
 
-    else
-        let
-            len =
-                length array
-        in
-        case compare len newLength of
-            GT ->
-                sliceUntil newLength array
+        else
+            let
+                arrayLength =
+                    array |> length
+            in
+            case compare arrayLength lengthNew of
+                GT ->
+                    array |> sliceUntil lengthNew
 
-            LT ->
-                append array
-                    (initialize (newLength - len)
-                        (defaultValueAtIndex << (\i -> i + len))
-                    )
+                LT ->
+                    append array
+                        (initialize (lengthNew - arrayLength)
+                            (defaultValueAtIndex << (\i -> i + arrayLength))
+                        )
 
-            EQ ->
-                array
+                EQ ->
+                    array
 
 
-{-| Resize an array from the right, padding the left-hand side with the given index function.
+{-| Resize from the right, padding the left-hand side with a given value based on index.
 
     import Array exposing (fromList, empty)
 
@@ -507,25 +525,26 @@ resizelIndexed newLength defaultValueAtIndex array =
 
 -}
 resizerIndexed : Int -> (Int -> a) -> Array a -> Array a
-resizerIndexed newLength defaultValueAtIndex array =
-    let
-        len =
-            length array
-    in
-    case compare len newLength of
-        GT ->
-            slice (len - newLength) len array
+resizerIndexed lengthNew paddingAtIndex =
+    \array ->
+        let
+            arrayLength =
+                array |> length
+        in
+        case compare arrayLength lengthNew of
+            GT ->
+                array |> slice (arrayLength - lengthNew) arrayLength
 
-        LT ->
-            append
-                (initialize (newLength - len) defaultValueAtIndex)
+            LT ->
+                append
+                    (initialize (lengthNew - arrayLength) paddingAtIndex)
+                    array
+
+            EQ ->
                 array
 
-        EQ ->
-            array
 
-
-{-| Reverse an array.
+{-| Flip the element order.
 
     import Array exposing (fromList)
 
@@ -534,10 +553,9 @@ resizerIndexed newLength defaultValueAtIndex array =
 
 -}
 reverse : Array a -> Array a
-reverse array =
-    array
-        |> reverseToList
-        |> Array.fromList
+reverse =
+    reverseToList
+        >> Array.fromList
 
 
 reverseToList : Array a -> List a
@@ -545,7 +563,7 @@ reverseToList =
     Array.foldl (::) []
 
 
-{-| Split an array into two arrays, the first ending before and the second starting at the given index.
+{-| Split into two `Array`s, the first ending before and the second starting with a given index.
 
     import Array exposing (fromList, empty)
 
@@ -560,17 +578,19 @@ reverseToList =
 
 -}
 splitAt : Int -> Array a -> ( Array a, Array a )
-splitAt index array =
-    if index > 0 then
-        ( sliceUntil index array
-        , sliceFrom index array
-        )
+splitAt index =
+    \array ->
+        if index > 0 then
+            ( array |> sliceUntil index
+            , array |> sliceFrom index
+            )
 
-    else
-        ( empty, array )
+        else
+            ( empty, array )
 
 
-{-| Remove the element at the given index. If the index is out of bounds, nothing is changed.
+{-| Remove the element at a given index.
+If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
@@ -585,27 +605,29 @@ splitAt index array =
 
 -}
 removeAt : Int -> Array a -> Array a
-removeAt index array =
-    if index >= 0 then
-        let
-            ( beforeIndex, startingAtIndex ) =
-                splitAt index array
+removeAt index =
+    \array ->
+        if index >= 0 then
+            let
+                ( beforeIndex, startingAtIndex ) =
+                    array |> splitAt index
 
-            lengthStartingAtIndex =
-                length startingAtIndex
-        in
-        if lengthStartingAtIndex == 0 then
-            beforeIndex
+                lengthStartingAtIndex =
+                    length startingAtIndex
+            in
+            if lengthStartingAtIndex == 0 then
+                beforeIndex
+
+            else
+                append beforeIndex
+                    (slice 1 lengthStartingAtIndex startingAtIndex)
 
         else
-            append beforeIndex
-                (slice 1 lengthStartingAtIndex startingAtIndex)
-
-    else
-        array
+            array
 
 
-{-| Insert an element at the given index. If the index is out of bounds, nothing is changed.
+{-| Insert an element at a given index.
+If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
@@ -620,26 +642,27 @@ removeAt index array =
 
 -}
 insertAt : Int -> a -> Array a -> Array a
-insertAt index val values =
-    let
-        length =
-            Array.length values
-    in
-    if index >= 0 && index <= length then
+insertAt index val =
+    \array ->
         let
-            before =
-                Array.slice 0 index values
-
-            after =
-                Array.slice index length values
+            arrayLength =
+                array |> length
         in
-        Array.append (Array.push val before) after
+        if index >= 0 && index <= arrayLength then
+            let
+                before =
+                    array |> Array.slice 0 index
 
-    else
-        values
+                after =
+                    array |> Array.slice index arrayLength
+            in
+            Array.append (Array.push val before) after
+
+        else
+            array
 
 
-{-| Whether all elements satisfy a test.
+{-| Whether all elements satisfy a given test.
 
     import Array exposing (fromList, empty)
 
@@ -654,14 +677,13 @@ insertAt index val values =
 
 -}
 all : (a -> Bool) -> Array a -> Bool
-all isOkay array =
-    array
-        |> Array.foldl
-            (\element -> (&&) (isOkay element))
-            True
+all isOkay =
+    Array.foldl
+        (\element -> (&&) (isOkay element))
+        True
 
 
-{-| Whether any elements satisfy a test.
+{-| Whether at least some elements satisfy a given test.
 
     import Array exposing (fromList, empty)
 
@@ -676,8 +698,59 @@ all isOkay array =
 
 -}
 any : (a -> Bool) -> Array a -> Bool
-any isOkay array =
-    array
-        |> Array.foldl
-            (\element -> (||) (isOkay element))
-            False
+any isOkay =
+    Array.foldl
+        (\element -> (||) (isOkay element))
+        False
+
+
+{-| Place all elements of a given `Array` between all current elements.
+Extra elements of either `Array` are glued to the end without anything in between.
+
+    import Array exposing (fromList, repeat)
+
+    fromList [ "turtles", "turtles", "turtles" ]
+        |> interweave (repeat 2 "on")
+    --> fromList [ "turtles", "on", "turtles", "on", "turtles" ]
+
+    fromList [ "turtles", "turtles", "turtles" ]
+        |> interweave (repeat 5 "on")
+    --> fromList [ "turtles", "on", "turtles", "on", "turtles", "on", "on", "on" ]
+
+    fromList [ "turtles", "turtles", "turtles" ]
+        |> interweave (repeat 1 "on")
+    --> fromList [ "turtles", "on", "turtles", "turtles" ]
+
+-}
+interweave : Array element -> (Array element -> Array element)
+interweave toInterweave =
+    \array ->
+        let
+            untilArrayEnd =
+                array
+                    |> Array.foldl
+                        (\element soFar ->
+                            case soFar.toInterweave of
+                                [] ->
+                                    { interwoven =
+                                        element :: soFar.interwoven
+                                    , toInterweave = []
+                                    }
+
+                                toInterweaveHead :: toInterweaveTail ->
+                                    { interwoven =
+                                        toInterweaveHead
+                                            :: element
+                                            :: soFar.interwoven
+                                    , toInterweave = toInterweaveTail
+                                    }
+                        )
+                        { interwoven = []
+                        , toInterweave = toInterweave |> Array.toList
+                        }
+        in
+        (untilArrayEnd.interwoven
+            |> List.reverse
+        )
+            ++ untilArrayEnd.toInterweave
+            |> Array.fromList
