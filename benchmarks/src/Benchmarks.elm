@@ -117,7 +117,7 @@ suite =
             [ ( "with foldr", arrayMemberFoldr )
             , ( "with foldl", arrayMemberFoldl )
             , ( "recursive", arrayMemberRec )
-            , ( "with List.meber", listMember )
+            , ( "with List.member", listMember )
             ]
         ]
 
