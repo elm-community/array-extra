@@ -444,7 +444,7 @@ suite =
                 )
             , Test.fuzz
                 (Fuzz.array Fuzz.int)
-                "doesn't exists"
+                "doesn't exist"
                 (Array.filter (\element -> element /= 123456)
                     >> member 123456
                     >> Expect.equal False
