@@ -1,4 +1,4 @@
-module Candidates exposing (allRecursive, allWithFold, allWithListAll, anyRecursive, anyWithFold, anyWithListAny, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
+module Candidates exposing (allRecursive, allWithFold, allWithListAll, anyRecursive, anyWithFold, anyWithListAny, arrayMemberFoldl, arrayMemberFoldr, arrayMemberRec, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps, listMember)
 
 import Array exposing (Array)
 import Array.Extra as Array
@@ -210,3 +210,37 @@ intersperseWithList separator array =
         |> Array.toList
         |> List.intersperse separator
         |> Array.fromList
+
+
+arrayMemberFoldr : a -> Array a -> Bool
+arrayMemberFoldr item array =
+    Array.foldr (\i res -> item == i || res) False array
+
+
+arrayMemberFoldl : a -> Array a -> Bool
+arrayMemberFoldl item array =
+    Array.foldl (\i res -> item == i || res) False array
+
+
+arrayMemberRec : a -> Array a -> Bool
+arrayMemberRec item array =
+    arrayMemberRecHelp 0 item array
+
+
+arrayMemberRecHelp : Int -> a -> Array a -> Bool
+arrayMemberRecHelp n item array =
+    case Array.get n array of
+        Just i ->
+            if i == item then
+                True
+
+            else
+                arrayMemberRecHelp (n + 1) item array
+
+        Nothing ->
+            False
+
+
+listMember : a -> Array a -> Bool
+listMember item array =
+    List.member item (Array.toList array)
