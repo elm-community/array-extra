@@ -24,6 +24,7 @@ application =
         (\sum -> ints1To100 |> sum)
         [ ( "fully curried", sumFullyCurried )
         , ( "partially curried/applied", sumPartiallyCurried )
+        , ( "piping", sumPiping )
         , ( "one lambda, fully applied", sumOneLambdaFullyAppliedCurried )
         , ( "nested lambda, fully applied", sumNestedLambdaFullyAppliedCurried )
         ]
