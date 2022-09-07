@@ -774,5 +774,5 @@ interweave toInterweave =
 
 -}
 member : a -> Array a -> Bool
-member item array =
-    Array.foldr (\i res -> item == i || res) False array
+member item =
+    Array.foldr (\i res -> item == i || res) False
