@@ -1,12 +1,12 @@
 module Array.Extra exposing
     ( all, any, member
-    , reverse, update
-    , pop, removeAt, removeWhen
-    , insertAt, intersperse
+    , reverse, intersperse
+    , update, pop, removeAt, insertAt
+    , removeWhen, filterMap
     , sliceFrom, sliceUntil, splitAt
     , interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
-    , filterMap, mapToList, indexedMapToList
+    , mapToList, indexedMapToList
     )
 
 {-| Convenience functions for working with `Array`
@@ -19,9 +19,13 @@ module Array.Extra exposing
 
 # alter
 
-@docs reverse, update
-@docs pop, removeAt, removeWhen
-@docs insertAt, intersperse
+@docs reverse, intersperse
+@docs update, pop, removeAt, insertAt
+
+
+## filter
+
+@docs removeWhen, filterMap
 
 
 ## part
@@ -41,7 +45,7 @@ module Array.Extra exposing
 
 # transform
 
-@docs filterMap, mapToList, indexedMapToList
+@docs mapToList, indexedMapToList
 
 -}
 
@@ -767,6 +771,7 @@ interweave toInterweave =
     fromList [ "Leonardo", "Michelangelo" ]
         |> member "Raphael"
     --> False
+
 -}
 member : a -> Array a -> Bool
 member item array =
