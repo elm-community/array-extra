@@ -760,7 +760,7 @@ interweave toInterweave =
             |> Array.fromList
 
 
-{-| Figure out whether an array contains a value
+{-| Whether a given value is contained.
 
     import Array exposing (fromList)
 
@@ -774,5 +774,5 @@ interweave toInterweave =
 
 -}
 member : element -> (Array element -> Bool)
-member item =
-    Array.foldr (\i res -> item == i || res) False
+member needle =
+    Array.foldr (\i res -> needle == i || res) False
