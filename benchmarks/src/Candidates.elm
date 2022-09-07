@@ -1,7 +1,38 @@
-module Candidates exposing (allRecursive, allWithFold, allWithListAll, anyRecursive, anyWithFold, anyWithListAny, arrayMemberFoldl, arrayMemberFoldr, arrayMemberRec, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps, listMember)
+module Candidates exposing (allRecursive, sumPiping, allWithFold, allWithListAll, anyRecursive, anyWithFold, anyWithListAny, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, memberRecursive, memberWithFold, memberWithList, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, sumFullyCurried, sumNestedLambdaFullyAppliedCurried, sumOneLambdaFullyAppliedCurried, sumPartiallyCurried, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
 
 import Array exposing (Array)
 import Array.Extra as Array
+
+
+
+-- application
+
+
+sumFullyCurried : Array number -> number
+sumFullyCurried =
+    Array.foldl (+) 0
+
+
+sumPartiallyCurried : Array number -> number
+sumPartiallyCurried =
+    Array.foldl (\element -> (+) element) 0
+
+sumPiping : Array number -> number
+sumPiping =
+    Array.foldl (\element soFar -> soFar |> (+) element) 0
+
+sumOneLambdaFullyAppliedCurried : Array number -> number
+sumOneLambdaFullyAppliedCurried =
+    Array.foldl (\element soFar -> soFar + element) 0
+
+
+sumNestedLambdaFullyAppliedCurried : Array number -> number
+sumNestedLambdaFullyAppliedCurried =
+    Array.foldl (\element -> \soFar -> soFar + element) 0
+
+
+
+-- array extra
 
 
 reverseWithFoldlToList : Array a -> Array a
@@ -153,7 +184,9 @@ allWithListAll isOkay =
 
 allWithFold : (a -> Bool) -> Array a -> Bool
 allWithFold isOkay =
-    Array.foldl (\element -> (&&) (isOkay element)) True
+    Array.foldl
+        (\element soFar -> soFar && isOkay element)
+        True
 
 
 anyWithListAny : (a -> Bool) -> Array a -> Bool
@@ -164,22 +197,55 @@ anyWithListAny isOkay =
 
 anyWithFold : (a -> Bool) -> Array a -> Bool
 anyWithFold isOkay =
-    Array.foldl (\element -> (||) (isOkay element)) False
+    Array.foldl
+        (\element soFar -> soFar || (isOkay element))
+        False
 
 
 anyRecursive : (a -> Bool) -> Array a -> Bool
-anyRecursive isOkay array =
-    -- read & write is faster on the last element
-    case Array.get (Array.length array - 1) array of
-        Nothing ->
-            False
+anyRecursive isOkay =
+    \array ->
+        -- read & write is faster on the last element
+        case array |> Array.get ((array |> Array.length) - 1) of
+            Nothing ->
+                False
 
-        Just last ->
-            if last |> isOkay then
-                True
+            Just last ->
+                if last |> isOkay then
+                    True
 
-            else
-                anyRecursive isOkay (array |> Array.pop)
+                else
+                    array |> Array.pop |> anyRecursive isOkay
+
+
+memberWithFold : a -> Array a -> Bool
+memberWithFold needle =
+    Array.foldl (\i res -> needle == i || res) False
+
+
+memberRecursive : a -> Array a -> Bool
+memberRecursive needle =
+    memberRecursiveFromIndex 0 needle
+
+
+memberRecursiveFromIndex : Int -> a -> Array a -> Bool
+memberRecursiveFromIndex index needle =
+    \array ->
+        case array |> Array.get index of
+            Just atIndex ->
+                if atIndex == needle then
+                    True
+
+                else
+                    array |> memberRecursiveFromIndex (index + 1) needle
+
+            Nothing ->
+                False
+
+
+memberWithList : a -> Array a -> Bool
+memberWithList needle =
+    Array.toList >> List.member needle
 
 
 intersperseWithArrayFoldr : a -> Array a -> Array a
@@ -188,7 +254,7 @@ intersperseWithArrayFoldr separator array =
         Just last ->
             let
                 beforeLast =
-                    Array.pop array
+                    array |> Array.pop
 
                 step element =
                     Array.push element
@@ -210,37 +276,3 @@ intersperseWithList separator array =
         |> Array.toList
         |> List.intersperse separator
         |> Array.fromList
-
-
-arrayMemberFoldr : a -> Array a -> Bool
-arrayMemberFoldr item array =
-    Array.foldr (\i res -> item == i || res) False array
-
-
-arrayMemberFoldl : a -> Array a -> Bool
-arrayMemberFoldl item array =
-    Array.foldl (\i res -> item == i || res) False array
-
-
-arrayMemberRec : a -> Array a -> Bool
-arrayMemberRec item array =
-    arrayMemberRecHelp 0 item array
-
-
-arrayMemberRecHelp : Int -> a -> Array a -> Bool
-arrayMemberRecHelp n item array =
-    case Array.get n array of
-        Just i ->
-            if i == item then
-                True
-
-            else
-                arrayMemberRecHelp (n + 1) item array
-
-        Nothing ->
-            False
-
-
-listMember : a -> Array a -> Bool
-listMember item array =
-    List.member item (Array.toList array)

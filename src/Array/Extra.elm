@@ -1,12 +1,12 @@
 module Array.Extra exposing
     ( all, any, member
-    , reverse, update
-    , pop, removeAt, removeWhen
-    , insertAt, intersperse
+    , reverse, intersperse
+    , update, pop, removeAt, insertAt
+    , removeWhen, filterMap
     , sliceFrom, sliceUntil, splitAt
     , interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
-    , filterMap, mapToList, indexedMapToList
+    , mapToList, indexedMapToList
     )
 
 {-| Convenience functions for working with `Array`
@@ -19,9 +19,13 @@ module Array.Extra exposing
 
 # alter
 
-@docs reverse, update
-@docs pop, removeAt, removeWhen
-@docs insertAt, intersperse
+@docs reverse, intersperse
+@docs update, pop, removeAt, insertAt
+
+
+## filter
+
+@docs removeWhen, filterMap
 
 
 ## part
@@ -41,7 +45,7 @@ module Array.Extra exposing
 
 # transform
 
-@docs filterMap, mapToList, indexedMapToList
+@docs mapToList, indexedMapToList
 
 -}
 
@@ -53,17 +57,20 @@ If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
-    update 1 ((+) 10) (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> update 1 (\n -> n + 10)
     --> fromList [ 1, 12, 3 ]
 
-    update 4 ((+) 10) (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> update 4 (\n -> n + 10)
     --> fromList [ 1, 2, 3 ]
 
-    update -1 ((+) 10) (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> update -1 (\n -> n + 10)
     --> fromList [ 1, 2, 3 ]
 
 -}
-update : Int -> (a -> a) -> Array a -> Array a
+update :
+    Int
+    -> (element -> element)
+    -> (Array element -> Array element)
 update index alter =
     \array ->
         case array |> Array.get index of
@@ -80,14 +87,14 @@ Given a negative argument, count the end of the slice from the end.
 
     import Array exposing (fromList)
 
-    sliceFrom 3 (fromList (List.range 0 6))
+    fromList (List.range 0 6) |> sliceFrom 3
     --> fromList [ 3, 4, 5, 6 ]
 
-    sliceFrom -3 (fromList (List.range 0 6))
+    fromList (List.range 0 6) |> sliceFrom -3
     --> fromList [ 4, 5, 6 ]
 
 -}
-sliceFrom : Int -> Array a -> Array a
+sliceFrom : Int -> (Array element -> Array element)
 sliceFrom lengthDropped =
     \array ->
         array |> slice lengthDropped (array |> length)
@@ -99,14 +106,14 @@ Given a negative argument, count the beginning of the slice from the end.
 
     import Array exposing (fromList)
 
-    sliceUntil 3 (fromList (List.range 0 6))
+    fromList (List.range 0 6) |> sliceUntil 3
     --> fromList [ 0, 1, 2 ]
 
-    sliceUntil -3 (fromList (List.range 0 6))
+    fromList (List.range 0 6) |> sliceUntil -3
     --> fromList [ 0, 1, 2, 3 ]
 
 -}
-sliceUntil : Int -> Array a -> Array a
+sliceUntil : Int -> (Array element -> Array element)
 sliceUntil lengthNew =
     \array ->
         array
@@ -123,31 +130,31 @@ sliceUntil lengthNew =
 
     import Array exposing (fromList, empty)
 
-    pop (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> pop
     --> fromList [ 1, 2 ]
 
-    pop empty
+    empty |> pop
     --> empty
 
 -}
-pop : Array a -> Array a
+pop : Array element -> Array element
 pop =
     slice 0 -1
 
 
-{-| Place a value between all members.
+{-| Place a value between all elements.
 
     import Array exposing (fromList)
 
-    intersperse "on"
-        (fromList [ "turtles", "turtles", "turtles" ])
+    fromList [ "turtles", "turtles", "turtles" ]
+        |> intersperse "on"
     --> fromList
     -->     [ "turtles", "on", "turtles", "on", "turtles" ]
 
 To interlace an `Array`, [`interweave`](#interweave).
 
 -}
-intersperse : a -> Array a -> Array a
+intersperse : element -> (Array element -> Array element)
 intersperse separator =
     Array.toList
         >> List.intersperse separator
@@ -158,12 +165,14 @@ intersperse separator =
 
     import Array exposing (fromList)
 
-    filterMap String.toInt
-        (fromList [ "3", "4.0", "5", "hats" ])
+    fromList [ "3", "4.0", "5", "hats" ]
+        |> filterMap String.toInt
     --> fromList [ 3, 5 ]
 
 -}
-filterMap : (a -> Maybe b) -> Array a -> Array b
+filterMap :
+    (element -> Maybe narrowElement)
+    -> (Array element -> Array narrowElement)
 filterMap tryMap =
     Array.toList
         >> List.filterMap tryMap
@@ -175,15 +184,17 @@ If one `Array` is longer, its extra elements are not used.
 
     import Array exposing (fromList, repeat)
 
-    apply
-        (fromList
-            [ \x -> -x, identity, (+) 10 ]
-        )
-        (repeat 5 100)
+    repeat 5 100
+        |> apply
+            (fromList
+                [ \x -> -x, identity, (+) 10 ]
+            )
     --> fromList [ -100, 100, 110 ]
 
 -}
-apply : Array (a -> b) -> Array a -> Array b
+apply :
+    Array (element -> mappedElement)
+    -> (Array element -> Array mappedElement)
 apply changes =
     map2 (\map element -> map element) changes
 
@@ -193,12 +204,14 @@ apply changes =
     import Array exposing (fromList)
     import Html
 
-    mapToList Html.text
-        (fromList [ "a", "b", "c" ])
+    fromList [ "a", "b", "c" ]
+        |> mapToList Html.text
     --> [ Html.text "a", Html.text "b", Html.text "c" ]
 
 -}
-mapToList : (a -> b) -> Array a -> List b
+mapToList :
+    (element -> mappedElement)
+    -> (Array element -> List mappedElement)
 mapToList mapElement =
     Array.foldr (mapElement >> (::)) []
 
@@ -213,22 +226,25 @@ and collect the result in a `List`.
         { name : String }
 
     exerciseRender : Int -> Exercise -> Html msg
-    exerciseRender index exercise =
-        String.concat
-            [ "Exercise #"
-            , String.fromInt (index + 1)
-            , " - "
-            , exercise.name
-            ]
-            |> Html.text
+    exerciseRender index =
+        \exercise ->
+            String.concat
+                [ "Exercise #"
+                , String.fromInt (index + 1)
+                , " - "
+                , exercise.name
+                ]
+                |> Html.text
 
     exercisesRender : Array Exercise -> Html msg
-    exercisesRender exercises =
-        indexedMapToList renderExercise exercises
-            |> Html.div []
+    exercisesRender =
+        indexedMapToList renderExercise
+            >> Html.div []
 
 -}
-indexedMapToList : (Int -> a -> b) -> Array a -> List b
+indexedMapToList :
+    (Int -> element -> mappedElement)
+    -> (Array element -> List mappedElement)
 indexedMapToList mapIndexedElement =
     \array ->
         array
@@ -245,7 +261,7 @@ If one `Array` is longer, its extra elements are not used.
 
     import Array exposing (fromList)
 
-    map2 (+)
+    map2 (\a b -> a + b)
         (fromList [ 1, 2, 3 ])
         (fromList [ 1, 2, 3, 4 ])
     --> fromList [ 2, 4, 6 ]
@@ -323,7 +339,10 @@ If one is longer, its extra elements are not used.
     --> fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
 
 -}
-zip : Array a -> Array b -> Array ( a, b )
+zip :
+    Array firstElement
+    -> Array secondElement
+    -> Array ( firstElement, secondElement )
 zip =
     map2 Tuple.pair
 
@@ -343,7 +362,11 @@ Only the indexes of the shortest `Array` are used.
     -->     ]
 
 -}
-zip3 : Array a -> Array b -> Array c -> Array ( a, b, c )
+zip3 :
+    Array firstElement
+    -> Array secondElement
+    -> Array thirdElement
+    -> Array ( firstElement, secondElement, thirdElement )
 zip3 =
     map3 (\a b c -> ( a, b, c ))
 
@@ -361,7 +384,9 @@ zip3 =
     --> )
 
 -}
-unzip : Array ( a, b ) -> ( Array a, Array b )
+unzip :
+    Array ( elementFirst, elementSecond )
+    -> ( Array elementFirst, Array elementSecond )
 unzip =
     \arrayOfTuples ->
         ( arrayOfTuples |> Array.map Tuple.first
@@ -374,12 +399,12 @@ This is equivalent to `Array.filter (not << predicate)`.
 
     import Array exposing (fromList)
 
-    removeWhen (\x -> x < 0)
-        (fromList [ -1, 92, 0, 14, -3 ])
+    fromList [ -1, 92, 0, 14, -3 ]
+        |> removeWhen (\x -> x < 0)
     --> fromList [ 92, 0, 14 ]
 
 -}
-removeWhen : (a -> Bool) -> Array a -> Array a
+removeWhen : (element -> Bool) -> (Array element -> Array element)
 removeWhen isBad =
     Array.filter (not << isBad)
 
@@ -388,17 +413,17 @@ removeWhen isBad =
 
     import Array exposing (fromList, empty)
 
-    resizelRepeat 4 0 (fromList [ 1, 2 ])
+    fromList [ 1, 2 ] |> resizelRepeat 4 0
     --> fromList [ 1, 2, 0, 0 ]
 
-    resizelRepeat 2 0 (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> resizelRepeat 2 0
     --> fromList [ 1, 2 ]
 
-    resizelRepeat -1 0 (fromList [ 1, 2 ])
+    fromList [ 1, 2 ] |> resizelRepeat -1 0
     --> empty
 
 -}
-resizelRepeat : Int -> a -> Array a -> Array a
+resizelRepeat : Int -> element -> (Array element -> Array element)
 resizelRepeat lengthNew padding =
     \array ->
         if lengthNew <= 0 then
@@ -424,17 +449,17 @@ resizelRepeat lengthNew padding =
 
     import Array exposing (fromList, empty)
 
-    resizerRepeat 4 0 (fromList [ 1, 2 ])
+    fromList [ 1, 2 ] |> resizerRepeat 4 0
     --> fromList [ 0, 0, 1, 2 ]
 
-    resizerRepeat 2 0 (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> resizerRepeat 2 0
     --> fromList [ 2, 3 ]
 
-    resizerRepeat -1 0 (fromList [ 1, 2 ])
+    fromList [ 1, 2 ] |> resizerRepeat -1 0
     --> empty
 
 -}
-resizerRepeat : Int -> a -> Array a -> Array a
+resizerRepeat : Int -> element -> (Array element -> Array element)
 resizerRepeat lengthNew defaultValue =
     \array ->
         let
@@ -458,28 +483,28 @@ resizerRepeat lengthNew defaultValue =
 
     import Array exposing (fromList, empty)
 
-    resizelIndexed 5
-        toLetterInAlphabet
-        (fromList [ 'a', 'b', 'c' ])
+    fromList [ 'a', 'b', 'c' ]
+        |> resizelIndexed 5 toLetterInAlphabet
     --> fromList [ 'a', 'b', 'c', 'd', 'e' ]
 
-    resizelIndexed 2
-        toLetterInAlphabet
-        (fromList [ 'a', 'b', 'c' ])
+    fromList [ 'a', 'b', 'c' ]
+        |> resizelIndexed 2 toLetterInAlphabet
     --> fromList [ 'a', 'b' ]
 
-    resizelIndexed -1
-        toLetterInAlphabet
-        (fromList [ 'a', 'b', 'c' ])
+    fromList [ 'a', 'b', 'c' ]
+        |> resizelIndexed -1 toLetterInAlphabet
     --> empty
 
     toLetterInAlphabet : Int -> Char
     toLetterInAlphabet inAlphabet =
-        (Char.toCode 'a') + inAlphabet
+        ('a' |> Char.toCode) + inAlphabet
             |> Char.fromCode
 
 -}
-resizelIndexed : Int -> (Int -> a) -> Array a -> Array a
+resizelIndexed :
+    Int
+    -> (Int -> element)
+    -> (Array element -> Array element)
 resizelIndexed lengthNew defaultValueAtIndex =
     \array ->
         if lengthNew <= 0 then
@@ -508,23 +533,23 @@ resizelIndexed lengthNew defaultValueAtIndex =
 
     import Array exposing (fromList, empty)
 
-    resizerIndexed 5
-        ((*) 5)
-        (fromList [ 10, 25, 36 ])
+    fromList [ 10, 25, 36 ]
+        |> resizerIndexed 5 (\n -> n * 5)
     --> fromList [ 0, 5, 10, 25, 36 ]
 
-    resizerIndexed 2
-        ((*) 5)
-        (fromList [ 10, 25, 36 ])
+    fromList [ 10, 25, 36 ]
+        |> resizerIndexed 2 (\n -> n * 5)
     --> fromList [ 25, 36 ]
 
-    resizerIndexed -1
-        ((*) 5)
-        (fromList [ 10, 25, 36 ])
+    fromList [ 10, 25, 36 ]
+        |> resizerIndexed -1 (\n -> n * 5)
     --> empty
 
 -}
-resizerIndexed : Int -> (Int -> a) -> Array a -> Array a
+resizerIndexed :
+    Int
+    -> (Int -> element)
+    -> (Array element -> Array element)
 resizerIndexed lengthNew paddingAtIndex =
     \array ->
         let
@@ -548,17 +573,17 @@ resizerIndexed lengthNew paddingAtIndex =
 
     import Array exposing (fromList)
 
-    reverse (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> reverse
     --> fromList [ 4, 3, 2, 1 ]
 
 -}
-reverse : Array a -> Array a
+reverse : Array element -> Array element
 reverse =
     reverseToList
         >> Array.fromList
 
 
-reverseToList : Array a -> List a
+reverseToList : Array element -> List element
 reverseToList =
     Array.foldl (::) []
 
@@ -567,17 +592,17 @@ reverseToList =
 
     import Array exposing (fromList, empty)
 
-    splitAt 2 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> splitAt 2
     --> ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
 
-    splitAt 100 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> splitAt 100
     --> ( fromList [ 1, 2, 3, 4 ], empty )
 
-    splitAt -1 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> splitAt -1
     --> ( empty, fromList [ 1, 2, 3, 4 ] )
 
 -}
-splitAt : Int -> Array a -> ( Array a, Array a )
+splitAt : Int -> Array element -> ( Array element, Array element )
 splitAt index =
     \array ->
         if index > 0 then
@@ -594,17 +619,17 @@ If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
-    removeAt 2 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> removeAt 2
     --> fromList [ 1, 2, 4 ]
 
-    removeAt -1 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> removeAt -1
     --> fromList [ 1, 2, 3, 4 ]
 
-    removeAt 100 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> removeAt 100
     --> fromList [ 1, 2, 3, 4 ]
 
 -}
-removeAt : Int -> Array a -> Array a
+removeAt : Int -> (Array element -> Array element)
 removeAt index =
     \array ->
         if index >= 0 then
@@ -631,17 +656,17 @@ If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
-    insertAt 1 'b' (fromList [ 'a', 'c' ])
+    fromList [ 'a', 'c' ] |> insertAt 1 'b'
     --> fromList [ 'a', 'b', 'c' ]
 
-    insertAt -1 'b' (fromList [ 'a', 'c' ])
+    fromList [ 'a', 'c' ] |> insertAt -1 'b'
     --> fromList [ 'a', 'c' ]
 
-    insertAt 100 'b' (fromList [ 'a', 'c' ])
+    fromList [ 'a', 'c' ] |>  insertAt 100 'b'
     --> fromList [ 'a', 'c' ]
 
 -}
-insertAt : Int -> a -> Array a -> Array a
+insertAt : Int -> element -> (Array element -> Array element)
 insertAt index val =
     \array ->
         let
@@ -666,20 +691,20 @@ insertAt index val =
 
     import Array exposing (fromList, empty)
 
-    all (\x -> x < 5) (fromList [ 2, 4 ])
+    fromList [ 2, 4 ] |> all (\x -> x < 5)
     --> True
 
-    all (\x -> x < 5) (fromList [ 4, 16 ])
+    fromList [ 4, 16 ] |> all (\x -> x < 5)
     --> False
 
-    all (\x -> x < 5) empty
+    empty |> all (\x -> x < 5)
     --> True
 
 -}
-all : (a -> Bool) -> Array a -> Bool
+all : (element -> Bool) -> (Array element -> Bool)
 all isOkay =
     Array.foldl
-        (\element -> (&&) (isOkay element))
+        (\element soFar -> soFar && isOkay element)
         True
 
 
@@ -687,20 +712,20 @@ all isOkay =
 
     import Array exposing (fromList, empty)
 
-    any (\x -> x < 5) (fromList [ 6, 3 ])
+    fromList [ 6, 3 ] |> any (\x -> x < 5)
     --> True
 
-    any (\x -> x < 5) (fromList [ 12, 33 ])
+    fromList [ 12, 33 ] |> any (\x -> x < 5)
     --> False
 
-    any (\x -> x < 5) empty
+    empty |> any (\x -> x < 5)
     --> False
 
 -}
-any : (a -> Bool) -> Array a -> Bool
+any : (element -> Bool) -> (Array element -> Bool)
 any isOkay =
     Array.foldl
-        (\element -> (||) (isOkay element))
+        (\element soFar -> soFar || isOkay element)
         False
 
 
@@ -756,7 +781,7 @@ interweave toInterweave =
             |> Array.fromList
 
 
-{-| Figure out whether an array contains a value
+{-| Whether a given value is contained.
 
     import Array exposing (fromList)
 
@@ -767,7 +792,8 @@ interweave toInterweave =
     fromList [ "Leonardo", "Michelangelo" ]
         |> member "Raphael"
     --> False
+
 -}
-member : a -> Array a -> Bool
-member item array =
-    Array.foldr (\i res -> item == i || res) False array
+member : element -> (Array element -> Bool)
+member needle =
+    Array.foldr (\i res -> needle == i || res) False
