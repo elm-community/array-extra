@@ -773,6 +773,6 @@ interweave toInterweave =
     --> False
 
 -}
-member : a -> Array a -> Bool
+member : element -> Array element -> Bool
 member item =
     Array.foldr (\i res -> item == i || res) False
