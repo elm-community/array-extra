@@ -10,18 +10,29 @@ import Candidates exposing (..)
 
 main : BenchmarkRunner.Program
 main =
-    BenchmarkRunner.program suite
+    BenchmarkRunner.program
+        (describe "for array-extra"
+            [ array
+            , arrayExtra
+            ]
+        )
 
 
-suite : Benchmark
-suite =
-    describe "array extra"
+array : Benchmark
+array =
+    describe "Array"
         [ rank "Array.fold"
             (\fold -> ints1To100 |> fold (+) 0)
             [ ( "foldl", Array.foldl )
             , ( "foldr", Array.foldr )
             ]
-        , rank "mapToList"
+        ]
+
+
+arrayExtra : Benchmark
+arrayExtra =
+    describe "Array.Extra"
+        [ rank "mapToList"
             (\mapToList -> mapToList (\v -> -v) ints1To100)
             [ ( "with foldr", mapToListWithFoldr )
             , ( "with Array.toIndexedList", mapToListWithListMap )
@@ -108,16 +119,11 @@ suite =
             [ ( "with Array.foldr", intersperseWithArrayFoldr )
             , ( "with List.intersperse", intersperseWithList )
             ]
-        , let
-            array =
-                Array.fromList <| List.range 0 100
-          in
-          rank "member implementation"
-            (\f -> f 50 array)
-            [ ( "with foldr", arrayMemberFoldr )
-            , ( "with foldl", arrayMemberFoldl )
-            , ( "recursive", arrayMemberRec )
-            , ( "with List.member", listMember )
+        , rank "member"
+            (\member -> member 50 ints1To100)
+            [ ( "with fold", memberWithFold )
+            , ( "recursive", memberRecursive )
+            , ( "with List.member", memberWithList )
             ]
         ]
 
