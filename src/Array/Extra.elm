@@ -1,5 +1,5 @@
 module Array.Extra exposing
-    ( all, any
+    ( all, any, member
     , reverse, update
     , pop, removeAt, removeWhen
     , insertAt, intersperse
@@ -14,7 +14,7 @@ module Array.Extra exposing
 
 # scan
 
-@docs all, any
+@docs all, any, member
 
 
 # alter
@@ -754,3 +754,20 @@ interweave toInterweave =
         )
             ++ untilArrayEnd.toInterweave
             |> Array.fromList
+
+
+{-| Figure out whether an array contains a value
+
+    import Array exposing (fromList)
+
+    fromList [ "Leonardo", "Michelangelo", "Donatello", "Raphael" ]
+        |> member "Donatello"
+    --> True
+
+    fromList [ "Leonardo", "Michelangelo" ]
+        |> member "Raphael"
+    --> False
+-}
+member : a -> Array a -> Bool
+member item array =
+    Array.foldr (\i res -> item == i || res) False array

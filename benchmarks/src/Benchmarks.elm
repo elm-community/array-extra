@@ -108,6 +108,17 @@ suite =
             [ ( "with Array.foldr", intersperseWithArrayFoldr )
             , ( "with List.intersperse", intersperseWithList )
             ]
+        , let
+            array =
+                Array.fromList <| List.range 0 100
+          in
+          rank "member implementation"
+            (\f -> f 50 array)
+            [ ( "with foldr", arrayMemberFoldr )
+            , ( "with foldl", arrayMemberFoldl )
+            , ( "recursive", arrayMemberRec )
+            , ( "with List.member", listMember )
+            ]
         ]
 
 

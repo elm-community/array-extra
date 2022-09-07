@@ -425,6 +425,31 @@ suite =
                             )
                 )
             ]
+        , describe "member"
+            [ Test.fuzz
+                (Fuzz.constant
+                    (\before after ->
+                        { before = before, after = after }
+                    )
+                    |> Fuzz.andMap (Fuzz.array Fuzz.int)
+                    |> Fuzz.andMap (Fuzz.array Fuzz.int)
+                )
+                "exists"
+                (\{ before, after } ->
+                    Array.append
+                        (before |> Array.push 123456)
+                        after
+                        |> member 123456
+                        |> Expect.equal True
+                )
+            , Test.fuzz
+                (Fuzz.array Fuzz.int)
+                "doesn't exist"
+                (Array.filter (\element -> element /= 123456)
+                    >> member 123456
+                    >> Expect.equal False
+                )
+            ]
         ]
 
 
