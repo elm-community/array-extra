@@ -1,7 +1,35 @@
-module Candidates exposing (allRecursive, allWithFold, allWithListAll, anyRecursive, anyWithFold, anyWithListAny, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, memberRecursive, memberWithFold, memberWithList, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
+module Candidates exposing (allRecursive, allWithFold, allWithListAll, anyRecursive, anyWithFold, anyWithListAny, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, memberRecursive, memberWithFold, memberWithList, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, sumFullyCurried, sumNestedLambdaFullyAppliedCurried, sumOneLambdaFullyAppliedCurried, sumPartiallyCurried, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
 
 import Array exposing (Array)
 import Array.Extra as Array
+
+
+
+-- application
+
+
+sumFullyCurried : Array number -> number
+sumFullyCurried =
+    Array.foldl (+) 0
+
+
+sumPartiallyCurried : Array number -> number
+sumPartiallyCurried =
+    Array.foldl (\element -> (+) element) 0
+
+
+sumOneLambdaFullyAppliedCurried : Array number -> number
+sumOneLambdaFullyAppliedCurried =
+    Array.foldl (\element soFar -> soFar + element) 0
+
+
+sumNestedLambdaFullyAppliedCurried : Array number -> number
+sumNestedLambdaFullyAppliedCurried =
+    Array.foldl (\element -> \soFar -> soFar + element) 0
+
+
+
+-- array extra
 
 
 reverseWithFoldlToList : Array a -> Array a

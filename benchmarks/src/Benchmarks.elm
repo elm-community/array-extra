@@ -10,12 +10,23 @@ import Candidates exposing (..)
 
 main : BenchmarkRunner.Program
 main =
-    BenchmarkRunner.program
-        (describe "for array-extra"
-            [ array
-            , arrayExtra
-            ]
-        )
+    describe "for array-extra"
+        [ application
+        , array
+        , arrayExtra
+        ]
+        |> BenchmarkRunner.program
+
+
+application : Benchmark
+application =
+    rank "application"
+        (\sum -> ints1To100 |> sum)
+        [ ( "fully curried", sumFullyCurried )
+        , ( "partially curried/applied", sumPartiallyCurried )
+        , ( "one lambda, fully applied", sumOneLambdaFullyAppliedCurried )
+        , ( "nested lambda, fully applied", sumNestedLambdaFullyAppliedCurried )
+        ]
 
 
 array : Benchmark
