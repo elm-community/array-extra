@@ -57,13 +57,13 @@ If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
-    update 1 ((+) 10) (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> update 1 (\n -> n + 10)
     --> fromList [ 1, 12, 3 ]
 
-    update 4 ((+) 10) (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> update 4 (\n -> n + 10)
     --> fromList [ 1, 2, 3 ]
 
-    update -1 ((+) 10) (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> update -1 (\n -> n + 10)
     --> fromList [ 1, 2, 3 ]
 
 -}
@@ -87,10 +87,10 @@ Given a negative argument, count the end of the slice from the end.
 
     import Array exposing (fromList)
 
-    sliceFrom 3 (fromList (List.range 0 6))
+    fromList (List.range 0 6) |> sliceFrom 3
     --> fromList [ 3, 4, 5, 6 ]
 
-    sliceFrom -3 (fromList (List.range 0 6))
+    fromList (List.range 0 6) |> sliceFrom -3
     --> fromList [ 4, 5, 6 ]
 
 -}
@@ -106,10 +106,10 @@ Given a negative argument, count the beginning of the slice from the end.
 
     import Array exposing (fromList)
 
-    sliceUntil 3 (fromList (List.range 0 6))
+    fromList (List.range 0 6) |> sliceUntil 3
     --> fromList [ 0, 1, 2 ]
 
-    sliceUntil -3 (fromList (List.range 0 6))
+    fromList (List.range 0 6) |> sliceUntil -3
     --> fromList [ 0, 1, 2, 3 ]
 
 -}
@@ -130,10 +130,10 @@ sliceUntil lengthNew =
 
     import Array exposing (fromList, empty)
 
-    pop (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> pop
     --> fromList [ 1, 2 ]
 
-    pop empty
+    empty |> pop
     --> empty
 
 -}
@@ -142,12 +142,12 @@ pop =
     slice 0 -1
 
 
-{-| Place a value between all members.
+{-| Place a value between all elements.
 
     import Array exposing (fromList)
 
-    intersperse "on"
-        (fromList [ "turtles", "turtles", "turtles" ])
+    fromList [ "turtles", "turtles", "turtles" ]
+        |> intersperse "on"
     --> fromList
     -->     [ "turtles", "on", "turtles", "on", "turtles" ]
 
@@ -165,8 +165,8 @@ intersperse separator =
 
     import Array exposing (fromList)
 
-    filterMap String.toInt
-        (fromList [ "3", "4.0", "5", "hats" ])
+    fromList [ "3", "4.0", "5", "hats" ]
+        |> filterMap String.toInt
     --> fromList [ 3, 5 ]
 
 -}
@@ -184,11 +184,11 @@ If one `Array` is longer, its extra elements are not used.
 
     import Array exposing (fromList, repeat)
 
-    apply
-        (fromList
-            [ \x -> -x, identity, (+) 10 ]
-        )
-        (repeat 5 100)
+    repeat 5 100
+        |> apply
+            (fromList
+                [ \x -> -x, identity, (+) 10 ]
+            )
     --> fromList [ -100, 100, 110 ]
 
 -}
@@ -204,8 +204,8 @@ apply changes =
     import Array exposing (fromList)
     import Html
 
-    mapToList Html.text
-        (fromList [ "a", "b", "c" ])
+    fromList [ "a", "b", "c" ]
+        |> mapToList Html.text
     --> [ Html.text "a", Html.text "b", Html.text "c" ]
 
 -}
@@ -226,19 +226,20 @@ and collect the result in a `List`.
         { name : String }
 
     exerciseRender : Int -> Exercise -> Html msg
-    exerciseRender index exercise =
-        String.concat
-            [ "Exercise #"
-            , String.fromInt (index + 1)
-            , " - "
-            , exercise.name
-            ]
-            |> Html.text
+    exerciseRender index =
+        \exercise ->
+            String.concat
+                [ "Exercise #"
+                , String.fromInt (index + 1)
+                , " - "
+                , exercise.name
+                ]
+                |> Html.text
 
     exercisesRender : Array Exercise -> Html msg
-    exercisesRender exercises =
-        indexedMapToList renderExercise exercises
-            |> Html.div []
+    exercisesRender =
+        indexedMapToList renderExercise
+            >> Html.div []
 
 -}
 indexedMapToList :
@@ -398,8 +399,8 @@ This is equivalent to `Array.filter (not << predicate)`.
 
     import Array exposing (fromList)
 
-    removeWhen (\x -> x < 0)
-        (fromList [ -1, 92, 0, 14, -3 ])
+    fromList [ -1, 92, 0, 14, -3 ]
+        |> removeWhen (\x -> x < 0)
     --> fromList [ 92, 0, 14 ]
 
 -}
@@ -412,13 +413,13 @@ removeWhen isBad =
 
     import Array exposing (fromList, empty)
 
-    resizelRepeat 4 0 (fromList [ 1, 2 ])
+    fromList [ 1, 2 ] |> resizelRepeat 4 0
     --> fromList [ 1, 2, 0, 0 ]
 
-    resizelRepeat 2 0 (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> resizelRepeat 2 0
     --> fromList [ 1, 2 ]
 
-    resizelRepeat -1 0 (fromList [ 1, 2 ])
+    fromList [ 1, 2 ] |> resizelRepeat -1 0
     --> empty
 
 -}
@@ -448,13 +449,13 @@ resizelRepeat lengthNew padding =
 
     import Array exposing (fromList, empty)
 
-    resizerRepeat 4 0 (fromList [ 1, 2 ])
+    fromList [ 1, 2 ] |> resizerRepeat 4 0
     --> fromList [ 0, 0, 1, 2 ]
 
-    resizerRepeat 2 0 (fromList [ 1, 2, 3 ])
+    fromList [ 1, 2, 3 ] |> resizerRepeat 2 0
     --> fromList [ 2, 3 ]
 
-    resizerRepeat -1 0 (fromList [ 1, 2 ])
+    fromList [ 1, 2 ] |> resizerRepeat -1 0
     --> empty
 
 -}
@@ -482,24 +483,21 @@ resizerRepeat lengthNew defaultValue =
 
     import Array exposing (fromList, empty)
 
-    resizelIndexed 5
-        toLetterInAlphabet
-        (fromList [ 'a', 'b', 'c' ])
+    fromList [ 'a', 'b', 'c' ]
+        |> resizelIndexed 5 toLetterInAlphabet
     --> fromList [ 'a', 'b', 'c', 'd', 'e' ]
 
-    resizelIndexed 2
-        toLetterInAlphabet
-        (fromList [ 'a', 'b', 'c' ])
+    fromList [ 'a', 'b', 'c' ]
+        |> resizelIndexed 2 toLetterInAlphabet
     --> fromList [ 'a', 'b' ]
 
-    resizelIndexed -1
-        toLetterInAlphabet
-        (fromList [ 'a', 'b', 'c' ])
+    fromList [ 'a', 'b', 'c' ]
+        |> resizelIndexed -1 toLetterInAlphabet
     --> empty
 
     toLetterInAlphabet : Int -> Char
     toLetterInAlphabet inAlphabet =
-        (Char.toCode 'a') + inAlphabet
+        ('a' |> Char.toCode) + inAlphabet
             |> Char.fromCode
 
 -}
@@ -535,19 +533,16 @@ resizelIndexed lengthNew defaultValueAtIndex =
 
     import Array exposing (fromList, empty)
 
-    resizerIndexed 5
-        ((*) 5)
-        (fromList [ 10, 25, 36 ])
+    fromList [ 10, 25, 36 ]
+        |> resizerIndexed 5 (\n -> n * 5)
     --> fromList [ 0, 5, 10, 25, 36 ]
 
-    resizerIndexed 2
-        ((*) 5)
-        (fromList [ 10, 25, 36 ])
+    fromList [ 10, 25, 36 ]
+        |> resizerIndexed 2 (\n -> n * 5)
     --> fromList [ 25, 36 ]
 
-    resizerIndexed -1
-        ((*) 5)
-        (fromList [ 10, 25, 36 ])
+    fromList [ 10, 25, 36 ]
+        |> resizerIndexed -1 (\n -> n * 5)
     --> empty
 
 -}
@@ -578,7 +573,7 @@ resizerIndexed lengthNew paddingAtIndex =
 
     import Array exposing (fromList)
 
-    reverse (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> reverse
     --> fromList [ 4, 3, 2, 1 ]
 
 -}
@@ -597,13 +592,13 @@ reverseToList =
 
     import Array exposing (fromList, empty)
 
-    splitAt 2 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> splitAt 2
     --> ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
 
-    splitAt 100 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> splitAt 100
     --> ( fromList [ 1, 2, 3, 4 ], empty )
 
-    splitAt -1 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> splitAt -1
     --> ( empty, fromList [ 1, 2, 3, 4 ] )
 
 -}
@@ -624,13 +619,13 @@ If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
-    removeAt 2 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> removeAt 2
     --> fromList [ 1, 2, 4 ]
 
-    removeAt -1 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> removeAt -1
     --> fromList [ 1, 2, 3, 4 ]
 
-    removeAt 100 (fromList [ 1, 2, 3, 4 ])
+    fromList [ 1, 2, 3, 4 ] |> removeAt 100
     --> fromList [ 1, 2, 3, 4 ]
 
 -}
@@ -661,13 +656,13 @@ If the index is out of bounds, nothing is changed.
 
     import Array exposing (fromList)
 
-    insertAt 1 'b' (fromList [ 'a', 'c' ])
+    fromList [ 'a', 'c' ] |> insertAt 1 'b'
     --> fromList [ 'a', 'b', 'c' ]
 
-    insertAt -1 'b' (fromList [ 'a', 'c' ])
+    fromList [ 'a', 'c' ] |> insertAt -1 'b'
     --> fromList [ 'a', 'c' ]
 
-    insertAt 100 'b' (fromList [ 'a', 'c' ])
+    fromList [ 'a', 'c' ] |>  insertAt 100 'b'
     --> fromList [ 'a', 'c' ]
 
 -}
@@ -696,13 +691,13 @@ insertAt index val =
 
     import Array exposing (fromList, empty)
 
-    all (\x -> x < 5) (fromList [ 2, 4 ])
+    fromList [ 2, 4 ] |> all (\x -> x < 5)
     --> True
 
-    all (\x -> x < 5) (fromList [ 4, 16 ])
+    fromList [ 4, 16 ] |> all (\x -> x < 5)
     --> False
 
-    all (\x -> x < 5) empty
+    empty |> all (\x -> x < 5)
     --> True
 
 -}
@@ -717,13 +712,13 @@ all isOkay =
 
     import Array exposing (fromList, empty)
 
-    any (\x -> x < 5) (fromList [ 6, 3 ])
+    fromList [ 6, 3 ] |> any (\x -> x < 5)
     --> True
 
-    any (\x -> x < 5) (fromList [ 12, 33 ])
+    fromList [ 12, 33 ] |> any (\x -> x < 5)
     --> False
 
-    any (\x -> x < 5) empty
+    empty |> any (\x -> x < 5)
     --> False
 
 -}
