@@ -67,7 +67,10 @@ If the index is out of bounds, nothing is changed.
     --> fromList [ 1, 2, 3 ]
 
 -}
-update : Int -> (a -> a) -> Array a -> Array a
+update :
+    Int
+    -> (element -> element)
+    -> (Array element -> Array element)
 update index alter =
     \array ->
         case array |> Array.get index of
@@ -91,7 +94,7 @@ Given a negative argument, count the end of the slice from the end.
     --> fromList [ 4, 5, 6 ]
 
 -}
-sliceFrom : Int -> Array a -> Array a
+sliceFrom : Int -> (Array element -> Array element)
 sliceFrom lengthDropped =
     \array ->
         array |> slice lengthDropped (array |> length)
@@ -110,7 +113,7 @@ Given a negative argument, count the beginning of the slice from the end.
     --> fromList [ 0, 1, 2, 3 ]
 
 -}
-sliceUntil : Int -> Array a -> Array a
+sliceUntil : Int -> (Array element -> Array element)
 sliceUntil lengthNew =
     \array ->
         array
@@ -134,7 +137,7 @@ sliceUntil lengthNew =
     --> empty
 
 -}
-pop : Array a -> Array a
+pop : Array element -> Array element
 pop =
     slice 0 -1
 
@@ -151,7 +154,7 @@ pop =
 To interlace an `Array`, [`interweave`](#interweave).
 
 -}
-intersperse : a -> Array a -> Array a
+intersperse : element -> (Array element -> Array element)
 intersperse separator =
     Array.toList
         >> List.intersperse separator
@@ -167,7 +170,9 @@ intersperse separator =
     --> fromList [ 3, 5 ]
 
 -}
-filterMap : (a -> Maybe b) -> Array a -> Array b
+filterMap :
+    (element -> Maybe narrowElement)
+    -> (Array element -> Array narrowElement)
 filterMap tryMap =
     Array.toList
         >> List.filterMap tryMap
@@ -187,7 +192,9 @@ If one `Array` is longer, its extra elements are not used.
     --> fromList [ -100, 100, 110 ]
 
 -}
-apply : Array (a -> b) -> Array a -> Array b
+apply :
+    Array (element -> mappedElement)
+    -> (Array element -> Array mappedElement)
 apply changes =
     map2 (\map element -> map element) changes
 
@@ -202,7 +209,9 @@ apply changes =
     --> [ Html.text "a", Html.text "b", Html.text "c" ]
 
 -}
-mapToList : (a -> b) -> Array a -> List b
+mapToList :
+    (element -> mappedElement)
+    -> (Array element -> List mappedElement)
 mapToList mapElement =
     Array.foldr (mapElement >> (::)) []
 
@@ -232,7 +241,9 @@ and collect the result in a `List`.
             |> Html.div []
 
 -}
-indexedMapToList : (Int -> a -> b) -> Array a -> List b
+indexedMapToList :
+    (Int -> element -> mappedElement)
+    -> (Array element -> List mappedElement)
 indexedMapToList mapIndexedElement =
     \array ->
         array
@@ -249,7 +260,7 @@ If one `Array` is longer, its extra elements are not used.
 
     import Array exposing (fromList)
 
-    map2 (+)
+    map2 (\a b -> a + b)
         (fromList [ 1, 2, 3 ])
         (fromList [ 1, 2, 3, 4 ])
     --> fromList [ 2, 4, 6 ]
@@ -327,7 +338,10 @@ If one is longer, its extra elements are not used.
     --> fromList [ ( 1, 'a' ), ( 2, 'b' ) ]
 
 -}
-zip : Array a -> Array b -> Array ( a, b )
+zip :
+    Array firstElement
+    -> Array secondElement
+    -> Array ( firstElement, secondElement )
 zip =
     map2 Tuple.pair
 
@@ -347,7 +361,11 @@ Only the indexes of the shortest `Array` are used.
     -->     ]
 
 -}
-zip3 : Array a -> Array b -> Array c -> Array ( a, b, c )
+zip3 :
+    Array firstElement
+    -> Array secondElement
+    -> Array thirdElement
+    -> Array ( firstElement, secondElement, thirdElement )
 zip3 =
     map3 (\a b c -> ( a, b, c ))
 
@@ -365,7 +383,9 @@ zip3 =
     --> )
 
 -}
-unzip : Array ( a, b ) -> ( Array a, Array b )
+unzip :
+    Array ( elementFirst, elementSecond )
+    -> ( Array elementFirst, Array elementSecond )
 unzip =
     \arrayOfTuples ->
         ( arrayOfTuples |> Array.map Tuple.first
@@ -383,7 +403,7 @@ This is equivalent to `Array.filter (not << predicate)`.
     --> fromList [ 92, 0, 14 ]
 
 -}
-removeWhen : (a -> Bool) -> Array a -> Array a
+removeWhen : (element -> Bool) -> (Array element -> Array element)
 removeWhen isBad =
     Array.filter (not << isBad)
 
@@ -402,7 +422,7 @@ removeWhen isBad =
     --> empty
 
 -}
-resizelRepeat : Int -> a -> Array a -> Array a
+resizelRepeat : Int -> element -> (Array element -> Array element)
 resizelRepeat lengthNew padding =
     \array ->
         if lengthNew <= 0 then
@@ -438,7 +458,7 @@ resizelRepeat lengthNew padding =
     --> empty
 
 -}
-resizerRepeat : Int -> a -> Array a -> Array a
+resizerRepeat : Int -> element -> (Array element -> Array element)
 resizerRepeat lengthNew defaultValue =
     \array ->
         let
@@ -483,7 +503,10 @@ resizerRepeat lengthNew defaultValue =
             |> Char.fromCode
 
 -}
-resizelIndexed : Int -> (Int -> a) -> Array a -> Array a
+resizelIndexed :
+    Int
+    -> (Int -> element)
+    -> (Array element -> Array element)
 resizelIndexed lengthNew defaultValueAtIndex =
     \array ->
         if lengthNew <= 0 then
@@ -528,7 +551,10 @@ resizelIndexed lengthNew defaultValueAtIndex =
     --> empty
 
 -}
-resizerIndexed : Int -> (Int -> a) -> Array a -> Array a
+resizerIndexed :
+    Int
+    -> (Int -> element)
+    -> (Array element -> Array element)
 resizerIndexed lengthNew paddingAtIndex =
     \array ->
         let
@@ -556,13 +582,13 @@ resizerIndexed lengthNew paddingAtIndex =
     --> fromList [ 4, 3, 2, 1 ]
 
 -}
-reverse : Array a -> Array a
+reverse : Array element -> Array element
 reverse =
     reverseToList
         >> Array.fromList
 
 
-reverseToList : Array a -> List a
+reverseToList : Array element -> List element
 reverseToList =
     Array.foldl (::) []
 
@@ -581,7 +607,7 @@ reverseToList =
     --> ( empty, fromList [ 1, 2, 3, 4 ] )
 
 -}
-splitAt : Int -> Array a -> ( Array a, Array a )
+splitAt : Int -> Array element -> ( Array element, Array element )
 splitAt index =
     \array ->
         if index > 0 then
@@ -608,7 +634,7 @@ If the index is out of bounds, nothing is changed.
     --> fromList [ 1, 2, 3, 4 ]
 
 -}
-removeAt : Int -> Array a -> Array a
+removeAt : Int -> (Array element -> Array element)
 removeAt index =
     \array ->
         if index >= 0 then
@@ -645,7 +671,7 @@ If the index is out of bounds, nothing is changed.
     --> fromList [ 'a', 'c' ]
 
 -}
-insertAt : Int -> a -> Array a -> Array a
+insertAt : Int -> element -> (Array element -> Array element)
 insertAt index val =
     \array ->
         let
@@ -680,10 +706,10 @@ insertAt index val =
     --> True
 
 -}
-all : (a -> Bool) -> Array a -> Bool
+all : (element -> Bool) -> (Array element -> Bool)
 all isOkay =
     Array.foldl
-        (\element -> (&&) (isOkay element))
+        (\element soFar -> soFar && isOkay element)
         True
 
 
@@ -701,10 +727,10 @@ all isOkay =
     --> False
 
 -}
-any : (a -> Bool) -> Array a -> Bool
+any : (element -> Bool) -> (Array element -> Bool)
 any isOkay =
     Array.foldl
-        (\element -> (||) (isOkay element))
+        (\element soFar -> soFar || isOkay element)
         False
 
 
