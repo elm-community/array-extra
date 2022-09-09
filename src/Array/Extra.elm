@@ -769,6 +769,8 @@ any isOkay =
         |> member "Raphael"
     --> False
 
+For checking if some aspect is present, use [`any`](#any).
+
 -}
 member : element -> (Array element -> Bool)
 member needle =
