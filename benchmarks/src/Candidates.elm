@@ -1,15 +1,34 @@
-module Candidates exposing (allRecursive, sumPiping, allWithFold, allWithListAll, anyRecursive, anyWithFold, anyWithListAny, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, memberRecursive, memberWithFold, memberWithList, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, sumFullyCurried, sumNestedLambdaFullyAppliedCurried, sumOneLambdaFullyAppliedCurried, sumPartiallyCurried, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
+module Candidates exposing (allRecursive, allWithFold, allWithListAll, anyRecursive, anyWithFold, anyWithListAny, filterMapWithListFilterMap, filterMapWithPush, indexedMapToListWithArrayIndexedMap, indexedMapToListWithFoldr, indexedMapToListWithListIndexedMap, indexedMapToListWithToIndexedList, intersperseWithArrayFoldr, intersperseWithList, map2WithListIndexedMap, map2WithListMap2, mapToListWithFoldr, mapToListWithListMap, memberRecursive, memberWithFold, memberWithList, negAbsComposeR, negAbsDeclarationArgumentPipeline, negAbsLambdaPipeline, reverseWithFoldl, reverseWithFoldlToList, reverseWithListReverse, sumNameOnlyCurried, sumNestedLambdaFullyAppliedCurried, sumOneLambdaFullyAppliedCurried, sumPartiallyCurried, sumPiping, unzipWithFoldlToArrays, unzipWithListUnzip, unzipWithMaps)
 
 import Array exposing (Array)
 import Array.Extra as Array
 
 
 
+-- chain
+
+
+negAbsDeclarationArgumentPipeline : number -> number
+negAbsDeclarationArgumentPipeline n =
+    n |> abs |> negate
+
+
+negAbsLambdaPipeline : number -> number
+negAbsLambdaPipeline =
+    \n -> n |> abs |> negate
+
+
+negAbsComposeR : number -> number
+negAbsComposeR =
+    abs >> negate
+
+
+
 -- application
 
 
-sumFullyCurried : Array number -> number
-sumFullyCurried =
+sumNameOnlyCurried : Array number -> number
+sumNameOnlyCurried =
     Array.foldl (+) 0
 
 
@@ -17,9 +36,11 @@ sumPartiallyCurried : Array number -> number
 sumPartiallyCurried =
     Array.foldl (\element -> (+) element) 0
 
+
 sumPiping : Array number -> number
 sumPiping =
     Array.foldl (\element soFar -> soFar |> (+) element) 0
+
 
 sumOneLambdaFullyAppliedCurried : Array number -> number
 sumOneLambdaFullyAppliedCurried =
@@ -198,7 +219,7 @@ anyWithListAny isOkay =
 anyWithFold : (a -> Bool) -> Array a -> Bool
 anyWithFold isOkay =
     Array.foldl
-        (\element soFar -> soFar || (isOkay element))
+        (\element soFar -> soFar || isOkay element)
         False
 
 

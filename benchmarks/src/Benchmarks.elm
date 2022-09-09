@@ -20,13 +20,21 @@ main =
 
 application : Benchmark
 application =
-    rank "application"
-        (\sum -> ints1To100 |> sum)
-        [ ( "fully curried", sumFullyCurried )
-        , ( "partially curried/applied", sumPartiallyCurried )
-        , ( "piping", sumPiping )
-        , ( "one lambda, fully applied", sumOneLambdaFullyAppliedCurried )
-        , ( "nested lambda, fully applied", sumNestedLambdaFullyAppliedCurried )
+    describe "application"
+        [ rank "curry"
+            (\sum -> ints1To100 |> sum)
+            [ ( "name only", sumNameOnlyCurried )
+            , ( "partially curried/applied", sumPartiallyCurried )
+            , ( "lambda, piping", sumPiping )
+            , ( "one lambda, fully applied", sumOneLambdaFullyAppliedCurried )
+            , ( "nested lambda, fully applied", sumNestedLambdaFullyAppliedCurried )
+            ]
+        , rank "chain"
+            (\negAbs -> ints1To100 |> Array.map negAbs)
+            [ ( "declaration argument, |> |>", negAbsDeclarationArgumentPipeline )
+            , ( "lambda, |> |>", negAbsLambdaPipeline )
+            , ( ">>", negAbsComposeR )
+            ]
         ]
 
 
