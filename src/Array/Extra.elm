@@ -773,10 +773,7 @@ any isOkay =
 member : element -> (Array element -> Bool)
 member needle =
     \array ->
-        array
-            |> Array.foldr
-                (\element soFar -> soFar || (needle == element))
-                False
+        array |> any (\element -> element == needle)
 
 
 {-| Place all elements of a given `Array` between all current elements.
