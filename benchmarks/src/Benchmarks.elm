@@ -153,6 +153,7 @@ arrayExtra =
             [ ( "with fold", Array.Extra.Member.withFold )
             , ( "recursive", Array.Extra.Member.recursive )
             , ( "with List.member", Array.Extra.Member.withList )
+            , ( "with any", Array.Extra.Member.withAny )
             ]
         ]
 

@@ -1,6 +1,7 @@
-module Array.Extra.Member exposing (recursive, recursiveFromIndex, withFold, withList)
+module Array.Extra.Member exposing (recursive, recursiveFromIndex, withAny, withFold, withList)
 
 import Array exposing (Array)
+import Array.Extra
 
 
 withFold : a -> Array a -> Bool
@@ -35,3 +36,9 @@ withList : a -> Array a -> Bool
 withList needle =
     \array ->
         array |> Array.toList |> List.member needle
+
+
+withAny : a -> Array a -> Bool
+withAny needle =
+    \array ->
+        array |> Array.Extra.any (\element -> element == needle)
