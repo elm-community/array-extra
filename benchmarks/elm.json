@@ -1,7 +1,8 @@
 {
     "type": "application",
     "source-directories": [
-        "src"
+        "src",
+        "../src"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
@@ -9,7 +10,6 @@
             "elm/browser": "1.0.2",
             "elm/core": "1.0.5",
             "elm/html": "1.0.0",
-            "elm-community/array-extra": "2.3.0",
             "elm-explorations/benchmark": "1.0.2",
             "lue-bird/elm-alternative-benchmark-runner": "1.0.0"
         },
@@ -20,7 +20,7 @@
             "elm/regex": "1.0.0",
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
-            "elm/virtual-dom": "1.0.2",
+            "elm/virtual-dom": "1.0.3",
             "mdgriffith/elm-ui": "1.1.8",
             "mdgriffith/style-elements": "5.0.2",
             "miniBill/elm-ui-with-context": "1.1.0",
