@@ -139,7 +139,7 @@ sliceUntil lengthNew =
 -}
 pop : Array element -> Array element
 pop =
-    slice 0 -1
+    \array -> array |> slice 0 -1
 
 
 {-| Place a value between all elements.
@@ -156,9 +156,11 @@ To interlace an `Array`, [`interweave`](#interweave).
 -}
 intersperse : element -> (Array element -> Array element)
 intersperse separator =
-    Array.toList
-        >> List.intersperse separator
-        >> Array.fromList
+    \array ->
+        array
+            |> Array.toList
+            |> List.intersperse separator
+            |> Array.fromList
 
 
 {-| Try transforming all elements but only keep the successes.
@@ -174,9 +176,11 @@ filterMap :
     (element -> Maybe narrowElement)
     -> (Array element -> Array narrowElement)
 filterMap tryMap =
-    Array.toList
-        >> List.filterMap tryMap
-        >> Array.fromList
+    \array ->
+        array
+            |> Array.toList
+            |> List.filterMap tryMap
+            |> Array.fromList
 
 
 {-| Apply a given `Array` of changes to all elements.
@@ -196,7 +200,8 @@ apply :
     Array (element -> mappedElement)
     -> (Array element -> Array mappedElement)
 apply changes =
-    map2 (\map element -> map element) changes
+    \array ->
+        array |> map2 (\map element -> map element) changes
 
 
 {-| Apply a function to the elements in the array and collect the result in a List.
@@ -212,8 +217,14 @@ apply changes =
 mapToList :
     (element -> mappedElement)
     -> (Array element -> List mappedElement)
-mapToList mapElement =
-    Array.foldr (mapElement >> (::)) []
+mapToList elementChange =
+    \array ->
+        array
+            |> Array.foldr
+                (\element soFar ->
+                    soFar |> (::) (element |> elementChange)
+                )
+                []
 
 
 {-| Transform all elements with their indexes as the first argument
@@ -250,7 +261,9 @@ indexedMapToList mapIndexedElement =
         array
             |> Array.foldr
                 (\element ( i, listSoFar ) ->
-                    ( i - 1, mapIndexedElement i element :: listSoFar )
+                    ( i - 1
+                    , listSoFar |> (::) (mapIndexedElement i element)
+                    )
                 )
                 ( (array |> length) - 1, [] )
             |> Tuple.second
@@ -279,8 +292,8 @@ map2 :
     -> Array a
     -> Array b
     -> Array combined
-map2 combineAb aArray bArray =
-    List.map2 combineAb
+map2 elementsCombine aArray bArray =
+    List.map2 elementsCombine
         (aArray |> Array.toList)
         (bArray |> Array.toList)
         |> Array.fromList
@@ -297,8 +310,8 @@ map3 :
     -> Array b
     -> Array c
     -> Array combined
-map3 combineAbc aArray bArray cArray =
-    apply (map2 combineAbc aArray bArray) cArray
+map3 elementsCombine aArray bArray cArray =
+    apply (map2 elementsCombine aArray bArray) cArray
 
 
 {-| Combine the elements of four `Array`s with the given function. See [`map2`](Array-Extra#map2).
@@ -310,8 +323,8 @@ map4 :
     -> Array c
     -> Array d
     -> Array combined
-map4 combineAbcd aArray bArray cArray dArray =
-    apply (map3 combineAbcd aArray bArray cArray) dArray
+map4 elementsCombine aArray bArray cArray dArray =
+    apply (map3 elementsCombine aArray bArray cArray) dArray
 
 
 {-| Combine the elements of five `Array`s with the given function. See [`map2`](Array-Extra#map2).
@@ -324,8 +337,8 @@ map5 :
     -> Array d
     -> Array e
     -> Array combined
-map5 combineAbcde aArray bArray cArray dArray eArray =
-    apply (map4 combineAbcde aArray bArray cArray dArray) eArray
+map5 elementsCombine aArray bArray cArray dArray eArray =
+    apply (map4 elementsCombine aArray bArray cArray dArray) eArray
 
 
 {-| Combine the elements of two `Array`s into tuples.
@@ -343,8 +356,8 @@ zip :
     Array firstElement
     -> Array secondElement
     -> Array ( firstElement, secondElement )
-zip =
-    map2 Tuple.pair
+zip firstArray secondArray =
+    map2 Tuple.pair firstArray secondArray
 
 
 {-| Zip the elements of three `Array`s into 3-tuples.
@@ -388,9 +401,9 @@ unzip :
     Array ( elementFirst, elementSecond )
     -> ( Array elementFirst, Array elementSecond )
 unzip =
-    \arrayOfTuples ->
-        ( arrayOfTuples |> Array.map Tuple.first
-        , arrayOfTuples |> Array.map Tuple.second
+    \arrayOfTuple ->
+        ( arrayOfTuple |> Array.map Tuple.first
+        , arrayOfTuple |> Array.map Tuple.second
         )
 
 
@@ -406,7 +419,9 @@ This is equivalent to `Array.filter (not << predicate)`.
 -}
 removeWhen : (element -> Bool) -> (Array element -> Array element)
 removeWhen isBad =
-    Array.filter (not << isBad)
+    \array ->
+        array
+            |> Array.filter (\element -> element |> isBad |> not)
 
 
 {-| Resize from the left, padding the right-hand side with a given value.
@@ -425,11 +440,11 @@ removeWhen isBad =
 -}
 resizelRepeat : Int -> element -> (Array element -> Array element)
 resizelRepeat lengthNew padding =
-    \array ->
-        if lengthNew <= 0 then
-            Array.empty
+    if lengthNew <= 0 then
+        \_ -> Array.empty
 
-        else
+    else
+        \array ->
             let
                 arrayLength =
                     array |> length
@@ -505,7 +520,7 @@ resizelIndexed :
     Int
     -> (Int -> element)
     -> (Array element -> Array element)
-resizelIndexed lengthNew defaultValueAtIndex =
+resizelIndexed lengthNew paddingElementForIndex =
     \array ->
         if lengthNew <= 0 then
             Array.empty
@@ -522,7 +537,10 @@ resizelIndexed lengthNew defaultValueAtIndex =
                 LT ->
                     append array
                         (initialize (lengthNew - arrayLength)
-                            (defaultValueAtIndex << (\i -> i + arrayLength))
+                            (\padIndex ->
+                                (arrayLength + padIndex)
+                                    |> paddingElementForIndex
+                            )
                         )
 
                 EQ ->
@@ -579,13 +597,15 @@ resizerIndexed lengthNew paddingAtIndex =
 -}
 reverse : Array element -> Array element
 reverse =
-    reverseToList
-        >> Array.fromList
+    \array ->
+        array
+            |> reverseToList
+            |> Array.fromList
 
 
 reverseToList : Array element -> List element
 reverseToList =
-    Array.foldl (::) []
+    \array -> array |> Array.foldl (::) []
 
 
 {-| Split into two `Array`s, the first ending before and the second starting with a given index.
@@ -605,7 +625,7 @@ reverseToList =
 splitAt : Int -> Array element -> ( Array element, Array element )
 splitAt index =
     \array ->
-        if index > 0 then
+        if index >= 1 then
             ( array |> sliceUntil index
             , array |> sliceFrom index
             )
@@ -667,21 +687,25 @@ If the index is out of bounds, nothing is changed.
 
 -}
 insertAt : Int -> element -> (Array element -> Array element)
-insertAt index val =
+insertAt index elementToInsert =
     \array ->
-        let
-            arrayLength =
-                array |> length
-        in
-        if index >= 0 && index <= arrayLength then
+        if index >= 0 then
             let
-                before =
-                    array |> Array.slice 0 index
-
-                after =
-                    array |> Array.slice index arrayLength
+                arrayLength =
+                    array |> length
             in
-            Array.append (Array.push val before) after
+            if index <= arrayLength then
+                let
+                    before =
+                        array |> Array.slice 0 index
+
+                    after =
+                        array |> Array.slice index arrayLength
+                in
+                Array.append (before |> Array.push elementToInsert) after
+
+            else
+                array
 
         else
             array
@@ -703,9 +727,11 @@ insertAt index val =
 -}
 all : (element -> Bool) -> (Array element -> Bool)
 all isOkay =
-    Array.foldl
-        (\element soFar -> soFar && isOkay element)
-        True
+    \array ->
+        array
+            |> Array.foldl
+                (\element soFar -> soFar && isOkay element)
+                True
 
 
 {-| Whether at least some elements satisfy a given test.
@@ -724,9 +750,33 @@ all isOkay =
 -}
 any : (element -> Bool) -> (Array element -> Bool)
 any isOkay =
-    Array.foldl
-        (\element soFar -> soFar || isOkay element)
-        False
+    \array ->
+        array
+            |> Array.foldl
+                (\element soFar -> soFar || isOkay element)
+                False
+
+
+{-| Whether a given value is contained.
+
+    import Array exposing (fromList)
+
+    fromList [ "Leonardo", "Michelangelo", "Donatello", "Raphael" ]
+        |> member "Donatello"
+    --> True
+
+    fromList [ "Leonardo", "Michelangelo" ]
+        |> member "Raphael"
+    --> False
+
+-}
+member : element -> (Array element -> Bool)
+member needle =
+    \array ->
+        array
+            |> Array.foldr
+                (\element soFar -> soFar || (needle == element))
+                False
 
 
 {-| Place all elements of a given `Array` between all current elements.
@@ -758,15 +808,15 @@ interweave toInterweave =
                             case soFar.toInterweave of
                                 [] ->
                                     { interwoven =
-                                        element :: soFar.interwoven
+                                        soFar.interwoven |> (::) element
                                     , toInterweave = []
                                     }
 
                                 toInterweaveHead :: toInterweaveTail ->
                                     { interwoven =
-                                        toInterweaveHead
-                                            :: element
-                                            :: soFar.interwoven
+                                        soFar.interwoven
+                                            |> (::) element
+                                            |> (::) toInterweaveHead
                                     , toInterweave = toInterweaveTail
                                     }
                         )
@@ -779,21 +829,3 @@ interweave toInterweave =
         )
             ++ untilArrayEnd.toInterweave
             |> Array.fromList
-
-
-{-| Whether a given value is contained.
-
-    import Array exposing (fromList)
-
-    fromList [ "Leonardo", "Michelangelo", "Donatello", "Raphael" ]
-        |> member "Donatello"
-    --> True
-
-    fromList [ "Leonardo", "Michelangelo" ]
-        |> member "Raphael"
-    --> False
-
--}
-member : element -> (Array element -> Bool)
-member needle =
-    Array.foldr (\i res -> needle == i || res) False
