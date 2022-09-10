@@ -4,7 +4,7 @@ module Tests exposing (suite)
 the tests are here to allow confident refactoring & changing.
 -}
 
-import Array exposing (Array, empty, fromList, repeat)
+import Array exposing (Array)
 import Array.Extra exposing (..)
 import Expect exposing (Expectation)
 import Fuzz
@@ -29,7 +29,7 @@ suite =
                     )
                 , test "example"
                     (\() ->
-                        fromList [ 2, 4 ]
+                        Array.fromList [ 2, 4 ]
                             |> all isEven
                             |> Expect.equal
                                 True
@@ -53,7 +53,7 @@ suite =
                     )
                 , test "example"
                     (\() ->
-                        fromList [ 2, 3 ]
+                        Array.fromList [ 2, 3 ]
                             |> all isEven
                             |> Expect.equal
                                 False
@@ -79,7 +79,7 @@ suite =
                     )
                 , test "example"
                     (\() ->
-                        fromList [ 1, 2 ]
+                        Array.fromList [ 1, 2 ]
                             |> any isEven
                             |> Expect.equal
                                 True
@@ -98,7 +98,7 @@ suite =
                     )
                 , test "example"
                     (\() ->
-                        fromList [ 1, 3 ]
+                        Array.fromList [ 1, 3 ]
                             |> any isEven
                             |> Expect.equal
                                 False
@@ -137,10 +137,10 @@ suite =
         , describe "update"
             [ test "index valid"
                 (\() ->
-                    fromList [ 1, 2, 3 ]
+                    Array.fromList [ 1, 2, 3 ]
                         |> update 1 (\n -> n + 10)
                         |> expectEqualArrays
-                            (fromList [ 1, 12, 3 ])
+                            (Array.fromList [ 1, 12, 3 ])
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -170,12 +170,12 @@ suite =
                 )
             ]
         , describe "pop"
-            [ test "empty → empty"
+            [ test "empty → Array.empty"
                 (\() ->
-                    empty
+                    Array.empty
                         |> pop
                         |> expectEqualArrays
-                            empty
+                            Array.empty
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -197,10 +197,10 @@ suite =
         , describe "splitAt"
             [ test "index valid"
                 (\() ->
-                    fromList [ 1, 2, 3, 4 ]
+                    Array.fromList [ 1, 2, 3, 4 ]
                         |> splitAt 2
                         |> Expect.equal
-                            ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
+                            ( Array.fromList [ 1, 2 ], Array.fromList [ 3, 4 ] )
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -213,7 +213,7 @@ suite =
                     array
                         |> splitAt index
                         |> Expect.equal
-                            ( empty, array )
+                            ( Array.empty, array )
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -226,16 +226,16 @@ suite =
                     array
                         |> splitAt ((array |> Array.length) + above)
                         |> Expect.equal
-                            ( array, empty )
+                            ( array, Array.empty )
                 )
             ]
         , describe "removeAt"
             [ test "index valid"
                 (\() ->
-                    fromList [ 1, 2, 3, 4 ]
+                    Array.fromList [ 1, 2, 3, 4 ]
                         |> removeAt 2
                         |> expectEqualArrays
-                            (fromList [ 1, 2, 4 ])
+                            (Array.fromList [ 1, 2, 4 ])
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -267,10 +267,10 @@ suite =
         , describe "insertAt"
             [ test "index valid"
                 (\() ->
-                    fromList [ 'a', 'c' ]
+                    Array.fromList [ 'a', 'c' ]
                         |> insertAt 1 'b'
                         |> expectEqualArrays
-                            (fromList [ 'a', 'b', 'c' ])
+                            (Array.fromList [ 'a', 'b', 'c' ])
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -302,17 +302,17 @@ suite =
         , describe "sliceFrom"
             [ test "index positive valid"
                 (\() ->
-                    fromList (List.range 0 6)
+                    Array.fromList (List.range 0 6)
                         |> sliceFrom 3
                         |> expectEqualArrays
-                            (fromList [ 3, 4, 5, 6 ])
+                            (Array.fromList [ 3, 4, 5, 6 ])
                 )
             , test "index negative valid"
                 (\() ->
-                    fromList (List.range 0 6)
+                    Array.fromList (List.range 0 6)
                         |> sliceFrom -3
                         |> expectEqualArrays
-                            (fromList [ 4, 5, 6 ])
+                            (Array.fromList [ 4, 5, 6 ])
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -325,7 +325,7 @@ suite =
                     array
                         |> sliceFrom ((array |> Array.length) + above)
                         |> expectEqualArrays
-                            empty
+                            Array.empty
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -344,17 +344,17 @@ suite =
         , describe "sliceUntil"
             [ test "index positive valid"
                 (\() ->
-                    fromList (List.range 0 6)
+                    Array.fromList (List.range 0 6)
                         |> sliceUntil 3
                         |> expectEqualArrays
-                            (fromList [ 0, 1, 2 ])
+                            (Array.fromList [ 0, 1, 2 ])
                 )
             , test "index negative valid"
                 (\() ->
-                    fromList (List.range 0 6)
+                    Array.fromList (List.range 0 6)
                         |> sliceUntil -3
                         |> expectEqualArrays
-                            (fromList [ 0, 1, 2, 3 ])
+                            (Array.fromList [ 0, 1, 2, 3 ])
                 )
             , Test.fuzz
                 (Fuzz.array Fuzz.int)
@@ -363,7 +363,7 @@ suite =
                     array
                         |> sliceUntil 0
                         |> expectEqualArrays
-                            empty
+                            Array.empty
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -389,7 +389,7 @@ suite =
                     array
                         |> sliceUntil (-(array |> Array.length) - below)
                         |> expectEqualArrays
-                            empty
+                            Array.empty
                 )
             ]
         , describe "filterMap"
@@ -410,14 +410,14 @@ suite =
                     arrayOfNothing
                         |> filterMap identity
                         |> expectEqualArrays
-                            empty
+                            Array.empty
                 )
             , test "some Nothing"
                 (\() ->
-                    fromList [ Just 3, Nothing, Just 5, Nothing ]
+                    Array.fromList [ Just 3, Nothing, Just 5, Nothing ]
                         |> filterMap identity
                         |> expectEqualArrays
-                            (fromList [ 3, 5 ])
+                            (Array.fromList [ 3, 5 ])
                 )
             ]
         , describe "apply"
@@ -425,9 +425,9 @@ suite =
                 (Fuzz.array Fuzz.int)
                 "more elements than functions"
                 (\after4 ->
-                    Array.append (repeat 4 100) after4
+                    Array.append (Array.repeat 4 100) after4
                         |> apply
-                            (fromList
+                            (Array.fromList
                                 [ negate
                                 , identity
                                 , \n -> n + 10
@@ -435,20 +435,20 @@ suite =
                                 ]
                             )
                         |> expectEqualArrays
-                            (fromList [ -100, 100, 110, 0 ])
+                            (Array.fromList [ -100, 100, 110, 0 ])
                 )
             , Test.fuzz
                 (Fuzz.array (Fuzz.constant (\_ -> 0)))
                 "more functions than elements"
                 (\after3 ->
-                    repeat 3 100
+                    Array.repeat 3 100
                         |> apply
                             (Array.append
-                                (fromList [ negate, identity, \n -> n + 10 ])
+                                (Array.fromList [ negate, identity, \n -> n + 10 ])
                                 after3
                             )
                         |> expectEqualArrays
-                            (fromList [ -100, 100, 110 ])
+                            (Array.fromList [ -100, 100, 110 ])
                 )
             ]
         , Test.fuzz
@@ -486,20 +486,20 @@ suite =
                 "behaves like List.map2"
                 (\{ first, second } ->
                     map2 (\a b -> a + b)
-                        (first |> fromList)
-                        (second |> fromList)
+                        (first |> Array.fromList)
+                        (second |> Array.fromList)
                         |> expectEqualArrays
                             (List.map2 (\a b -> a + b) first second
-                                |> fromList
+                                |> Array.fromList
                             )
                 )
             , test "first array shorter than the last example"
                 (\() ->
                     map2 Tuple.pair
-                        (fromList [ 1, 2, 3, 4 ])
-                        (fromList [ 'a', 'b', 'c', 'd', 'e' ])
+                        (Array.fromList [ 1, 2, 3, 4 ])
+                        (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
                         |> expectEqualArrays
-                            (fromList
+                            (Array.fromList
                                 [ ( 1, 'a' )
                                 , ( 2, 'b' )
                                 , ( 3, 'c' )
@@ -510,10 +510,10 @@ suite =
             , test "first array longer than the last example"
                 (\() ->
                     map2 Tuple.pair
-                        (fromList [ 'a', 'b', 'c', 'd', 'e' ])
-                        (fromList [ 1, 2, 3, 4 ])
+                        (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
+                        (Array.fromList [ 1, 2, 3, 4 ])
                         |> expectEqualArrays
-                            (fromList
+                            (Array.fromList
                                 [ ( 'a', 1 )
                                 , ( 'b', 2 )
                                 , ( 'c', 3 )
@@ -537,22 +537,22 @@ suite =
                 "behaves like List.map3"
                 (\{ first, second, third } ->
                     map3 (\a b c -> a + b + c)
-                        (first |> fromList)
-                        (second |> fromList)
-                        (third |> fromList)
+                        (first |> Array.fromList)
+                        (second |> Array.fromList)
+                        (third |> Array.fromList)
                         |> expectEqualArrays
                             (List.map3 (\a b c -> a + b + c) first second third
-                                |> fromList
+                                |> Array.fromList
                             )
                 )
             , test "first array the shortest example"
                 (\() ->
                     map3 (\a b c -> ( a, b, c ))
-                        (fromList [ "a", "b", "c" ])
-                        (fromList [ 'a', 'b', 'c', 'd', 'e' ])
-                        (fromList [ 1, 2, 3, 4 ])
+                        (Array.fromList [ "a", "b", "c" ])
+                        (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
+                        (Array.fromList [ 1, 2, 3, 4 ])
                         |> expectEqualArrays
-                            (fromList
+                            (Array.fromList
                                 [ ( "a", 'a', 1 )
                                 , ( "b", 'b', 2 )
                                 , ( "c", 'c', 3 )
@@ -562,11 +562,11 @@ suite =
             , test "second array the shortest example"
                 (\() ->
                     map3 (\a b c -> ( a, b, c ))
-                        (fromList [ 'a', 'b', 'c', 'd', 'e' ])
-                        (fromList [ "a", "b", "c" ])
-                        (fromList [ 1, 2, 3, 4 ])
+                        (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
+                        (Array.fromList [ "a", "b", "c" ])
+                        (Array.fromList [ 1, 2, 3, 4 ])
                         |> expectEqualArrays
-                            (fromList
+                            (Array.fromList
                                 [ ( 'a', "a", 1 )
                                 , ( 'b', "b", 2 )
                                 , ( 'c', "c", 3 )
@@ -576,11 +576,11 @@ suite =
             , test "third array the shortest example"
                 (\() ->
                     map3 (\a b c -> ( a, b, c ))
-                        (fromList [ 'a', 'b', 'c', 'd', 'e' ])
-                        (fromList [ 1, 2, 3, 4 ])
-                        (fromList [ "a", "b", "c" ])
+                        (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
+                        (Array.fromList [ 1, 2, 3, 4 ])
+                        (Array.fromList [ "a", "b", "c" ])
                         |> expectEqualArrays
-                            (fromList
+                            (Array.fromList
                                 [ ( 'a', 1, "a" )
                                 , ( 'b', 2, "b" )
                                 , ( 'c', 3, "c" )
@@ -591,30 +591,30 @@ suite =
         , describe "removeWhen"
             [ test "example"
                 (\() ->
-                    fromList [ 1, 2, 3, 4 ]
+                    Array.fromList [ 1, 2, 3, 4 ]
                         |> removeWhen isEven
                         |> expectEqualArrays
-                            (fromList [ 1, 3 ])
+                            (Array.fromList [ 1, 3 ])
                 )
             , Test.fuzz
                 (Fuzz.array Fuzz.int)
-                "filter is |> removeWhen is  → empty"
+                "filter is |> removeWhen is  → Array.empty"
                 (\array ->
                     array
                         |> Array.filter isEven
                         |> removeWhen isEven
                         |> expectEqualArrays
-                            empty
+                            Array.empty
                 )
             , Test.fuzz
                 (Fuzz.array Fuzz.int)
-                "removeWhen is |> filter is  → empty"
+                "removeWhen is |> filter is  → Array.empty"
                 (\array ->
                     array
                         |> removeWhen isEven
                         |> Array.filter isEven
                         |> expectEqualArrays
-                            empty
+                            Array.empty
                 )
             ]
         , describe "unzip"
@@ -623,12 +623,12 @@ suite =
                 "behaves like List.unzip"
                 (\listOfTuple ->
                     listOfTuple
-                        |> fromList
+                        |> Array.fromList
                         |> unzip
                         |> Expect.equal
                             (listOfTuple
                                 |> List.unzip
-                                |> Tuple.mapBoth fromList fromList
+                                |> Tuple.mapBoth Array.fromList Array.fromList
                             )
                 )
             , Test.fuzz
@@ -651,11 +651,11 @@ suite =
                 )
             , test "example"
                 (\() ->
-                    fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]
+                    Array.fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]
                         |> unzip
                         |> Expect.equal
-                            ( fromList [ 1, 2, 3 ]
-                            , fromList [ 'a', 'b', 'c' ]
+                            ( Array.fromList [ 1, 2, 3 ]
+                            , Array.fromList [ 'a', 'b', 'c' ]
                             )
                 )
             ]
@@ -672,26 +672,26 @@ suite =
                 )
             , test "example"
                 (\() ->
-                    fromList [ 1, 2, 3, 4 ]
+                    Array.fromList [ 1, 2, 3, 4 ]
                         |> reverse
                         |> expectEqualArrays
-                            (fromList [ 4, 3, 2, 1 ])
+                            (Array.fromList [ 4, 3, 2, 1 ])
                 )
             ]
         , describe "resizelRepeat"
             [ test "length less than current"
                 (\() ->
-                    fromList [ 1, 2, 3, 4 ]
+                    Array.fromList [ 1, 2, 3, 4 ]
                         |> resizelRepeat 3 0
                         |> expectEqualArrays
-                            (fromList [ 1, 2, 3 ])
+                            (Array.fromList [ 1, 2, 3 ])
                 )
             , test "length greater than current"
                 (\() ->
-                    fromList [ 1, 2, 3, 4 ]
+                    Array.fromList [ 1, 2, 3, 4 ]
                         |> resizelRepeat 6 0
                         |> expectEqualArrays
-                            (fromList [ 1, 2, 3, 4, 0, 0 ])
+                            (Array.fromList [ 1, 2, 3, 4, 0, 0 ])
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -699,7 +699,7 @@ suite =
                     |> Fuzz.andMap (Fuzz.array Fuzz.int)
                     |> Fuzz.andMap (Fuzz.intRange Random.minInt 0)
                 )
-                "length not positive  → empty"
+                "length not positive  → Array.empty"
                 (\{ array, length } ->
                     array
                         |> resizelRepeat length 0
@@ -710,17 +710,17 @@ suite =
         , describe "resizerRepeat"
             [ test "length less than current"
                 (\() ->
-                    fromList [ 1, 2, 3, 4 ]
+                    Array.fromList [ 1, 2, 3, 4 ]
                         |> resizerRepeat 3 0
                         |> expectEqualArrays
-                            (fromList [ 2, 3, 4 ])
+                            (Array.fromList [ 2, 3, 4 ])
                 )
             , test "length greater than current"
                 (\() ->
-                    fromList [ 1, 2, 3, 4 ]
+                    Array.fromList [ 1, 2, 3, 4 ]
                         |> resizerRepeat 6 0
                         |> expectEqualArrays
-                            (fromList [ 0, 0, 1, 2, 3, 4 ])
+                            (Array.fromList [ 0, 0, 1, 2, 3, 4 ])
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -728,7 +728,7 @@ suite =
                     |> Fuzz.andMap (Fuzz.array Fuzz.int)
                     |> Fuzz.andMap (Fuzz.intRange Random.minInt 0)
                 )
-                "length not positive  → empty"
+                "length not positive  → Array.empty"
                 (\{ array, length } ->
                     array
                         |> resizelRepeat length 0
@@ -739,17 +739,17 @@ suite =
         , describe "resizelIndexed"
             [ test "length less than current"
                 (\() ->
-                    fromList [ "a", "b", "c" ]
+                    Array.fromList [ "a", "b", "c" ]
                         |> resizelIndexed 2 String.fromInt
                         |> expectEqualArrays
-                            (fromList [ "a", "b" ])
+                            (Array.fromList [ "a", "b" ])
                 )
             , test "length greater than current"
                 (\() ->
-                    fromList [ "a", "b", "c" ]
+                    Array.fromList [ "a", "b", "c" ]
                         |> resizelIndexed 5 String.fromInt
                         |> expectEqualArrays
-                            (fromList [ "a", "b", "c", "3", "4" ])
+                            (Array.fromList [ "a", "b", "c", "3", "4" ])
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -757,7 +757,7 @@ suite =
                     |> Fuzz.andMap (Fuzz.array Fuzz.string)
                     |> Fuzz.andMap (Fuzz.intRange Random.minInt 0)
                 )
-                "length not positive  → empty"
+                "length not positive  → Array.empty"
                 (\{ array, length } ->
                     array
                         |> resizelIndexed length String.fromInt
@@ -768,17 +768,17 @@ suite =
         , describe "resizerIndexed"
             [ test "length less than current"
                 (\() ->
-                    fromList [ "a", "b", "c" ]
+                    Array.fromList [ "a", "b", "c" ]
                         |> resizerIndexed 2 String.fromInt
                         |> expectEqualArrays
-                            (fromList [ "b", "c" ])
+                            (Array.fromList [ "b", "c" ])
                 )
             , test "length greater than current"
                 (\() ->
-                    fromList [ "a", "b", "c" ]
+                    Array.fromList [ "a", "b", "c" ]
                         |> resizerIndexed 5 String.fromInt
                         |> expectEqualArrays
-                            (fromList [ "0", "1", "a", "b", "c" ])
+                            (Array.fromList [ "0", "1", "a", "b", "c" ])
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -786,7 +786,7 @@ suite =
                     |> Fuzz.andMap (Fuzz.array Fuzz.string)
                     |> Fuzz.andMap (Fuzz.intRange Random.minInt -1)
                 )
-                "negative length  → empty"
+                "negative length  → Array.empty"
                 (\{ array, index } ->
                     array
                         |> resizerIndexed index String.fromInt
@@ -796,12 +796,12 @@ suite =
             ]
         , describe "intersperse"
             [ Test.fuzz Fuzz.int
-                "empty → empty"
+                "empty → Array.empty"
                 (\separator ->
-                    empty
+                    Array.empty
                         |> intersperse separator
                         |> expectEqualArrays
-                            empty
+                            Array.empty
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -841,10 +841,10 @@ suite =
                 )
             , test "multiple"
                 (\() ->
-                    fromList [ "turtles", "turtles", "turtles" ]
+                    Array.fromList [ "turtles", "turtles", "turtles" ]
                         |> intersperse "on"
                         |> expectEqualArrays
-                            (fromList
+                            (Array.fromList
                                 [ "turtles", "on", "turtles", "on", "turtles" ]
                             )
                 )
@@ -870,21 +870,21 @@ suite =
                 )
             , test "less to interweave"
                 (\() ->
-                    fromList [ "a0", "a1", "a2" ]
+                    Array.fromList [ "a0", "a1", "a2" ]
                         |> interweave
-                            (fromList [ "b0" ])
+                            (Array.fromList [ "b0" ])
                         |> expectEqualArrays
-                            (fromList
+                            (Array.fromList
                                 [ "a0", "b0", "a1", "a2" ]
                             )
                 )
             , test "more to interweave"
                 (\() ->
-                    fromList [ "a0", "a1", "a2" ]
+                    Array.fromList [ "a0", "a1", "a2" ]
                         |> interweave
-                            (fromList [ "b0", "b1", "b2", "b3", "b4" ])
+                            (Array.fromList [ "b0", "b1", "b2", "b3", "b4" ])
                         |> expectEqualArrays
-                            (fromList
+                            (Array.fromList
                                 [ "a0", "b0", "a1", "b1", "a2", "b2", "b3", "b4" ]
                             )
                 )
