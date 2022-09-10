@@ -24,13 +24,15 @@ suite =
                         array
                             |> Array.filter isEven
                             |> all isEven
-                            |> Expect.equal True
+                            |> Expect.equal
+                                True
                     )
                 , test "example"
                     (\() ->
                         fromList [ 2, 4 ]
                             |> all isEven
-                            |> Expect.equal True
+                            |> Expect.equal
+                                True
                     )
                 ]
             , describe "False"
@@ -46,13 +48,15 @@ suite =
                             (before |> Array.push 1)
                             after
                             |> all isEven
-                            |> Expect.equal False
+                            |> Expect.equal
+                                False
                     )
                 , test "example"
                     (\() ->
                         fromList [ 2, 3 ]
                             |> all isEven
-                            |> Expect.equal False
+                            |> Expect.equal
+                                False
                     )
                 ]
             ]
@@ -70,13 +74,15 @@ suite =
                             (before |> Array.push 2)
                             after
                             |> any isEven
-                            |> Expect.equal True
+                            |> Expect.equal
+                                True
                     )
                 , test "example"
                     (\() ->
                         fromList [ 1, 2 ]
                             |> any isEven
-                            |> Expect.equal True
+                            |> Expect.equal
+                                True
                     )
                 ]
             , describe "False"
@@ -87,13 +93,15 @@ suite =
                         array
                             |> removeWhen isEven
                             |> any isEven
-                            |> Expect.equal False
+                            |> Expect.equal
+                                False
                     )
                 , test "example"
                     (\() ->
                         fromList [ 1, 3 ]
                             |> any isEven
-                            |> Expect.equal False
+                            |> Expect.equal
+                                False
                     )
                 ]
             ]
@@ -112,7 +120,8 @@ suite =
                         (before |> Array.push 123456)
                         after
                         |> member 123456
-                        |> Expect.equal True
+                        |> Expect.equal
+                            True
                 )
             , Test.fuzz
                 (Fuzz.array Fuzz.int)
@@ -121,7 +130,8 @@ suite =
                     array
                         |> Array.filter (\element -> element /= 123456)
                         |> member 123456
-                        |> Expect.equal False
+                        |> Expect.equal
+                            False
                 )
             ]
         , describe "update"
@@ -196,7 +206,8 @@ suite =
                 (\() ->
                     fromList [ 1, 2, 3, 4 ]
                         |> splitAt -1
-                        |> Expect.equal ( empty, fromList [ 1, 2, 3, 4 ] )
+                        |> Expect.equal
+                            ( empty, fromList [ 1, 2, 3, 4 ] )
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -208,7 +219,8 @@ suite =
                 (\{ array, above } ->
                     array
                         |> splitAt ((array |> Array.length) + above)
-                        |> Expect.equal ( array, empty )
+                        |> Expect.equal
+                            ( array, empty )
                 )
             ]
         , describe "removeAt"
