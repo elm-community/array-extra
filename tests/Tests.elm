@@ -7,7 +7,7 @@ the tests are here to allow confident refactoring & changing.
 import Array exposing (Array, empty, fromList, repeat)
 import Array.Extra exposing (..)
 import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer)
+import Fuzz
 import Random
 import Test exposing (Test, describe, test)
 
@@ -753,14 +753,14 @@ suite =
                 )
             , Test.fuzz
                 (Fuzz.constant
-                    (\array index -> { array = array, index = index })
-                    |> Fuzz.andMap (Fuzz.array Fuzz.int)
-                    |> Fuzz.andMap (Fuzz.intRange Random.minInt -1)
+                    (\array length -> { array = array, length = length })
+                    |> Fuzz.andMap (Fuzz.array Fuzz.string)
+                    |> Fuzz.andMap (Fuzz.intRange Random.minInt 0)
                 )
-                "negative length  → empty"
-                (\{ array, index } ->
-                    fromList [ "a", "b", "c" ]
-                        |> resizelIndexed -1 String.fromInt
+                "length not positive  → empty"
+                (\{ array, length } ->
+                    array
+                        |> resizelIndexed length String.fromInt
                         |> expectEqualArrays
                             Array.empty
                 )
