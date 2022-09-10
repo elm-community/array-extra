@@ -5,7 +5,7 @@ the tests are here to allow confident refactoring & changing.
 -}
 
 import Array exposing (Array)
-import Array.Extra exposing (..)
+import Array.Extra as Array
 import Expect exposing (Expectation)
 import Fuzz
 import Random
@@ -23,14 +23,14 @@ suite =
                     (\array ->
                         array
                             |> Array.filter isEven
-                            |> all isEven
+                            |> Array.all isEven
                             |> Expect.equal
                                 True
                     )
                 , test "example"
                     (\() ->
                         Array.fromList [ 2, 4 ]
-                            |> all isEven
+                            |> Array.all isEven
                             |> Expect.equal
                                 True
                     )
@@ -47,14 +47,14 @@ suite =
                         Array.append
                             (before |> Array.push 1)
                             after
-                            |> all isEven
+                            |> Array.all isEven
                             |> Expect.equal
                                 False
                     )
                 , test "example"
                     (\() ->
                         Array.fromList [ 2, 3 ]
-                            |> all isEven
+                            |> Array.all isEven
                             |> Expect.equal
                                 False
                     )
@@ -73,14 +73,14 @@ suite =
                         Array.append
                             (before |> Array.push 2)
                             after
-                            |> any isEven
+                            |> Array.any isEven
                             |> Expect.equal
                                 True
                     )
                 , test "example"
                     (\() ->
                         Array.fromList [ 1, 2 ]
-                            |> any isEven
+                            |> Array.any isEven
                             |> Expect.equal
                                 True
                     )
@@ -91,15 +91,15 @@ suite =
                     "removeWhen test |> any test"
                     (\array ->
                         array
-                            |> removeWhen isEven
-                            |> any isEven
+                            |> Array.removeWhen isEven
+                            |> Array.any isEven
                             |> Expect.equal
                                 False
                     )
                 , test "example"
                     (\() ->
                         Array.fromList [ 1, 3 ]
-                            |> any isEven
+                            |> Array.any isEven
                             |> Expect.equal
                                 False
                     )
@@ -119,7 +119,7 @@ suite =
                     Array.append
                         (before |> Array.push 123456)
                         after
-                        |> member 123456
+                        |> Array.member 123456
                         |> Expect.equal
                             True
                 )
@@ -128,8 +128,8 @@ suite =
                 "all removed → False"
                 (\array ->
                     array
-                        |> removeWhen (\element -> element == 123456)
-                        |> member 123456
+                        |> Array.removeWhen (\element -> element == 123456)
+                        |> Array.member 123456
                         |> Expect.equal
                             False
                 )
@@ -138,7 +138,7 @@ suite =
             [ test "index valid"
                 (\() ->
                     Array.fromList [ 1, 2, 3 ]
-                        |> update 1 (\n -> n + 10)
+                        |> Array.update 1 (\n -> n + 10)
                         |> expectEqualArrays
                             (Array.fromList [ 1, 12, 3 ])
                 )
@@ -151,7 +151,7 @@ suite =
                 "index negative"
                 (\{ array, index } ->
                     array
-                        |> update index (\n -> n + 10)
+                        |> Array.update index (\n -> n + 10)
                         |> expectEqualArrays
                             array
                 )
@@ -164,7 +164,7 @@ suite =
                 "index too high"
                 (\{ array, above } ->
                     array
-                        |> update ((array |> Array.length) + above) (\n -> n + 10)
+                        |> Array.update ((array |> Array.length) + above) (\n -> n + 10)
                         |> expectEqualArrays
                             array
                 )
@@ -173,7 +173,7 @@ suite =
             [ test "empty → Array.empty"
                 (\() ->
                     Array.empty
-                        |> pop
+                        |> Array.pop
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -189,7 +189,7 @@ suite =
                 (\{ beforeLast, last } ->
                     beforeLast
                         |> Array.push last
-                        |> pop
+                        |> Array.pop
                         |> expectEqualArrays
                             beforeLast
                 )
@@ -198,7 +198,7 @@ suite =
             [ test "index valid"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
-                        |> splitAt 2
+                        |> Array.splitAt 2
                         |> Expect.equal
                             ( Array.fromList [ 1, 2 ], Array.fromList [ 3, 4 ] )
                 )
@@ -211,7 +211,7 @@ suite =
                 "index not positive"
                 (\{ array, index } ->
                     array
-                        |> splitAt index
+                        |> Array.splitAt index
                         |> Expect.equal
                             ( Array.empty, array )
                 )
@@ -224,7 +224,7 @@ suite =
                 "index too high"
                 (\{ array, above } ->
                     array
-                        |> splitAt ((array |> Array.length) + above)
+                        |> Array.splitAt ((array |> Array.length) + above)
                         |> Expect.equal
                             ( array, Array.empty )
                 )
@@ -233,7 +233,7 @@ suite =
             [ test "index valid"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
-                        |> removeAt 2
+                        |> Array.removeAt 2
                         |> expectEqualArrays
                             (Array.fromList [ 1, 2, 4 ])
                 )
@@ -246,7 +246,7 @@ suite =
                 "index negative"
                 (\{ array, index } ->
                     array
-                        |> removeAt index
+                        |> Array.removeAt index
                         |> expectEqualArrays
                             array
                 )
@@ -259,7 +259,7 @@ suite =
                 "index too high"
                 (\{ array, above } ->
                     array
-                        |> removeAt ((array |> Array.length) + above)
+                        |> Array.removeAt ((array |> Array.length) + above)
                         |> expectEqualArrays
                             array
                 )
@@ -268,7 +268,7 @@ suite =
             [ test "index valid"
                 (\() ->
                     Array.fromList [ 'a', 'c' ]
-                        |> insertAt 1 'b'
+                        |> Array.insertAt 1 'b'
                         |> expectEqualArrays
                             (Array.fromList [ 'a', 'b', 'c' ])
                 )
@@ -281,7 +281,7 @@ suite =
                 "index negative"
                 (\{ array, index } ->
                     array
-                        |> insertAt index 12345
+                        |> Array.insertAt index 12345
                         |> expectEqualArrays
                             array
                 )
@@ -294,7 +294,7 @@ suite =
                 "index too high"
                 (\{ array, above } ->
                     array
-                        |> insertAt ((array |> Array.length) + above) 12345
+                        |> Array.insertAt ((array |> Array.length) + above) 12345
                         |> expectEqualArrays
                             array
                 )
@@ -303,14 +303,14 @@ suite =
             [ test "index positive valid"
                 (\() ->
                     Array.fromList (List.range 0 6)
-                        |> sliceFrom 3
+                        |> Array.sliceFrom 3
                         |> expectEqualArrays
                             (Array.fromList [ 3, 4, 5, 6 ])
                 )
             , test "index negative valid"
                 (\() ->
                     Array.fromList (List.range 0 6)
-                        |> sliceFrom -3
+                        |> Array.sliceFrom -3
                         |> expectEqualArrays
                             (Array.fromList [ 4, 5, 6 ])
                 )
@@ -323,7 +323,7 @@ suite =
                 "index positive too high"
                 (\{ array, above } ->
                     array
-                        |> sliceFrom ((array |> Array.length) + above)
+                        |> Array.sliceFrom ((array |> Array.length) + above)
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -336,7 +336,7 @@ suite =
                 "index negative too low"
                 (\{ array, below } ->
                     array
-                        |> sliceFrom (-(array |> Array.length) - below)
+                        |> Array.sliceFrom (-(array |> Array.length) - below)
                         |> expectEqualArrays
                             array
                 )
@@ -345,14 +345,14 @@ suite =
             [ test "index positive valid"
                 (\() ->
                     Array.fromList (List.range 0 6)
-                        |> sliceUntil 3
+                        |> Array.sliceUntil 3
                         |> expectEqualArrays
                             (Array.fromList [ 0, 1, 2 ])
                 )
             , test "index negative valid"
                 (\() ->
                     Array.fromList (List.range 0 6)
-                        |> sliceUntil -3
+                        |> Array.sliceUntil -3
                         |> expectEqualArrays
                             (Array.fromList [ 0, 1, 2, 3 ])
                 )
@@ -361,7 +361,7 @@ suite =
                 "index 0"
                 (\array ->
                     array
-                        |> sliceUntil 0
+                        |> Array.sliceUntil 0
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -374,7 +374,7 @@ suite =
                 "index positive too high"
                 (\{ array, above } ->
                     array
-                        |> sliceUntil ((array |> Array.length) + above)
+                        |> Array.sliceUntil ((array |> Array.length) + above)
                         |> expectEqualArrays
                             array
                 )
@@ -387,7 +387,7 @@ suite =
                 "index negative too low"
                 (\{ array, below } ->
                     array
-                        |> sliceUntil (-(array |> Array.length) - below)
+                        |> Array.sliceUntil (-(array |> Array.length) - below)
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -399,7 +399,7 @@ suite =
                 (\array ->
                     array
                         |> Array.map Just
-                        |> filterMap identity
+                        |> Array.filterMap identity
                         |> expectEqualArrays
                             array
                 )
@@ -408,14 +408,14 @@ suite =
                 "all Nothing"
                 (\arrayOfNothing ->
                     arrayOfNothing
-                        |> filterMap identity
+                        |> Array.filterMap identity
                         |> expectEqualArrays
                             Array.empty
                 )
             , test "some Nothing"
                 (\() ->
                     Array.fromList [ Just 3, Nothing, Just 5, Nothing ]
-                        |> filterMap identity
+                        |> Array.filterMap identity
                         |> expectEqualArrays
                             (Array.fromList [ 3, 5 ])
                 )
@@ -426,7 +426,7 @@ suite =
                 "more elements than functions"
                 (\after4 ->
                     Array.append (Array.repeat 4 100) after4
-                        |> apply
+                        |> Array.apply
                             (Array.fromList
                                 [ negate
                                 , identity
@@ -442,7 +442,7 @@ suite =
                 "more functions than elements"
                 (\after3 ->
                     Array.repeat 3 100
-                        |> apply
+                        |> Array.apply
                             (Array.append
                                 (Array.fromList [ negate, identity, \n -> n + 10 ])
                                 after3
@@ -456,7 +456,7 @@ suite =
             "mapToList"
             (\array ->
                 array
-                    |> mapToList String.fromInt
+                    |> Array.mapToList String.fromInt
                     |> Expect.equalLists
                         (array
                             |> Array.map String.fromInt
@@ -468,7 +468,7 @@ suite =
             "indexedMapToList"
             (\array ->
                 array
-                    |> indexedMapToList (\i el -> ( i, el ))
+                    |> Array.indexedMapToList (\i el -> ( i, el ))
                     |> Expect.equalLists
                         (array
                             |> Array.toIndexedList
@@ -485,7 +485,7 @@ suite =
                 )
                 "behaves like List.map2"
                 (\{ first, second } ->
-                    map2 (\a b -> a + b)
+                    Array.map2 (\a b -> a + b)
                         (first |> Array.fromList)
                         (second |> Array.fromList)
                         |> expectEqualArrays
@@ -495,7 +495,7 @@ suite =
                 )
             , test "first array shorter than the last example"
                 (\() ->
-                    map2 Tuple.pair
+                    Array.map2 Tuple.pair
                         (Array.fromList [ 1, 2, 3, 4 ])
                         (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
                         |> expectEqualArrays
@@ -509,7 +509,7 @@ suite =
                 )
             , test "first array longer than the last example"
                 (\() ->
-                    map2 Tuple.pair
+                    Array.map2 Tuple.pair
                         (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
                         (Array.fromList [ 1, 2, 3, 4 ])
                         |> expectEqualArrays
@@ -536,7 +536,7 @@ suite =
                 )
                 "behaves like List.map3"
                 (\{ first, second, third } ->
-                    map3 (\a b c -> a + b + c)
+                    Array.map3 (\a b c -> a + b + c)
                         (first |> Array.fromList)
                         (second |> Array.fromList)
                         (third |> Array.fromList)
@@ -547,7 +547,7 @@ suite =
                 )
             , test "first array the shortest example"
                 (\() ->
-                    map3 (\a b c -> ( a, b, c ))
+                    Array.map3 (\a b c -> ( a, b, c ))
                         (Array.fromList [ "a", "b", "c" ])
                         (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
                         (Array.fromList [ 1, 2, 3, 4 ])
@@ -561,7 +561,7 @@ suite =
                 )
             , test "second array the shortest example"
                 (\() ->
-                    map3 (\a b c -> ( a, b, c ))
+                    Array.map3 (\a b c -> ( a, b, c ))
                         (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
                         (Array.fromList [ "a", "b", "c" ])
                         (Array.fromList [ 1, 2, 3, 4 ])
@@ -575,7 +575,7 @@ suite =
                 )
             , test "third array the shortest example"
                 (\() ->
-                    map3 (\a b c -> ( a, b, c ))
+                    Array.map3 (\a b c -> ( a, b, c ))
                         (Array.fromList [ 'a', 'b', 'c', 'd', 'e' ])
                         (Array.fromList [ 1, 2, 3, 4 ])
                         (Array.fromList [ "a", "b", "c" ])
@@ -592,7 +592,7 @@ suite =
             [ test "example"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
-                        |> removeWhen isEven
+                        |> Array.removeWhen isEven
                         |> expectEqualArrays
                             (Array.fromList [ 1, 3 ])
                 )
@@ -602,7 +602,7 @@ suite =
                 (\array ->
                     array
                         |> Array.filter isEven
-                        |> removeWhen isEven
+                        |> Array.removeWhen isEven
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -611,7 +611,7 @@ suite =
                 "removeWhen is |> filter is  → Array.empty"
                 (\array ->
                     array
-                        |> removeWhen isEven
+                        |> Array.removeWhen isEven
                         |> Array.filter isEven
                         |> expectEqualArrays
                             Array.empty
@@ -624,7 +624,7 @@ suite =
                 (\listOfTuple ->
                     listOfTuple
                         |> Array.fromList
-                        |> unzip
+                        |> Array.unzip
                         |> Expect.equal
                             (listOfTuple
                                 |> List.unzip
@@ -642,17 +642,17 @@ suite =
                         minLength =
                             Basics.min (first |> Array.length) (second |> Array.length)
                     in
-                    zip first second
-                        |> unzip
+                    Array.zip first second
+                        |> Array.unzip
                         |> Expect.equal
-                            ( first |> sliceUntil minLength
-                            , second |> sliceUntil minLength
+                            ( first |> Array.sliceUntil minLength
+                            , second |> Array.sliceUntil minLength
                             )
                 )
             , test "example"
                 (\() ->
                     Array.fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]
-                        |> unzip
+                        |> Array.unzip
                         |> Expect.equal
                             ( Array.fromList [ 1, 2, 3 ]
                             , Array.fromList [ 'a', 'b', 'c' ]
@@ -666,14 +666,14 @@ suite =
                 (\list ->
                     list
                         |> Array.fromList
-                        |> reverse
+                        |> Array.reverse
                         |> expectEqualArrays
                             (list |> List.reverse |> Array.fromList)
                 )
             , test "example"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
-                        |> reverse
+                        |> Array.reverse
                         |> expectEqualArrays
                             (Array.fromList [ 4, 3, 2, 1 ])
                 )
@@ -682,14 +682,14 @@ suite =
             [ test "length less than current"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
-                        |> resizelRepeat 3 0
+                        |> Array.resizelRepeat 3 0
                         |> expectEqualArrays
                             (Array.fromList [ 1, 2, 3 ])
                 )
             , test "length greater than current"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
-                        |> resizelRepeat 6 0
+                        |> Array.resizelRepeat 6 0
                         |> expectEqualArrays
                             (Array.fromList [ 1, 2, 3, 4, 0, 0 ])
                 )
@@ -702,7 +702,7 @@ suite =
                 "length not positive  → Array.empty"
                 (\{ array, length } ->
                     array
-                        |> resizelRepeat length 0
+                        |> Array.resizelRepeat length 0
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -711,14 +711,14 @@ suite =
             [ test "length less than current"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
-                        |> resizerRepeat 3 0
+                        |> Array.resizerRepeat 3 0
                         |> expectEqualArrays
                             (Array.fromList [ 2, 3, 4 ])
                 )
             , test "length greater than current"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
-                        |> resizerRepeat 6 0
+                        |> Array.resizerRepeat 6 0
                         |> expectEqualArrays
                             (Array.fromList [ 0, 0, 1, 2, 3, 4 ])
                 )
@@ -731,7 +731,7 @@ suite =
                 "length not positive  → Array.empty"
                 (\{ array, length } ->
                     array
-                        |> resizelRepeat length 0
+                        |> Array.resizelRepeat length 0
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -740,14 +740,14 @@ suite =
             [ test "length less than current"
                 (\() ->
                     Array.fromList [ "a", "b", "c" ]
-                        |> resizelIndexed 2 String.fromInt
+                        |> Array.resizelIndexed 2 String.fromInt
                         |> expectEqualArrays
                             (Array.fromList [ "a", "b" ])
                 )
             , test "length greater than current"
                 (\() ->
                     Array.fromList [ "a", "b", "c" ]
-                        |> resizelIndexed 5 String.fromInt
+                        |> Array.resizelIndexed 5 String.fromInt
                         |> expectEqualArrays
                             (Array.fromList [ "a", "b", "c", "3", "4" ])
                 )
@@ -760,7 +760,7 @@ suite =
                 "length not positive  → Array.empty"
                 (\{ array, length } ->
                     array
-                        |> resizelIndexed length String.fromInt
+                        |> Array.resizelIndexed length String.fromInt
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -769,14 +769,14 @@ suite =
             [ test "length less than current"
                 (\() ->
                     Array.fromList [ "a", "b", "c" ]
-                        |> resizerIndexed 2 String.fromInt
+                        |> Array.resizerIndexed 2 String.fromInt
                         |> expectEqualArrays
                             (Array.fromList [ "b", "c" ])
                 )
             , test "length greater than current"
                 (\() ->
                     Array.fromList [ "a", "b", "c" ]
-                        |> resizerIndexed 5 String.fromInt
+                        |> Array.resizerIndexed 5 String.fromInt
                         |> expectEqualArrays
                             (Array.fromList [ "0", "1", "a", "b", "c" ])
                 )
@@ -789,7 +789,7 @@ suite =
                 "negative length  → Array.empty"
                 (\{ array, index } ->
                     array
-                        |> resizerIndexed index String.fromInt
+                        |> Array.resizerIndexed index String.fromInt
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -799,7 +799,7 @@ suite =
                 "empty → Array.empty"
                 (\separator ->
                     Array.empty
-                        |> intersperse separator
+                        |> Array.intersperse separator
                         |> expectEqualArrays
                             Array.empty
                 )
@@ -815,7 +815,7 @@ suite =
                 (\{ onlyElement, separator } ->
                     Array.empty
                         |> Array.push onlyElement
-                        |> intersperse separator
+                        |> Array.intersperse separator
                         |> expectEqualArrays
                             (Array.empty
                                 |> Array.push onlyElement
@@ -832,7 +832,7 @@ suite =
                 "combined length"
                 (\{ base, separator } ->
                     base
-                        |> intersperse separator
+                        |> Array.intersperse separator
                         |> Array.length
                         |> Expect.equal
                             (((base |> Array.length) * 2 - 1)
@@ -842,7 +842,7 @@ suite =
             , test "multiple"
                 (\() ->
                     Array.fromList [ "turtles", "turtles", "turtles" ]
-                        |> intersperse "on"
+                        |> Array.intersperse "on"
                         |> expectEqualArrays
                             (Array.fromList
                                 [ "turtles", "on", "turtles", "on", "turtles" ]
@@ -861,7 +861,7 @@ suite =
                 "lengths add up"
                 (\{ base, toInterweave } ->
                     base
-                        |> interweave toInterweave
+                        |> Array.interweave toInterweave
                         |> Array.length
                         |> Expect.equal
                             ((base |> Array.length)
@@ -871,7 +871,7 @@ suite =
             , test "less to interweave"
                 (\() ->
                     Array.fromList [ "a0", "a1", "a2" ]
-                        |> interweave
+                        |> Array.interweave
                             (Array.fromList [ "b0" ])
                         |> expectEqualArrays
                             (Array.fromList
@@ -881,7 +881,7 @@ suite =
             , test "more to interweave"
                 (\() ->
                     Array.fromList [ "a0", "a1", "a2" ]
-                        |> interweave
+                        |> Array.interweave
                             (Array.fromList [ "b0", "b1", "b2", "b3", "b4" ])
                         |> expectEqualArrays
                             (Array.fromList
