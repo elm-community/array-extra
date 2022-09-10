@@ -114,7 +114,7 @@ suite =
                     |> Fuzz.andMap (Fuzz.array Fuzz.int)
                     |> Fuzz.andMap (Fuzz.array Fuzz.int)
                 )
-                "exists"
+                "included → True"
                 (\{ before, after } ->
                     Array.append
                         (before |> Array.push 123456)
@@ -125,10 +125,10 @@ suite =
                 )
             , Test.fuzz
                 (Fuzz.array Fuzz.int)
-                "doesn't exist"
+                "all removed → False"
                 (\array ->
                     array
-                        |> Array.filter (\element -> element /= 123456)
+                        |> removeWhen (\element -> element == 123456)
                         |> member 123456
                         |> Expect.equal
                             False
