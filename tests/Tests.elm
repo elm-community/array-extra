@@ -9,14 +9,14 @@ import Array.Extra as Array
 import Expect exposing (Expectation)
 import Fuzz
 import Random
-import Test exposing (Test, describe, test)
+import Test exposing (Test, test)
 
 
 suite : Test
 suite =
-    describe "Array.Extra"
-        [ describe "all"
-            [ describe "True"
+    Test.describe "Array.Extra"
+        [ Test.describe "all"
+            [ Test.describe "True"
                 [ Test.fuzz
                     (Fuzz.array Fuzz.int)
                     "filter test |> all test"
@@ -35,7 +35,7 @@ suite =
                                 True
                     )
                 ]
-            , describe "False"
+            , Test.describe "False"
                 [ Test.fuzz
                     (Fuzz.constant
                         (\before after -> { before = before, after = after })
@@ -60,8 +60,8 @@ suite =
                     )
                 ]
             ]
-        , describe "any"
-            [ describe "True"
+        , Test.describe "any"
+            [ Test.describe "True"
                 [ Test.fuzz
                     (Fuzz.constant
                         (\before after -> { before = before, after = after })
@@ -85,7 +85,7 @@ suite =
                                 True
                     )
                 ]
-            , describe "False"
+            , Test.describe "False"
                 [ Test.fuzz
                     (Fuzz.array Fuzz.int)
                     "removeWhen test |> any test"
@@ -105,7 +105,7 @@ suite =
                     )
                 ]
             ]
-        , describe "member"
+        , Test.describe "member"
             [ Test.fuzz
                 (Fuzz.constant
                     (\before after ->
@@ -134,7 +134,7 @@ suite =
                             False
                 )
             ]
-        , describe "update"
+        , Test.describe "update"
             [ test "index valid"
                 (\() ->
                     Array.fromList [ 1, 2, 3 ]
@@ -169,7 +169,7 @@ suite =
                             array
                 )
             ]
-        , describe "pop"
+        , Test.describe "pop"
             [ test "empty → Array.empty"
                 (\() ->
                     Array.empty
@@ -194,7 +194,7 @@ suite =
                             beforeLast
                 )
             ]
-        , describe "splitAt"
+        , Test.describe "splitAt"
             [ test "index valid"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
@@ -229,7 +229,7 @@ suite =
                             ( array, Array.empty )
                 )
             ]
-        , describe "removeAt"
+        , Test.describe "removeAt"
             [ test "index valid"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
@@ -264,7 +264,7 @@ suite =
                             array
                 )
             ]
-        , describe "insertAt"
+        , Test.describe "insertAt"
             [ test "index valid"
                 (\() ->
                     Array.fromList [ 'a', 'c' ]
@@ -299,7 +299,7 @@ suite =
                             array
                 )
             ]
-        , describe "sliceFrom"
+        , Test.describe "sliceFrom"
             [ test "index positive valid"
                 (\() ->
                     Array.fromList (List.range 0 6)
@@ -341,7 +341,7 @@ suite =
                             array
                 )
             ]
-        , describe "sliceUntil"
+        , Test.describe "sliceUntil"
             [ test "index positive valid"
                 (\() ->
                     Array.fromList (List.range 0 6)
@@ -392,7 +392,7 @@ suite =
                             Array.empty
                 )
             ]
-        , describe "filterMap"
+        , Test.describe "filterMap"
             [ Test.fuzz
                 (Fuzz.array Fuzz.int)
                 "all Just"
@@ -420,7 +420,7 @@ suite =
                             (Array.fromList [ 3, 5 ])
                 )
             ]
-        , describe "apply"
+        , Test.describe "apply"
             [ Test.fuzz
                 (Fuzz.array Fuzz.int)
                 "more elements than functions"
@@ -474,7 +474,7 @@ suite =
                             |> Array.toIndexedList
                         )
             )
-        , describe "map2"
+        , Test.describe "map2"
             -- `zip` will probably always be implemented with `map2`.
             -- No need to test both
             [ Test.fuzz
@@ -524,7 +524,7 @@ suite =
             ]
         , -- `zip3` will probably always be implemented using `map3`.
           -- No need to test both
-          describe "map3"
+          Test.describe "map3"
             [ Test.fuzz
                 (Fuzz.constant
                     (\first second third ->
@@ -588,7 +588,7 @@ suite =
                             )
                 )
             ]
-        , describe "removeWhen"
+        , Test.describe "removeWhen"
             [ test "example"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
@@ -617,7 +617,7 @@ suite =
                             Array.empty
                 )
             ]
-        , describe "unzip"
+        , Test.describe "unzip"
             [ Test.fuzz
                 (Fuzz.list (Fuzz.tuple ( Fuzz.int, Fuzz.char )))
                 "behaves like List.unzip"
@@ -659,7 +659,7 @@ suite =
                             )
                 )
             ]
-        , describe "reverse"
+        , Test.describe "reverse"
             [ Test.fuzz
                 (Fuzz.list Fuzz.int)
                 "like List.reverse"
@@ -678,7 +678,7 @@ suite =
                             (Array.fromList [ 4, 3, 2, 1 ])
                 )
             ]
-        , describe "resizelRepeat"
+        , Test.describe "resizelRepeat"
             [ test "length less than current"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
@@ -707,7 +707,7 @@ suite =
                             Array.empty
                 )
             ]
-        , describe "resizerRepeat"
+        , Test.describe "resizerRepeat"
             [ test "length less than current"
                 (\() ->
                     Array.fromList [ 1, 2, 3, 4 ]
@@ -736,7 +736,7 @@ suite =
                             Array.empty
                 )
             ]
-        , describe "resizelIndexed"
+        , Test.describe "resizelIndexed"
             [ test "length less than current"
                 (\() ->
                     Array.fromList [ "a", "b", "c" ]
@@ -765,7 +765,7 @@ suite =
                             Array.empty
                 )
             ]
-        , describe "resizerIndexed"
+        , Test.describe "resizerIndexed"
             [ test "length less than current"
                 (\() ->
                     Array.fromList [ "a", "b", "c" ]
@@ -794,7 +794,7 @@ suite =
                             Array.empty
                 )
             ]
-        , describe "intersperse"
+        , Test.describe "intersperse"
             [ Test.fuzz Fuzz.int
                 "empty → Array.empty"
                 (\separator ->
@@ -849,7 +849,7 @@ suite =
                             )
                 )
             ]
-        , describe "interweave"
+        , Test.describe "interweave"
             [ Test.fuzz
                 (Fuzz.constant
                     (\base toInterweave ->
