@@ -400,7 +400,8 @@ suite =
                     array
                         |> Array.map Just
                         |> filterMap identity
-                        |> expectEqualArrays array
+                        |> expectEqualArrays
+                            array
                 )
             , Test.fuzz
                 (Fuzz.array (Fuzz.constant Nothing))
@@ -408,7 +409,8 @@ suite =
                 (\arrayOfNothing ->
                     arrayOfNothing
                         |> filterMap identity
-                        |> expectEqualArrays empty
+                        |> expectEqualArrays
+                            empty
                 )
             , test "some Nothing"
                 (\() ->
@@ -701,7 +703,8 @@ suite =
                 (\{ array, length } ->
                     array
                         |> resizelRepeat length 0
-                        |> expectEqualArrays Array.empty
+                        |> expectEqualArrays
+                            Array.empty
                 )
             ]
         , describe "resizerRepeat"
@@ -729,7 +732,8 @@ suite =
                 (\{ array, length } ->
                     array
                         |> resizelRepeat length 0
-                        |> expectEqualArrays Array.empty
+                        |> expectEqualArrays
+                            Array.empty
                 )
             ]
         , describe "resizelIndexed"
@@ -757,7 +761,8 @@ suite =
                 (\{ array, index } ->
                     fromList [ "a", "b", "c" ]
                         |> resizelIndexed -1 String.fromInt
-                        |> expectEqualArrays Array.empty
+                        |> expectEqualArrays
+                            Array.empty
                 )
             ]
         , describe "resizerIndexed"
@@ -785,7 +790,8 @@ suite =
                 (\{ array, index } ->
                     array
                         |> resizerIndexed index String.fromInt
-                        |> expectEqualArrays Array.empty
+                        |> expectEqualArrays
+                            Array.empty
                 )
             ]
         , describe "intersperse"
@@ -794,7 +800,8 @@ suite =
                 (\separator ->
                     empty
                         |> intersperse separator
-                        |> expectEqualArrays empty
+                        |> expectEqualArrays
+                            empty
                 )
             , Test.fuzz
                 (Fuzz.constant
