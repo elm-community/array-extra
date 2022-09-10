@@ -796,7 +796,7 @@ suite =
             ]
         , describe "intersperse"
             [ Test.fuzz Fuzz.int
-                "empty"
+                "empty → empty"
                 (\separator ->
                     empty
                         |> intersperse separator
@@ -811,7 +811,7 @@ suite =
                     |> Fuzz.andMap Fuzz.int
                     |> Fuzz.andMap Fuzz.int
                 )
-                "one"
+                "one → one"
                 (\{ onlyElement, separator } ->
                     Array.empty
                         |> Array.push onlyElement
@@ -894,7 +894,7 @@ suite =
 
 isEven : Int -> Bool
 isEven =
-    modBy 2 >> (==) 0
+    \int -> (int |> modBy 2) == 0
 
 
 expectEqualArrays : Array a -> Array a -> Expectation
