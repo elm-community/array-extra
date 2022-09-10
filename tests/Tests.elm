@@ -202,12 +202,18 @@ suite =
                         |> Expect.equal
                             ( fromList [ 1, 2 ], fromList [ 3, 4 ] )
                 )
-            , test "index negative"
-                (\() ->
-                    fromList [ 1, 2, 3, 4 ]
-                        |> splitAt -1
+            , Test.fuzz
+                (Fuzz.constant
+                    (\array index -> { array = array, index = index })
+                    |> Fuzz.andMap (Fuzz.array Fuzz.int)
+                    |> Fuzz.andMap (Fuzz.intRange Random.minInt 0)
+                )
+                "index not positive"
+                (\{ array, index } ->
+                    array
+                        |> splitAt index
                         |> Expect.equal
-                            ( empty, fromList [ 1, 2, 3, 4 ] )
+                            ( empty, array )
                 )
             , Test.fuzz
                 (Fuzz.constant
@@ -413,9 +419,11 @@ suite =
                 )
             ]
         , describe "apply"
-            [ test "more elements than functions"
-                (\() ->
-                    repeat 5 100
+            [ Test.fuzz
+                (Fuzz.array Fuzz.int)
+                "more elements than functions"
+                (\after4 ->
+                    Array.append (repeat 4 100) after4
                         |> apply
                             (fromList
                                 [ negate
@@ -425,25 +433,20 @@ suite =
                                 ]
                             )
                         |> expectEqualArrays
-                            (fromList
-                                [ -100, 100, 110, 0 ]
-                            )
+                            (fromList [ -100, 100, 110, 0 ])
                 )
-            , test "more functions than elements"
-                (\() ->
+            , Test.fuzz
+                (Fuzz.array (Fuzz.constant (\_ -> 0)))
+                "more functions than elements"
+                (\after3 ->
                     repeat 3 100
                         |> apply
-                            (fromList
-                                [ negate
-                                , identity
-                                , \n -> n + 10
-                                , \_ -> 0
-                                ]
+                            (Array.append
+                                (fromList [ negate, identity, \n -> n + 10 ])
+                                after3
                             )
                         |> expectEqualArrays
-                            (fromList
-                                [ -100, 100, 110 ]
-                            )
+                            (fromList [ -100, 100, 110 ])
                 )
             ]
         , Test.fuzz
@@ -472,7 +475,23 @@ suite =
         , describe "map2"
             -- `zip` will probably always be implemented with `map2`.
             -- No need to test both
-            [ test "first array longer than the last"
+            [ Test.fuzz
+                (Fuzz.constant
+                    (\first second -> { first = first, second = second })
+                    |> Fuzz.andMap (Fuzz.list Fuzz.int)
+                    |> Fuzz.andMap (Fuzz.list Fuzz.int)
+                )
+                "behaves like List.map2"
+                (\{ first, second } ->
+                    map2 (\a b -> a + b)
+                        (first |> fromList)
+                        (second |> fromList)
+                        |> expectEqualArrays
+                            (List.map2 (\a b -> a + b) first second
+                                |> fromList
+                            )
+                )
+            , test "first array shorter than the last example"
                 (\() ->
                     map2 Tuple.pair
                         (fromList [ 1, 2, 3, 4 ])
@@ -486,7 +505,7 @@ suite =
                                 ]
                             )
                 )
-            , test "first array shorter than the last"
+            , test "first array longer than the last example"
                 (\() ->
                     map2 Tuple.pair
                         (fromList [ 'a', 'b', 'c', 'd', 'e' ])
@@ -504,7 +523,27 @@ suite =
         , -- `zip3` will probably always be implemented using `map3`.
           -- No need to test both
           describe "map3"
-            [ test "first array the shortest"
+            [ Test.fuzz
+                (Fuzz.constant
+                    (\first second third ->
+                        { first = first, second = second, third = third }
+                    )
+                    |> Fuzz.andMap (Fuzz.list Fuzz.int)
+                    |> Fuzz.andMap (Fuzz.list Fuzz.int)
+                    |> Fuzz.andMap (Fuzz.list Fuzz.int)
+                )
+                "behaves like List.map3"
+                (\{ first, second, third } ->
+                    map3 (\a b c -> a + b + c)
+                        (first |> fromList)
+                        (second |> fromList)
+                        (third |> fromList)
+                        |> expectEqualArrays
+                            (List.map3 (\a b c -> a + b + c) first second third
+                                |> fromList
+                            )
+                )
+            , test "first array the shortest example"
                 (\() ->
                     map3 (\a b c -> ( a, b, c ))
                         (fromList [ "a", "b", "c" ])
@@ -518,7 +557,7 @@ suite =
                                 ]
                             )
                 )
-            , test "second array the shortest"
+            , test "second array the shortest example"
                 (\() ->
                     map3 (\a b c -> ( a, b, c ))
                         (fromList [ 'a', 'b', 'c', 'd', 'e' ])
@@ -532,7 +571,7 @@ suite =
                                 ]
                             )
                 )
-            , test "third array the shortest"
+            , test "third array the shortest example"
                 (\() ->
                     map3 (\a b c -> ( a, b, c ))
                         (fromList [ 'a', 'b', 'c', 'd', 'e' ])
@@ -576,15 +615,48 @@ suite =
                             empty
                 )
             ]
-        , test "unzip"
-            (\() ->
-                fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]
-                    |> unzip
-                    |> Expect.equal
-                        ( fromList [ 1, 2, 3 ]
-                        , fromList [ 'a', 'b', 'c' ]
-                        )
-            )
+        , describe "unzip"
+            [ Test.fuzz
+                (Fuzz.list (Fuzz.tuple ( Fuzz.int, Fuzz.char )))
+                "behaves like List.unzip"
+                (\listOfTuple ->
+                    listOfTuple
+                        |> fromList
+                        |> unzip
+                        |> Expect.equal
+                            (listOfTuple
+                                |> List.unzip
+                                |> Tuple.mapBoth fromList fromList
+                            )
+                )
+            , Test.fuzz
+                (Fuzz.constant (\first second -> { first = first, second = second })
+                    |> Fuzz.andMap (Fuzz.array Fuzz.int)
+                    |> Fuzz.andMap (Fuzz.array Fuzz.char)
+                )
+                "restores what was before zip with the same length taken"
+                (\{ first, second } ->
+                    let
+                        minLength =
+                            Basics.min (first |> Array.length) (second |> Array.length)
+                    in
+                    zip first second
+                        |> unzip
+                        |> Expect.equal
+                            ( first |> sliceUntil minLength
+                            , second |> sliceUntil minLength
+                            )
+                )
+            , test "example"
+                (\() ->
+                    fromList [ ( 1, 'a' ), ( 2, 'b' ), ( 3, 'c' ) ]
+                        |> unzip
+                        |> Expect.equal
+                            ( fromList [ 1, 2, 3 ]
+                            , fromList [ 'a', 'b', 'c' ]
+                            )
+                )
+            ]
         , describe "reverse"
             [ Test.fuzz
                 (Fuzz.list Fuzz.int)
@@ -625,7 +697,7 @@ suite =
                     |> Fuzz.andMap (Fuzz.array Fuzz.int)
                     |> Fuzz.andMap (Fuzz.intRange Random.minInt 0)
                 )
-                "non-positive length  → empty"
+                "length not positive  → empty"
                 (\{ array, length } ->
                     array
                         |> resizelRepeat length 0
@@ -653,7 +725,7 @@ suite =
                     |> Fuzz.andMap (Fuzz.array Fuzz.int)
                     |> Fuzz.andMap (Fuzz.intRange Random.minInt 0)
                 )
-                "non-positive length  → empty"
+                "length not positive  → empty"
                 (\{ array, length } ->
                     array
                         |> resizelRepeat length 0
@@ -709,7 +781,7 @@ suite =
                     |> Fuzz.andMap (Fuzz.array Fuzz.string)
                     |> Fuzz.andMap (Fuzz.intRange Random.minInt -1)
                 )
-                "negative length"
+                "negative length  → empty"
                 (\{ array, index } ->
                     array
                         |> resizerIndexed index String.fromInt
