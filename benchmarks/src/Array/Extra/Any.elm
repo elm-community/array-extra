@@ -1,4 +1,4 @@
-module Array.Extra.Any exposing (recursive, withFold, withList)
+module Array.Extra.Any exposing (recursiveGet, recursiveLast, withFold, withList)
 
 import Array exposing (Array)
 import Array.Extra
@@ -21,8 +21,8 @@ withFold isOkay =
                 False
 
 
-recursive : (a -> Bool) -> Array a -> Bool
-recursive isOkay =
+recursiveLast : (a -> Bool) -> Array a -> Bool
+recursiveLast isOkay =
     \array ->
         -- read & write is faster on the last element
         case array |> Array.get ((array |> Array.length) - 1) of
@@ -34,4 +34,22 @@ recursive isOkay =
                     True
 
                 else
-                    array |> Array.Extra.pop |> recursive isOkay
+                    array |> Array.Extra.pop |> recursiveLast isOkay
+
+
+recursiveGet : (a -> Bool) -> Array a -> Bool
+recursiveGet isOkay array =
+    recursiveGetFromIndex 0 isOkay array
+
+
+recursiveGetFromIndex : Int -> (a -> Bool) -> Array a -> Bool
+recursiveGetFromIndex index isOkay array =
+    case Array.get index array |> Maybe.map isOkay of
+        Just True ->
+            True
+
+        Just False ->
+            recursiveGetFromIndex (index + 1) isOkay array
+
+        Nothing ->
+            False
