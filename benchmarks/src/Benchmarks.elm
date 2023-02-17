@@ -129,7 +129,8 @@ arrayExtra =
           in
           rank "all"
             (\all -> allTrue |> all identity)
-            [ ( "recursive", Array.Extra.All.recursive )
+            [ ( "recursive last", Array.Extra.All.recursiveLast )
+            , ( "recursive get", Array.Extra.All.recursiveGet )
             , ( "with List.all", Array.Extra.All.withListAll )
             , ( "with fold", Array.Extra.All.withFold )
             ]
@@ -139,7 +140,8 @@ arrayExtra =
           in
           rank "any"
             (\any -> allFalse |> any identity)
-            [ ( "recursive", Array.Extra.Any.recursive )
+            [ ( "recursive last", Array.Extra.Any.recursiveLast )
+            , ( "recursive get", Array.Extra.Any.recursiveGet )
             , ( "with List.any", Array.Extra.Any.withList )
             , ( "with fold", Array.Extra.Any.withFold )
             ]
