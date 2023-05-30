@@ -3,8 +3,8 @@ module Array.Extra exposing
     , reverse, intersperse
     , update, pop, removeAt, insertAt
     , removeWhen, filterMap
-    , sliceFrom, sliceUntil, splitAt
-    , interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
+    , sliceFrom, sliceUntil, splitAt, unzip
+    , interweave, apply, map2, map3, map4, map5, zip, zip3
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
     , mapToList, indexedMapToList
     )
@@ -12,7 +12,7 @@ module Array.Extra exposing
 {-| Convenience functions for working with `Array`
 
 
-# scan
+# observe
 
 @docs all, any, member
 
@@ -30,12 +30,12 @@ module Array.Extra exposing
 
 ## part
 
-@docs sliceFrom, sliceUntil, splitAt
+@docs sliceFrom, sliceUntil, splitAt, unzip
 
 
 ## combine
 
-@docs interweave, apply, map2, map3, map4, map5, zip, zip3, unzip
+@docs interweave, apply, map2, map3, map4, map5, zip, zip3
 
 
 ## resize
