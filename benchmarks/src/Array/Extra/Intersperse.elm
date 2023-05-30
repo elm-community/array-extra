@@ -14,8 +14,8 @@ withPush separator =
             Just last ->
                 let
                     step element =
-                        \arrayBeforeStep ->
-                            arrayBeforeStep
+                        \beforeStep ->
+                            beforeStep
                                 |> Array.push element
                                 |> Array.push separator
 
@@ -37,8 +37,8 @@ withCons separator =
             Just last ->
                 let
                     step element =
-                        \arrayBeforeStep ->
-                            arrayBeforeStep
+                        \beforeStep ->
+                            beforeStep
                                 |> (::) element
                                 |> (::) separator
 
