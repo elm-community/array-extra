@@ -25,7 +25,9 @@ withGet combine aArray bArray =
                     case bArray |> Array.get state.index of
                         Just bElement ->
                             { state
-                                | combined = combine aElement bElement :: state.combined
+                                | combined =
+                                    state.combined
+                                        |> (::) (combine aElement bElement)
                                 , index = state.index + 1
                             }
 
@@ -52,8 +54,8 @@ withUncons combine aArray bArray =
 
                     bsRemainingHead :: bsRemainingTail ->
                         { combined =
-                            combine aElement bsRemainingHead
-                                :: state.combined
+                            state.combined
+                                |> (::) (combine aElement bsRemainingHead)
                         , bsRemaining = bsRemainingTail
                         }
             )
