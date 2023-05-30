@@ -96,9 +96,10 @@ arrayExtra =
           in
           rank "unzip"
             (\unzip -> zipped |> unzip)
-            [ ( "with Array.maps", Array.Extra.Unzip.withMaps )
+            [ ( "with maps", Array.Extra.Unzip.withMaps )
             , ( "with List.unzip", Array.Extra.Unzip.withListUnzip )
-            , ( "with foldl to Arrays", Array.Extra.Unzip.wthFoldlToArrays )
+            , ( "with push", Array.Extra.Unzip.wthPush )
+            , ( "with cons", Array.Extra.Unzip.wthCons )
             ]
         , rank "map2"
             (\map2 ->

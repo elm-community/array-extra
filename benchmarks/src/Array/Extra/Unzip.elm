@@ -1,4 +1,4 @@
-module Array.Extra.Unzip exposing (withListUnzip, withMaps, wthFoldlToArrays)
+module Array.Extra.Unzip exposing (withListUnzip, withMaps, wthCons, wthPush)
 
 import Array exposing (Array)
 
@@ -20,8 +20,8 @@ withListUnzip =
             |> Tuple.mapBoth Array.fromList Array.fromList
 
 
-wthFoldlToArrays : Array ( a, b ) -> ( Array a, Array b )
-wthFoldlToArrays =
+wthPush : Array ( a, b ) -> ( Array a, Array b )
+wthPush =
     \arrayOfTuple ->
         arrayOfTuple
             |> Array.foldl
@@ -31,3 +31,17 @@ wthFoldlToArrays =
                     )
                 )
                 ( Array.empty, Array.empty )
+
+
+wthCons : Array ( a, b ) -> ( Array a, Array b )
+wthCons =
+    \arrayOfTuple ->
+        arrayOfTuple
+            |> Array.foldr
+                (\( a, b ) ( arrayOfASoFar, arrayOfBSoFar ) ->
+                    ( arrayOfASoFar |> (::) a
+                    , arrayOfBSoFar |> (::) b
+                    )
+                )
+                ( [], [] )
+            |> Tuple.mapBoth Array.fromList Array.fromList
