@@ -178,9 +178,21 @@ filterMap :
 filterMap tryMap =
     \array ->
         array
-            |> Array.toList
-            |> List.filterMap tryMap
+            |> Array.foldr
+                (\el soFar -> soFar |> consTry (el |> tryMap))
+                []
             |> Array.fromList
+
+
+consTry : Maybe a -> List a -> List a
+consTry maybeNewHead =
+    \list ->
+        case maybeNewHead of
+            Just newHead ->
+                newHead :: list
+
+            Nothing ->
+                list
 
 
 {-| Apply a given `Array` of changes to all elements.

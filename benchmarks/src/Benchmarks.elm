@@ -122,6 +122,7 @@ arrayExtra =
             (\filterMap -> maybeInts |> filterMap identity)
             [ ( "with List.filterMap", Array.Extra.FilterMap.withListFilterMap )
             , ( "with push", Array.Extra.FilterMap.withPush )
+            , ( "with cons", Array.Extra.FilterMap.withCons )
             ]
         , let
             allTrue =
