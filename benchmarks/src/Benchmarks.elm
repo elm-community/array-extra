@@ -86,9 +86,9 @@ arrayExtra =
             ]
         , rank "reverse"
             (\reverse -> reverse ints1To100)
-            [ ( "with Array.foldl to list", Array.Extra.Reverse.withFoldlToList )
+            [ ( "with cons", Array.Extra.Reverse.withCons )
             , ( "with List.reverse", Array.Extra.Reverse.withListReverse )
-            , ( "with Array.foldr to array", Array.Extra.Reverse.withFoldl )
+            , ( "with push", Array.Extra.Reverse.withPush )
             ]
         , let
             zipped =
