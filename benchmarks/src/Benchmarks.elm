@@ -150,8 +150,9 @@ arrayExtra =
             ]
         , rank "intersperse"
             (\intersperse -> ints1To100 |> intersperse 0)
-            [ ( "with Array.foldr", Array.Extra.Intersperse.withArrayFoldr )
-            , ( "with List.intersperse", Array.Extra.Intersperse.withList )
+            [ ( "with push", Array.Extra.Intersperse.withPush )
+            , ( "with cons", Array.Extra.Intersperse.withCons )
+            , ( "with List.intersperse", Array.Extra.Intersperse.withListIntersperse )
             ]
         , rank "member"
             (\member -> member 50 ints1To100)
