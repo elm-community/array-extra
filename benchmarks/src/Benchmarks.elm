@@ -105,7 +105,8 @@ arrayExtra =
                 map2 Tuple.pair ints1To100 ints1To100
             )
             [ ( "with List.map2", Array.Extra.Map2.withListMap2 )
-            , ( "with indexedMap", Array.Extra.Map2.withIndexedMap )
+            , ( "with get", Array.Extra.Map2.withGet )
+            , ( "with un-cons", Array.Extra.Map2.withUncons )
             ]
         , let
             maybeInts =

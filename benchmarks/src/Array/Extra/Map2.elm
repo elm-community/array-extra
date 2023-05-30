@@ -1,29 +1,65 @@
-module Array.Extra.Map2 exposing (withIndexedMap, withListMap2)
+module Array.Extra.Map2 exposing (withGet, withListMap2, withUncons)
 
 import Array exposing (Array)
 import Array.Extra
+import Html exposing (b)
 
 
 withListMap2 : (a -> b -> c) -> Array a -> Array b -> Array c
 withListMap2 combine aArray bArray =
     List.map2 combine
-        (Array.toList aArray)
-        (Array.toList bArray)
+        (aArray |> Array.toList)
+        (bArray |> Array.toList)
         |> Array.fromList
 
 
-withIndexedMap : (a -> b -> c) -> Array a -> Array b -> Array c
-withIndexedMap combine aArray bArray =
-    let
-        length =
-            min
-                (aArray |> Array.length)
-                (bArray |> Array.length)
-    in
+withGet : (a -> b -> c) -> Array a -> Array b -> Array c
+withGet combine aArray bArray =
     aArray
-        |> Array.slice 0 length
-        |> Array.indexedMap
-            (\i a ->
-                Maybe.map (combine a) (bArray |> Array.get i)
+        |> Array.foldl
+            (\aElement state ->
+                if state.bsExhausted then
+                    state
+
+                else
+                    case bArray |> Array.get state.index of
+                        Just bElement ->
+                            { state
+                                | combined = combine aElement bElement :: state.combined
+                                , index = state.index + 1
+                            }
+
+                        Nothing ->
+                            { state | bsExhausted = True }
             )
-        |> Array.Extra.filterMap identity
+            { bsExhausted = False
+            , index = 0
+            , combined = []
+            }
+        |> .combined
+        |> List.reverse
+        |> Array.fromList
+
+
+withUncons : (a -> b -> c) -> Array a -> Array b -> Array c
+withUncons combine aArray bArray =
+    aArray
+        |> Array.foldl
+            (\aElement state ->
+                case state.bsRemaining of
+                    [] ->
+                        state
+
+                    bsRemainingHead :: bsRemainingTail ->
+                        { combined =
+                            combine aElement bsRemainingHead
+                                :: state.combined
+                        , bsRemaining = bsRemainingTail
+                        }
+            )
+            { bsRemaining = bArray |> Array.toList
+            , combined = []
+            }
+        |> .combined
+        |> List.reverse
+        |> Array.fromList
