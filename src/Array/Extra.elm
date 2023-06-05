@@ -199,6 +199,9 @@ consTry maybeNewHead =
 try unpacking _all_ `Just` values.
 If just a single element is `Nothing`, `Nothing` is returned.
 
+This is like a nicer [`all`](#all) where if you test for certain elements you already get
+the `Array` with all the successful results or `Nothing` if one wasn't successful.
+
     import Array exposing (empty, fromList)
 
     empty
