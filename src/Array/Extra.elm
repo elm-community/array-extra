@@ -186,13 +186,12 @@ filterMap tryMap =
 
 consTry : Maybe a -> List a -> List a
 consTry maybeNewHead =
-    \list ->
-        case maybeNewHead of
-            Just newHead ->
-                newHead :: list
+    case maybeNewHead of
+        Just newHead ->
+            \list -> list |> (::) newHead
 
-            Nothing ->
-                list
+        Nothing ->
+            identity
 
 
 {-| After applying the given function to every element,
