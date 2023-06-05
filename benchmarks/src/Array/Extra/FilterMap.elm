@@ -1,4 +1,4 @@
-module Array.Extra.FilterMap exposing (withListFilterMap, withPush)
+module Array.Extra.FilterMap exposing (withCons, withListFilterMap, withPush)
 
 import Array exposing (Array)
 
@@ -8,14 +8,14 @@ withPush elementParse =
     \array ->
         Array.foldl
             (\element soFar ->
-                soFar |> maybePush (element |> elementParse)
+                soFar |> pushTry (element |> elementParse)
             )
             Array.empty
             array
 
 
-maybePush : Maybe a -> Array a -> Array a
-maybePush maybe =
+pushTry : Maybe a -> Array a -> Array a
+pushTry maybe =
     case maybe of
         Just value ->
             \array -> array |> Array.push value
@@ -31,3 +31,24 @@ withListFilterMap tryMap =
             |> Array.toList
             |> List.filterMap tryMap
             |> Array.fromList
+
+
+withCons : (a -> Maybe mapped) -> Array a -> Array mapped
+withCons tryChange =
+    \array ->
+        array
+            |> Array.foldr
+                (\el soFar -> soFar |> consTry (el |> tryChange))
+                []
+            |> Array.fromList
+
+
+consTry : Maybe a -> List a -> List a
+consTry maybeNewHead =
+    \list ->
+        case maybeNewHead of
+            Just newHead ->
+                newHead :: list
+
+            Nothing ->
+                list

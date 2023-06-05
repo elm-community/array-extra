@@ -1,16 +1,16 @@
-module Array.Extra.Reverse exposing (withFoldl, withFoldlToList, withListReverse)
+module Array.Extra.Reverse exposing (withCons, withListReverse, withPush)
 
 import Array exposing (Array)
 
 
-withFoldlToList : Array a -> Array a
-withFoldlToList =
+withCons : Array a -> Array a
+withCons =
     \array ->
         array |> Array.foldl (::) [] |> Array.fromList
 
 
-withFoldl : Array a -> Array a
-withFoldl =
+withPush : Array a -> Array a
+withPush =
     \array ->
         array |> Array.foldl Array.push Array.empty
 

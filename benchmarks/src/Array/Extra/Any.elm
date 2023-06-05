@@ -17,7 +17,7 @@ withFold isOkay =
     \array ->
         array
             |> Array.foldl
-                (\element soFar -> soFar || isOkay element)
+                (\element soFar -> soFar || (element |> isOkay))
                 False
 
 

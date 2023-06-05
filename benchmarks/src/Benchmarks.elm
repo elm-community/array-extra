@@ -86,9 +86,9 @@ arrayExtra =
             ]
         , rank "reverse"
             (\reverse -> reverse ints1To100)
-            [ ( "with Array.foldl to list", Array.Extra.Reverse.withFoldlToList )
+            [ ( "with cons", Array.Extra.Reverse.withCons )
             , ( "with List.reverse", Array.Extra.Reverse.withListReverse )
-            , ( "with Array.foldr to array", Array.Extra.Reverse.withFoldl )
+            , ( "with push", Array.Extra.Reverse.withPush )
             ]
         , let
             zipped =
@@ -96,16 +96,18 @@ arrayExtra =
           in
           rank "unzip"
             (\unzip -> zipped |> unzip)
-            [ ( "with Array.maps", Array.Extra.Unzip.withMaps )
+            [ ( "with maps", Array.Extra.Unzip.withMaps )
             , ( "with List.unzip", Array.Extra.Unzip.withListUnzip )
-            , ( "with foldl to Arrays", Array.Extra.Unzip.wthFoldlToArrays )
+            , ( "with push", Array.Extra.Unzip.wthPush )
+            , ( "with cons", Array.Extra.Unzip.wthCons )
             ]
         , rank "map2"
             (\map2 ->
                 map2 Tuple.pair ints1To100 ints1To100
             )
             [ ( "with List.map2", Array.Extra.Map2.withListMap2 )
-            , ( "with List.indexedMap", Array.Extra.Map2.withListIndexedMap )
+            , ( "with get", Array.Extra.Map2.withGet )
+            , ( "with un-cons", Array.Extra.Map2.withUncons )
             ]
         , let
             maybeInts =
@@ -122,6 +124,7 @@ arrayExtra =
             (\filterMap -> maybeInts |> filterMap identity)
             [ ( "with List.filterMap", Array.Extra.FilterMap.withListFilterMap )
             , ( "with push", Array.Extra.FilterMap.withPush )
+            , ( "with cons", Array.Extra.FilterMap.withCons )
             ]
         , let
             allTrue =
@@ -147,8 +150,9 @@ arrayExtra =
             ]
         , rank "intersperse"
             (\intersperse -> ints1To100 |> intersperse 0)
-            [ ( "with Array.foldr", Array.Extra.Intersperse.withArrayFoldr )
-            , ( "with List.intersperse", Array.Extra.Intersperse.withList )
+            [ ( "with push", Array.Extra.Intersperse.withPush )
+            , ( "with cons", Array.Extra.Intersperse.withCons )
+            , ( "with List.intersperse", Array.Extra.Intersperse.withListIntersperse )
             ]
         , rank "member"
             (\member -> member 50 ints1To100)

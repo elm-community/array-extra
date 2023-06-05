@@ -7,7 +7,6 @@ import Array.Extra
 recursiveLast : (a -> Bool) -> Array a -> Bool
 recursiveLast isOkay =
     \array ->
-        -- read & write is faster on the last element
         case array |> Array.get ((array |> Array.length) - 1) of
             Nothing ->
                 True
@@ -33,7 +32,7 @@ withFold isOkay =
     \array ->
         array
             |> Array.foldl
-                (\element soFar -> soFar && isOkay element)
+                (\element soFar -> soFar && (element |> isOkay))
                 True
 
 

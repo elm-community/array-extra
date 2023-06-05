@@ -8,7 +8,7 @@ withFold : a -> Array a -> Bool
 withFold needle =
     \array ->
         array
-            |> Array.foldl (\i res -> needle == i || res) False
+            |> Array.foldl (\el soFar -> soFar || needle == el) False
 
 
 recursive : a -> Array a -> Bool
