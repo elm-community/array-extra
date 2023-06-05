@@ -889,6 +889,44 @@ suite =
                             )
                 )
             ]
+        , Test.describe "firstJustMap"
+            [ Test.fuzz (Fuzz.array (Fuzz.maybe Fuzz.int))
+                "is equivalent to filterMap |> get 0"
+                (\maybes ->
+                    maybes
+                        |> Array.firstJustMap identity
+                        |> Expect.equal
+                            (maybes
+                                |> Array.filterMap identity
+                                |> Array.get 0
+                            )
+                )
+            ]
+        , Test.describe "allJustMap"
+            [ Test.fuzz (Fuzz.array (Fuzz.map Just Fuzz.int))
+                "is equivalent to Just filterMap when only justs"
+                (\maybes ->
+                    maybes
+                        |> Array.allJustMap identity
+                        |> Expect.equal
+                            (maybes
+                                |> Array.filterMap identity
+                                |> Just
+                            )
+                )
+            , Test.fuzz
+                (Fuzz.constant (\before after -> Array.append (before |> Array.push Nothing) after)
+                    |> Fuzz.andMap (Fuzz.array (Fuzz.maybe Fuzz.int))
+                    |> Fuzz.andMap (Fuzz.array (Fuzz.maybe Fuzz.int))
+                )
+                "is equivalent to Nothing when one Nothing"
+                (\maybes ->
+                    maybes
+                        |> Array.allJustMap identity
+                        |> Expect.equal
+                            Nothing
+                )
+            ]
         ]
 
 
