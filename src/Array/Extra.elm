@@ -217,7 +217,7 @@ the `Array` with all the successful results or `Nothing` if one wasn't successfu
 
 This is often called "traverse".
 A version with óut the map is often called "sequence"
-and `Maybe.Extra` calls it [`combineArray`](https://package.elm-lang.org/packages/elm-community/maybe-extra/latest/Maybe-Extra#combineArray)
+and `Maybe.Extra` calls it [`combine`](https://package.elm-lang.org/packages/elm-community/maybe-extra/latest/Maybe-Extra#combineArray)
 
 -}
 allJustMap :
