@@ -262,8 +262,8 @@ that matches your search.
         |> firstJustMap String.toInt
     --> Just 2
 
-This is often called "findMap",
-`Maybe.Extra` calls it [`combineArray`](https://package.elm-lang.org/packages/elm-community/maybe-extra/latest/Maybe-Extra#combineArray)
+This is often called "findMap"
+(for example in [`List.Extra`](https://package.elm-lang.org/packages/elm-community/list-extra/latest/List-Extra#findMap)).
 
 -}
 firstJustMap :
