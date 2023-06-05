@@ -179,13 +179,13 @@ filterMap tryMap =
     \array ->
         array
             |> Array.foldr
-                (\el soFar -> soFar |> consTry (el |> tryMap))
+                (\el soFar -> soFar |> consJust (el |> tryMap))
                 []
             |> Array.fromList
 
 
-consTry : Maybe a -> List a -> List a
-consTry maybeNewHead =
+consJust : Maybe a -> List a -> List a
+consJust maybeNewHead =
     case maybeNewHead of
         Just newHead ->
             \list -> list |> (::) newHead
