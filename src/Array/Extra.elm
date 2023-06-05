@@ -1,8 +1,8 @@
 module Array.Extra exposing
-    ( all, any, member
+    ( all, any, firstJustMap, member
     , reverse, intersperse
     , update, pop, removeAt, insertAt
-    , removeWhen, filterMap
+    , removeWhen, filterMap, allJustMap
     , sliceFrom, sliceUntil, splitAt, unzip
     , interweave, apply, map2, map3, map4, map5, zip, zip3
     , resizelRepeat, resizerRepeat, resizelIndexed, resizerIndexed
@@ -14,7 +14,7 @@ module Array.Extra exposing
 
 # observe
 
-@docs all, any, member
+@docs all, any, firstJustMap, member
 
 
 # alter
@@ -25,7 +25,7 @@ module Array.Extra exposing
 
 ## filter
 
-@docs removeWhen, filterMap
+@docs removeWhen, filterMap, allJustMap
 
 
 ## part
@@ -193,6 +193,94 @@ consTry maybeNewHead =
 
             Nothing ->
                 list
+
+
+{-| After applying the given function to every element,
+try unpacking _all_ `Just` values.
+If just a single element is `Nothing`, `Nothing` is returned.
+
+    import Array exposing (empty, fromList)
+
+    empty
+        |> allJustMap String.toInt
+    --> Just empty
+
+    fromList [ "1", "2", "3" ]
+        |> allJustMap String.toInt
+    --> Just (fromList [ 1, 2, 3 ])
+
+    fromList [ "1", "NaN", "3" ]
+        |> allJustMap String.toInt
+    --> Nothing
+
+This is often called "traverse".
+A version with óut the map is often called "sequence"
+and `Maybe.Extra` calls it [`combineArray`](https://package.elm-lang.org/packages/elm-community/maybe-extra/latest/Maybe-Extra#combineArray)
+
+-}
+allJustMap :
+    (element -> Maybe narrowElement)
+    -> Array element
+    -> Maybe (Array narrowElement)
+allJustMap elementToMaybeValue =
+    \array ->
+        array
+            |> Array.foldr
+                (\element soFar ->
+                    case soFar of
+                        Nothing ->
+                            Nothing
+
+                        Just soFarList ->
+                            Maybe.map
+                                (\value -> soFarList |> (::) value)
+                                (element |> elementToMaybeValue)
+                )
+                ([] |> Just)
+            |> Maybe.map Array.fromList
+
+
+{-| The first element (the one with lowest index) that returns a `Just` value for a given function.
+If every element is transformed to `Nothing`, `Nothing` is returned.
+
+This is like a nicer [`any`](#any) where if you test for certain elements you already get one
+that matches your search.
+
+    import Array exposing (empty, fromList)
+
+    empty
+        |> firstJustMap String.toInt
+    --> Nothing
+
+    fromList [ "1", "2", "3" ]
+        |> firstJustMap String.toInt
+    --> Just 1
+
+    fromList [ "NaN", "2", "3" ]
+        |> firstJustMap String.toInt
+    --> Just 2
+
+This is often called "findMap",
+`Maybe.Extra` calls it [`combineArray`](https://package.elm-lang.org/packages/elm-community/maybe-extra/latest/Maybe-Extra#combineArray)
+
+-}
+firstJustMap :
+    (element -> Maybe narrowElement)
+    -> Array element
+    -> Maybe narrowElement
+firstJustMap elementToMaybeValue =
+    \array ->
+        array
+            |> Array.foldl
+                (\element soFar ->
+                    case soFar of
+                        Just found ->
+                            found |> Just
+
+                        Nothing ->
+                            element |> elementToMaybeValue
+                )
+                Nothing
 
 
 {-| Apply a given `Array` of changes to all elements.
